@@ -1,0 +1,3836 @@
+<title>Droplet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+/* ══════════════════════════════════════════════════════════════════
+   JETONS — le thème clair est complet ici, le sombre ne redéfinit
+   que les couleurs. Aucune couleur n'est déclarée UNIQUEMENT dans un
+   bloc de thème : sinon la page s'affiche sans, chez les visiteurs
+   qui n'ont fait aucun choix explicite.
+   ══════════════════════════════════════════════════════════════════ */
+:root {
+  --goutte:      #0066E0;
+  --goutte-doux: rgba(0, 102, 224, 0.10);
+  --goutte-trait:rgba(0, 102, 224, 0.28);
+  --encre:       #0A1420;
+  --fond:        #F3F6FA;
+  --surface:     #FFFFFF;
+  --brume:       #55677D;
+  --trait:       rgba(10, 20, 32, 0.12);
+  --trait-fin:   rgba(10, 20, 32, 0.07);
+  --relais:      #C77800;
+  --vif:         #17843D;
+
+  /* L'encart nocturne du héros : volontairement identique dans les
+     deux thèmes. C'est une fenêtre sur un écran de téléphone la nuit,
+     pas une surface de la page. */
+  --nuit:        #060D17;
+  --nuit-trait:  rgba(255, 255, 255, 0.10);
+  --nuit-texte:  #C9D8EA;
+  --nuit-faible: #62768E;
+  --nuit-goutte: #3B9BFF;
+  --nuit-relais: #FFB020;
+  --nuit-vif:    #34D964;
+
+  --mesure: 68ch;
+  --marge: clamp(20px, 5vw, 56px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --goutte:      #3B9BFF;
+    --goutte-doux: rgba(59, 155, 255, 0.12);
+    --goutte-trait:rgba(59, 155, 255, 0.30);
+    --encre:       #E8EFF7;
+    --fond:        #070E18;
+    --surface:     #0E1826;
+    --brume:       #8C9FB6;
+    --trait:       rgba(232, 239, 247, 0.14);
+    --trait-fin:   rgba(232, 239, 247, 0.08);
+    --relais:      #FFB020;
+    --vif:         #34D964;
+  }
+}
+
+:root[data-theme="dark"] {
+  --goutte:      #3B9BFF;
+  --goutte-doux: rgba(59, 155, 255, 0.12);
+  --goutte-trait:rgba(59, 155, 255, 0.30);
+  --encre:       #E8EFF7;
+  --fond:        #070E18;
+  --surface:     #0E1826;
+  --brume:       #8C9FB6;
+  --trait:       rgba(232, 239, 247, 0.14);
+  --trait-fin:   rgba(232, 239, 247, 0.08);
+  --relais:      #FFB020;
+  --vif:         #34D964;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   BASE
+   ══════════════════════════════════════════════════════════════════ */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  /* Fond explicite : sans lui, la page emprunte le fond de son hôte. */
+  background: var(--fond);
+  color: var(--encre);
+  font-family: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, .affiche {
+  font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+  text-wrap: balance;
+  margin: 0;
+}
+
+/* ⚠️ LES MINIMUMS SONT BAS EXPRÈS.
+   `clamp(2.6rem, …)` garantissait 41,6 px même sur un écran de 360 px :
+   « Le réseau tombe. » y mesurait plus large que la colonne, et
+   débordait. Un titre coupé est le premier chose que voit un visiteur
+   sur téléphone — c'est-à-dire la majorité, ici. La borne basse suit
+   donc la largeur (`vw`) bien plus tôt. */
+h1 { font-size: clamp(2.05rem, 8.6vw, 4.6rem); font-weight: 800; }
+h2 { font-size: clamp(1.55rem, 5.6vw, 3.1rem); }
+h3 { font-size: 1.16rem; letter-spacing: -0.015em; line-height: 1.28; }
+
+p { margin: 0 0 1.05em; }
+p:last-child { margin-bottom: 0; }
+
+a { color: var(--goutte); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--goutte);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+code, .donnee {
+  font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  font-size: 0.88em;
+  font-variant-numeric: tabular-nums;
+}
+
+.mesure { max-width: var(--mesure); }
+.enveloppe {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: var(--marge);
+}
+
+/* Étiquette technique en petites capitales espacées. */
+.etiquette {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.685rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brume);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   NAVIGATION — un filet, pas une barre.
+   ══════════════════════════════════════════════════════════════════ */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--fond) 88%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+/* Posée par le script juste après ce bloc — voir sa note pour
+   pourquoi elle vit hors du garde-fou `immobile`. */
+.nav.defile {
+  border-bottom-color: var(--trait-fin);
+  box-shadow: 0 12px 28px -22px rgba(0, 0, 0, 0.45);
+}
+.nav-int {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding: 13px var(--marge);
+  display: flex;
+  align-items: center;
+  gap: 26px;
+}
+.marque {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 1.02rem;
+  letter-spacing: -0.02em;
+  color: var(--encre);
+  text-decoration: none;
+  margin-right: auto;
+}
+.nav-liens { display: flex; gap: 22px; }
+.nav-liens a {
+  color: var(--brume);
+  text-decoration: none;
+  font-size: 0.905rem;
+  font-weight: 500;
+  transition: color 0.16s;
+}
+.nav-liens a:hover { color: var(--encre); }
+/* ── ⚠️ LA NAVIGATION NE DISPARAÎT PLUS SUR TÉLÉPHONE ──────────
+   Elle était simplement masquée sous 720 px. Sur une page aussi
+   longue, cela laissait le visiteur téléphone — la majorité — sans
+   aucun moyen d'atteindre « Télécharger » autrement qu'en faisant
+   défiler huit sections.
+
+   Elle devient donc une bande qui se fait glisser du pouce. Pas de
+   menu à tiroir : un menu caché derrière trois traits demande un
+   appui de plus et se remarque moins qu'une rangée de mots déjà
+   visibles. */
+@media (max-width: 760px) {
+  .nav-int {
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    padding-bottom: 9px;
+  }
+  .nav-liens {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    gap: 16px;
+    padding-bottom: 2px;
+    /* Sur iOS, l'inertie du défilement rend la bande naturelle. */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .nav-liens::-webkit-scrollbar { display: none; }
+  .nav-liens a { white-space: nowrap; font-size: 0.86rem; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   HÉROS
+   ------------------------------------------------------------------
+   ⚠️ CE QUI MANQUAIT LE PLUS N'ÉTAIT PAS UNE INTERACTION DE PLUS —
+   C'ÉTAIT DE LA PROFONDEUR.
+   Un curseur soigné sur une page plate reste une page plate. Ce que
+   partagent Stripe, Vercel, Apple : une lueur d'ambiance derrière le
+   propos (jamais un fond uni), un écart de taille bien plus marqué
+   entre le titre et le reste, et un accent qui n'est jamais un aplat
+   de couleur mais un dégradé, même discret.
+   ══════════════════════════════════════════════════════════════════ */
+.heros {
+  position: relative;
+  overflow: clip;
+  padding: clamp(64px, 11vw, 132px) 0 clamp(44px, 7vw, 72px);
+}
+/* La lueur : un dégradé radial très doux, flouté au point de n'être
+   plus une forme mais une variation de lumière. `overflow: clip` sur
+   `.heros` l'empêche de déborder sur les sections suivantes ;
+   `z-index: 0` la garde derrière le texte sans lui retirer d'espace
+   (elle est hors du flux, `position: absolute`). */
+.heros::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  left: 50%;
+  width: min(1100px, 150vw);
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, var(--goutte) 0%, transparent 62%);
+  opacity: 0.16;
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 0;
+}
+:root[data-theme="dark"] .heros::before { opacity: 0.24; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .heros::before { opacity: 0.24; }
+}
+.heros > .enveloppe { position: relative; z-index: 1; }
+
+.heros h1 { margin-bottom: 24px; }
+/* Le plafond monte franchement : c'est l'écart de taille avec le
+   reste de la page qui fait « déclaration », pas seulement le poids
+   de la graisse. Le plancher, lui, ne bouge pas — il protège les
+   360 px, voir la note plus haut sur `h1`. */
+.heros h1 { font-size: clamp(2.05rem, 10.5vw, 5.6rem); letter-spacing: -0.035em; }
+/* ⚠️ `em` ET `.mot-accent`, PAS `em` SEUL.
+   Le script de découpage du titre (plus bas) remplace entièrement le
+   contenu de `h1` — le `<em>` d'origine disparaît du DOM et chaque mot
+   redevient un `<i>` autonome. Sans le second sélecteur, ce dégradé ne
+   s'appliquerait qu'à la version SANS JavaScript. */
+.heros h1 em, .mot-accent {
+  font-style: normal;
+  background: linear-gradient(115deg, var(--goutte), color-mix(in srgb, var(--goutte) 55%, var(--vif) 45%));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--goutte); /* repli si `background-clip: text` n'est pas pris en charge */
+}
+.chapeau {
+  font-size: clamp(1.1rem, 2.2vw, 1.36rem);
+  color: var(--brume);
+  max-width: 54ch;
+  margin-bottom: 34px;
+}
+
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.96rem;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform 0.14s, background 0.16s, box-shadow 0.2s;
+}
+.bouton:hover { transform: translateY(-1px); }
+/* Un aplat lisible se lit comme un bouton HTML par défaut ; un très
+   léger dégradé, plus un filet de lumière en haut (l'ombre intérieure
+   blanche), donne au bouton un volume — la différence entre un bouton
+   « dessiné » et un bouton « fabriqué ». */
+.bouton-plein {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--goutte) 88%, white 12%), var(--goutte));
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset,
+              0 10px 24px -10px color-mix(in srgb, var(--goutte) 65%, transparent);
+}
+.bouton-plein:hover {
+  box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset,
+              0 14px 30px -10px color-mix(in srgb, var(--goutte) 75%, transparent);
+}
+.bouton-vide {
+  border-color: var(--trait);
+  color: var(--encre);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  backdrop-filter: blur(6px);
+}
+.bouton-vide:hover { background: var(--goutte-doux); border-color: var(--goutte-trait); }
+
+/* ══════════════════════════════════════════════════════════════════
+   LA SCÈNE — « le message trouve son chemin »
+   ------------------------------------------------------------------
+   L'unique endroit de la page qui MONTRE Droplet au lieu d'en parler.
+   Nuit dans les deux thèmes : ce n'est pas une surface de la page,
+   c'est une fenêtre sur ce qui se passe entre les téléphones. Tout le
+   mouvement est peint sur `<canvas id="toile">` ; le HTML autour ne
+   porte que l'état lisible et la commande.
+   ══════════════════════════════════════════════════════════════════ */
+.scene {
+  position: relative;
+  margin-top: clamp(38px, 6vw, 62px);
+  background:
+    radial-gradient(120% 90% at 50% 0%, #0B1626 0%, var(--nuit) 62%);
+  border: 1px solid var(--nuit-trait);
+  border-radius: 22px;
+  overflow: hidden;
+  isolation: isolate;
+}
+/* Une lueur qui déborde à peine du cadre — « regardez ici » avant même
+   que l'œil n'ait lu un mot. Discrète : c'est un halo, pas un néon. */
+.scene::before {
+  content: "";
+  position: absolute;
+  inset: -80px;
+  z-index: -1;
+  background: radial-gradient(ellipse at 50% 42%, var(--goutte) 0%, transparent 58%);
+  opacity: 0.18;
+  filter: blur(70px);
+  pointer-events: none;
+}
+/* Grain : une trame à peine perceptible qui retire au noir son côté
+   « aplat numérique ». Posé sur la VUE (le canvas), pas sur toute la
+   `.scene` — sinon, `.scene` ayant `overflow: hidden`, il faudrait
+   l'empiler au-dessus des bulles de message, qui vivent dans la vue.
+   Ici il reste sous elles (z-index 1 < bulles 5) et ne couvre que la
+   fenêtre de simulation, ce qui est de toute façon le seul endroit où
+   on le veut. */
+.scene-vue::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+}
+
+.scene-tete {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 18px;
+  padding: 15px 20px 14px;
+  border-bottom: 1px solid var(--nuit-trait);
+  flex-wrap: wrap;
+}
+.scene-tete .sous {
+  color: var(--nuit-faible);
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+}
+#etat {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.76rem;
+  color: var(--nuit-faible);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  white-space: nowrap;
+  transition: color 0.4s ease;
+}
+#etat .puce {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--nuit-faible);
+  flex: none;
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+#etat.cherche { color: var(--nuit-texte); }
+#etat.cherche .puce { background: var(--nuit-relais); box-shadow: 0 0 0 4px color-mix(in srgb, var(--nuit-relais) 22%, transparent); }
+#etat.transmet { color: var(--nuit-texte); }
+#etat.transmet .puce { background: var(--nuit-goutte); box-shadow: 0 0 0 4px color-mix(in srgb, var(--nuit-goutte) 22%, transparent); }
+#etat.arrive { color: var(--nuit-vif); }
+#etat.arrive .puce { background: var(--nuit-vif); box-shadow: 0 0 0 4px color-mix(in srgb, var(--nuit-vif) 22%, transparent); }
+
+.scene-vue {
+  position: relative;
+  z-index: 2;
+  touch-action: pan-y;
+}
+#toile {
+  display: block;
+  width: 100%;
+  height: 420px;
+  cursor: grab;
+}
+#toile.saisie { cursor: grabbing; }
+#toile.survol-noeud { cursor: pointer; }
+
+/* Les bulles de message — du vrai texte HTML posé au-dessus du canvas
+   pour une typo nette, positionné par le script depuis les
+   coordonnées des nœuds. */
+.bulle {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  padding: 7px 12px 8px;
+  border-radius: 13px 13px 13px 4px;
+  font-size: 0.84rem;
+  line-height: 1.3;
+  color: #EAF2FF;
+  background: color-mix(in srgb, var(--nuit-goutte) 20%, #0C1A2C);
+  border: 1px solid color-mix(in srgb, var(--nuit-goutte) 40%, transparent);
+  box-shadow: 0 10px 30px -12px rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(6px) scale(0.94);
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bulle.recu {
+  border-radius: 13px 13px 4px 13px;
+  color: #DFF7E6;
+  background: color-mix(in srgb, var(--nuit-vif) 16%, #0C1A2C);
+  border-color: color-mix(in srgb, var(--nuit-vif) 38%, transparent);
+}
+.bulle.visible { opacity: 1; transform: translateY(0) scale(1); }
+
+.scene-pied {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 14px 18px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  border-top: 1px solid var(--nuit-trait);
+}
+#mesh-envoyer {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: #fff;
+  padding: 11px 20px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--goutte) 86%, white 14%), var(--goutte));
+  box-shadow: 0 1px 0 rgba(255,255,255,0.28) inset,
+              0 12px 26px -12px color-mix(in srgb, var(--goutte) 70%, transparent);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, opacity 0.3s ease;
+}
+#mesh-envoyer:hover { transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,0.28) inset, 0 16px 32px -12px color-mix(in srgb, var(--goutte) 80%, transparent); }
+#mesh-envoyer:active { transform: translateY(0) scale(0.985); }
+#mesh-envoyer:disabled { opacity: 0.5; cursor: default; transform: none; box-shadow: none; }
+#mesh-envoyer:focus-visible { outline: 2px solid var(--nuit-goutte); outline-offset: 3px; }
+
+#mesh-rejouer {
+  appearance: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.84rem;
+  color: var(--nuit-faible);
+  padding: 6px 4px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+#mesh-rejouer:hover { color: var(--nuit-texte); }
+#mesh-rejouer:focus-visible { outline: 2px solid var(--nuit-goutte); outline-offset: 3px; border-radius: 4px; }
+
+#mesh-bilan {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.8rem;
+  color: var(--nuit-texte);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+#mesh-bilan.visible { opacity: 1; transform: none; }
+#mesh-bilan .ok { color: var(--nuit-vif); font-weight: 700; }
+#mesh-bilan .sep { color: var(--nuit-trait); }
+
+.scene-legende {
+  position: relative;
+  z-index: 4;
+  margin: 0;
+  padding: 0 20px 18px;
+  font-size: 0.82rem;
+  color: var(--nuit-faible);
+}
+.scene-legende b { color: var(--nuit-texte); font-weight: 600; }
+
+@media (max-width: 900px) { #toile { height: 380px; } }
+@media (max-width: 620px) {
+  #toile { height: 340px; }
+  .scene-tete { gap: 4px 12px; padding: 13px 16px; }
+  .scene-pied { padding: 14px 16px; }
+  .scene-legende { padding: 0 16px 16px; }
+  #mesh-envoyer { flex: 1 1 auto; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SECTIONS — marquées par un arc de portée, pas par un numéro.
+   ══════════════════════════════════════════════════════════════════ */
+/* Le plafond monte : plus d'air entre les sections, c'est ce qui
+   distingue une page qui respire d'une page qui s'entasse. Le
+   plancher ne bouge pas — sur téléphone, l'espace coûte cher. */
+section { padding: clamp(58px, 9vw, 128px) 0; }
+section + section { border-top: 1px solid var(--trait-fin); }
+
+.tete-section { margin-bottom: clamp(30px, 4.5vw, 46px); }
+.tete-section .etiquette {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  /* La pastille : un fond très pâle et un contour, comme une bulle
+     posée plutôt qu'un mot nu — le même repère visuel que les grands
+     sites produit pour distinguer un « kicker » du texte courant. */
+  padding: 5px 12px 5px 10px;
+  border-radius: 999px;
+  background: var(--goutte-doux);
+  border: 1px solid var(--goutte-trait);
+  color: var(--goutte);
+}
+.arc { flex: none; color: var(--goutte); }
+.tete-section h2 { margin-bottom: 14px; }
+.tete-section p { color: var(--brume); max-width: 60ch; }
+
+/* ══════════════════════════════════════════════════════════════════
+   GRILLES
+   ══════════════════════════════════════════════════════════════════ */
+.grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+  gap: 1px;
+  background: var(--trait-fin);
+  border: 1px solid var(--trait-fin);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.carte {
+  background: var(--surface);
+  padding: 26px 24px 28px;
+}
+.carte h3 { margin-bottom: 8px; }
+.carte p { color: var(--brume); font-size: 0.945rem; margin: 0; }
+.carte .icone {
+  width: 34px; height: 34px;
+  margin-bottom: 16px;
+  color: var(--goutte);
+  filter: drop-shadow(0 3px 10px var(--goutte-doux));
+}
+
+/* ── Les trois transports ── */
+.transports {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 30px;
+}
+.transport {
+  background: var(--surface);
+  border: 1px solid var(--trait-fin);
+  border-radius: 14px;
+  padding: 22px;
+}
+.transport .etiquette { display: block; margin-bottom: 9px; color: var(--goutte); }
+.transport b {
+  font-family: "Archivo", sans-serif;
+  font-size: 1.05rem;
+  display: block;
+  margin-bottom: 6px;
+}
+.transport span { color: var(--brume); font-size: 0.9rem; }
+.portee {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--trait-fin);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.78rem;
+  color: var(--brume);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Le tableau comparatif ── */
+.defilant { overflow-x: auto; margin-top: 30px; }
+table {
+  width: 100%;
+  /* Assez pour que les trois colonnes restent lisibles, et le
+     conteneur `.defilant` le fait défiler latéralement plutôt que la
+     page entière. */
+  min-width: 460px;
+  border-collapse: collapse;
+  font-size: 0.94rem;
+}
+th, td {
+  text-align: left;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--trait-fin);
+  vertical-align: top;
+}
+thead th {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.685rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brume);
+  font-weight: 500;
+  border-bottom-color: var(--trait);
+}
+tbody th { font-weight: 600; width: 34%; }
+td { color: var(--brume); }
+td.oui { color: var(--encre); }
+
+/* ══════════════════════════════════════════════════════════════════
+   LA VITRINE — LE TÉLÉPHONE ÉPINGLÉ
+   ------------------------------------------------------------------
+   ⚠️ LA MÊME MÉCANIQUE QUE LES PAGES PRODUIT D'APPLE.
+   Le téléphone reste collé à l'écran (`position: sticky`) pendant que
+   les légendes, elles, défilent normalement à côté — chacune plus
+   grande section de page que d'espace visuel réellement occupé, pour
+   laisser au visiteur le temps de lire avant que l'écran suivant ne
+   prenne le relais. Un `IntersectionObserver` regarde laquelle des
+   légendes traverse le CENTRE de l'écran (pas juste « est visible » :
+   sur une page aussi longue, plusieurs le seraient à la fois) et
+   bascule le contenu du téléphone en conséquence.
+   ══════════════════════════════════════════════════════════════════ */
+.vitrine {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) 1fr;
+  gap: clamp(32px, 6vw, 80px);
+  margin-top: 8px;
+}
+.vitrine-telephone {
+  position: sticky;
+  /* Sous la nav, avec une marge : collé pile sous elle, le téléphone
+     aurait l'air pris au piège plutôt que simplement accompagné. */
+  top: calc(64px + 40px);
+  align-self: start;
+  display: flex;
+  justify-content: center;
+}
+.telephone {
+  position: relative;
+  width: 240px;
+  /* Le format exact des captures (498 × 1080) — pas un arrondi, sinon
+     l'image serait tronquée ou entourée d'un vide sur les côtés. */
+  aspect-ratio: 498 / 1080;
+  background: var(--nuit);
+  border: 8px solid #060D17;
+  border-radius: 40px;
+  box-shadow: 0 30px 70px -30px rgba(0,0,0,0.45),
+              0 0 0 1px var(--nuit-trait);
+  overflow: hidden;
+}
+.telephone-encoche {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 84px; height: 20px;
+  background: #060D17;
+  border-radius: 0 0 14px 14px;
+  z-index: 2;
+}
+.telephone-ecran { position: relative; width: 100%; height: 100%; }
+
+/* La capture d'écran affichée dans le téléphone — un fondu enchaîné
+   entre les 4 vues au fil du défilement. */
+.ecran-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.ecran-image.actif { opacity: 1; }
+
+.vitrine-legendes { display: flex; flex-direction: column; }
+.legende {
+  /* La hauteur donne le TEMPS de lecture : un lecteur qui défilerait
+     à vitesse normale doit avoir fini la phrase avant que l'écran
+     suivant ne prenne le relais. */
+  min-height: 74vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: 24px;
+  opacity: 0.32;
+  transform: translateY(6px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.legende:last-child { min-height: 50vh; }
+.legende.actif { opacity: 1; transform: none; }
+.legende .etiquette {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: var(--goutte);
+}
+.legende h3 { font-size: clamp(1.2rem, 2.6vw, 1.5rem); margin-bottom: 10px; }
+.legende p { color: var(--brume); max-width: 46ch; }
+
+@media (max-width: 760px) {
+  .vitrine { grid-template-columns: 1fr; }
+  .vitrine-telephone { position: static; margin-bottom: 12px; }
+  .telephone { width: 200px; }
+  .legende { min-height: 0; opacity: 1; transform: none; padding-block: 18px; }
+  .legende:last-child { min-height: 0; }
+}
+
+/* ── Le schéma comparatif ── */
+.schema {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin-top: 32px;
+}
+.volet {
+  background: var(--surface);
+  border: 1px solid var(--trait-fin);
+  border-radius: 16px;
+  padding: 22px;
+}
+.volet .etiquette { display: block; margin-bottom: 16px; }
+.volet svg { width: 100%; height: auto; display: block; }
+.volet figcaption {
+  margin-top: 16px;
+  font-size: 0.9rem;
+  color: var(--brume);
+}
+
+/* ── Bande de chiffres ── */
+.chiffres {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1px;
+  background: var(--trait-fin);
+  border: 1px solid var(--trait-fin);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-top: 32px;
+}
+.chiffre-cell {
+  background: var(--surface);
+  padding: 30px 24px;
+  transition: background 0.24s;
+}
+.chiffre-cell:hover { background: var(--goutte-doux); }
+.chiffre-cell .val {
+  font-family: "Archivo", sans-serif;
+  font-size: 2.9rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  /* Même dégradé que l'accent du titre — c'est ce fil qui dit que
+     ces chiffres et cette promesse viennent du même endroit, plutôt
+     qu'un bleu plat qui pourrait être n'importe quel bleu. */
+  background: linear-gradient(115deg, var(--goutte), color-mix(in srgb, var(--goutte) 55%, var(--vif) 45%));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--goutte);
+  font-variant-numeric: tabular-nums;
+  display: block;
+  margin-bottom: 10px;
+}
+.chiffre-cell .lib { color: var(--brume); font-size: 0.92rem; }
+
+/* ── Liste de faits (sécurité) ── */
+.faits { display: grid; gap: 1px; background: var(--trait-fin); border-radius: 14px; overflow: hidden; border: 1px solid var(--trait-fin); margin-top: 28px; }
+.fait {
+  background: var(--surface);
+  padding: 18px 22px;
+  display: grid;
+  grid-template-columns: minmax(140px, 190px) 1fr;
+  gap: 20px;
+}
+@media (max-width: 620px) { .fait { grid-template-columns: 1fr; gap: 5px; } }
+.fait dt { font-family: "JetBrains Mono", monospace; font-size: 0.78rem; color: var(--goutte); letter-spacing: 0.03em; padding-top: 3px; }
+.fait dd { margin: 0; font-size: 0.945rem; }
+
+/* ── Les limites : l'encadré le plus important du site ── */
+.limites {
+  margin-top: 30px;
+  border: 1px solid var(--trait);
+  border-radius: 16px;
+  padding: 4px 26px 24px;
+  background: var(--surface);
+}
+.limites li {
+  list-style: none;
+  padding: 18px 0 0 30px;
+  position: relative;
+  border-top: 1px solid var(--trait-fin);
+  margin-top: 18px;
+  color: var(--brume);
+  font-size: 0.95rem;
+}
+.limites li:first-child { border-top: none; margin-top: 0; padding-top: 22px; }
+.limites li b { color: var(--encre); display: block; font-weight: 600; margin-bottom: 3px; font-size: 1rem; }
+.limites li::before {
+  content: "";
+  position: absolute;
+  left: 4px; top: 25px;
+  width: 9px; height: 9px;
+  border-radius: 2px;
+  background: var(--relais);
+}
+.limites li:first-child::before { top: 29px; }
+.limites ul { margin: 0; padding: 0; }
+
+/* ══════════════════════════════════════════════════════════════════
+   PHASE DE TEST
+   ------------------------------------------------------------------
+   ⚠️ CE BANDEAU EST EN HAUT, ET IL Y RESTE.
+   Une application en test présentée comme finie est un abus de
+   confiance — et le premier plantage le prouve à l'utilisateur, qui
+   ne revient pas. Le dire d'emblée coûte quelques visiteurs et en
+   garde beaucoup plus : celui qui sait qu'il essuie les plâtres
+   pardonne un défaut, celui qui croyait acheter du fini ne pardonne
+   rien.
+   ══════════════════════════════════════════════════════════════════ */
+.bandeau-test {
+  background: var(--goutte);
+  color: #fff;
+  font-size: 0.88rem;
+  text-align: center;
+  padding: 9px var(--marge);
+  line-height: 1.4;
+}
+.bandeau-test b { font-weight: 600; }
+.bandeau-test a { color: #fff; text-decoration-thickness: 1.5px; }
+
+/* La pastille « bêta » à côté de la marque. */
+.beta {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--goutte-trait);
+  color: var(--goutte);
+  font-weight: 500;
+}
+
+/* ── Les premiers testeurs ── */
+.testeurs {
+  background: var(--surface);
+  border: 1px solid var(--goutte-trait);
+  border-radius: 18px;
+  padding: clamp(26px, 4vw, 40px);
+  margin-top: 32px;
+}
+.rangs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 22px;
+  margin-top: 28px;
+  padding-top: 28px;
+  border-top: 1px solid var(--trait-fin);
+}
+.rangs h3 { font-size: 1.02rem; margin-bottom: 6px; }
+.rangs p { color: var(--brume); font-size: 0.91rem; margin: 0; }
+
+/* Le protocole de signalement, en étapes numérotées.
+   Numérotées ici, et nulle part ailleurs sur ce site : c'est le seul
+   contenu de la page qui soit VRAIMENT une séquence — chaque étape
+   dépend de la précédente. */
+.protocole { counter-reset: pas; margin: 26px 0 0; padding: 0; list-style: none; }
+.protocole li {
+  counter-increment: pas;
+  position: relative;
+  padding: 0 0 20px 46px;
+  color: var(--brume);
+  font-size: 0.95rem;
+}
+.protocole li:last-child { padding-bottom: 0; }
+.protocole li::before {
+  content: counter(pas);
+  position: absolute;
+  left: 0; top: -1px;
+  width: 29px; height: 29px;
+  border-radius: 50%;
+  background: var(--goutte-doux);
+  color: var(--goutte);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: grid;
+  place-items: center;
+}
+/* Le filet qui relie les étapes : il dit « la suite existe ». */
+.protocole li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 14px; top: 32px; bottom: 6px;
+  width: 1px;
+  background: var(--trait-fin);
+}
+.protocole li b { color: var(--encre); display: block; margin-bottom: 2px; }
+
+.contacts { display: grid; gap: 10px; margin-top: 26px; }
+.contact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--fond);
+  border: 1px solid var(--trait-fin);
+  border-radius: 12px;
+  padding: 13px 15px;
+  text-decoration: none;
+  color: var(--encre);
+  transition: border-color 0.18s, transform 0.18s;
+}
+.contact:hover { border-color: var(--goutte-trait); transform: translateX(2px); }
+.contact svg { flex: none; color: var(--goutte); }
+.contact .quoi {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+.contact .via { display: block; font-size: 0.72rem; color: var(--brume); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; }
+
+/* ── Soutenir ── */
+.dons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 16px;
+  margin-top: 32px;
+}
+.don {
+  background: var(--surface);
+  border: 1px solid var(--trait-fin);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.don-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.don h3 { font-size: 1.08rem; }
+.don .note { color: var(--brume); font-size: 0.9rem; margin: 0; }
+
+/* La marque du moyen : une pastille de couleur, pas un logo importé.
+   Reproduire les logos MTN ou Orange sans autorisation serait un
+   emprunt de marque ; une pastille dit la même chose sans le risque. */
+.jeton {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex: none;
+}
+.jeton.local { background: var(--goutte-doux); color: var(--goutte); }
+.jeton.libre { background: color-mix(in srgb, var(--vif) 14%, transparent); color: var(--vif); }
+
+/* Le bloc à copier. `user-select: all` pour qu'un appui long
+   sélectionne l'adresse entière : c'est le secours quand le
+   presse-papiers est refusé par le navigateur. */
+.valeur {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--fond);
+  border: 1px solid var(--trait-fin);
+  border-radius: 10px;
+  padding: 11px 13px;
+}
+.valeur span {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  user-select: all;
+  flex: 1;
+}
+.valeur.vide span { color: var(--brume); user-select: none; }
+.copier {
+  flex: none;
+  border: 1px solid var(--trait);
+  background: transparent;
+  color: var(--encre);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.copier:hover:not(:disabled) { background: var(--goutte); color: #fff; border-color: var(--goutte); }
+.copier:disabled { opacity: 0.4; cursor: not-allowed; }
+.copier.fait { background: var(--vif); border-color: var(--vif); color: #fff; }
+
+.marches {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 0.88rem;
+  color: var(--brume);
+}
+.marches li { display: flex; gap: 9px; }
+.marches li b {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.76rem;
+  color: var(--goutte);
+  flex: none;
+  padding-top: 2px;
+  min-width: 1.4em;
+}
+
+/* Les façons d'aider qui ne coûtent rien. */
+.gratuit {
+  margin-top: 34px;
+  border-top: 1px solid var(--trait-fin);
+  padding-top: 34px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 26px;
+}
+.gratuit h3 { margin-bottom: 7px; }
+.gratuit p { color: var(--brume); font-size: 0.93rem; margin: 0; }
+.gratuit .rang {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--goutte);
+  display: block;
+  margin-bottom: 12px;
+}
+
+/* ── Téléchargement ── */
+.telecharger {
+  background: var(--surface);
+  border: 1px solid var(--trait-fin);
+  border-radius: 18px;
+  padding: clamp(26px, 4vw, 40px);
+  margin-top: 30px;
+}
+.telecharger h3 { margin-bottom: 10px; font-size: 1.34rem; }
+.telecharger p { color: var(--brume); }
+.avis {
+  margin-top: 22px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: var(--goutte-doux);
+  border: 1px solid var(--goutte-trait);
+  font-size: 0.92rem;
+}
+.avis b { display: block; margin-bottom: 3px; }
+
+/* ── Pied ── */
+footer {
+  border-top: 1px solid var(--trait-fin);
+  padding: 46px 0 60px;
+  color: var(--brume);
+  font-size: 0.9rem;
+}
+.pied-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  margin-bottom: 34px;
+}
+.pied-grille b { display: block; color: var(--encre); font-size: 0.82rem; margin-bottom: 10px; font-family: "JetBrains Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; }
+.pied-grille a { display: block; color: var(--brume); text-decoration: none; padding: 3px 0; }
+.pied-grille a:hover { color: var(--goutte); }
+
+/* ══════════════════════════════════════════════════════════════════
+   MOUVEMENT
+   ------------------------------------------------------------------
+   ⚠️ TOUT PART DE L'ÉTAT VISIBLE, ET REVIENT À LUI SI LE JAVASCRIPT
+   NE S'EXÉCUTE PAS.
+   La faute classique est de cacher les éléments en CSS puis de les
+   révéler en JS : au moindre script bloqué, la page reste blanche et
+   illisible. Ici, la classe `.anime` n'est POSÉE que par le script,
+   juste avant l'observation. Sans JS, rien n'est jamais caché.
+   ══════════════════════════════════════════════════════════════════ */
+.anime {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.62s cubic-bezier(.22,.61,.36,1),
+              transform 0.62s cubic-bezier(.22,.61,.36,1);
+}
+.anime.vu { opacity: 1; transform: none; }
+
+/* Le décalage en cascade : les éléments d'un même groupe arrivent
+   l'un après l'autre, jamais tous ensemble. C'est ce décalage qui
+   impose un ordre de lecture — tout faire apparaître d'un coup donne
+   un mur que l'œil survole. */
+.anime[data-rang="1"] { transition-delay: 0.07s; }
+.anime[data-rang="2"] { transition-delay: 0.14s; }
+.anime[data-rang="3"] { transition-delay: 0.21s; }
+.anime[data-rang="4"] { transition-delay: 0.28s; }
+.anime[data-rang="5"] { transition-delay: 0.35s; }
+
+/* ── L'ENTRÉE DU TITRE : DÉCODÉ, PAS GLISSÉ ──
+   Chaque lettre traverse quelques caractères au hasard avant de se
+   fixer sur la bonne — le titre se DÉCHIFFRE plutôt que de glisser
+   derrière un cache. `.brouille` la rend un peu plus sourde tant
+   qu'elle n'a pas trouvé sa forme définitive ; le script (plus bas)
+   retire cette classe à l'instant précis où le vrai caractère se
+   pose, ce qui donne le petit « clic » de netteté qui marque
+   l'arrivée. */
+.mot { display: inline-block; vertical-align: bottom; }
+.lettre { display: inline-block; font-style: inherit; }
+.lettre.brouille { opacity: 0.55; }
+
+/* ── LES ARCS QUI SE TRACENT ──
+   Le marqueur de section n'apparaît pas : il se DESSINE, comme une
+   portée qui s'établit. */
+.arc path { stroke-dasharray: 20; stroke-dashoffset: 20; }
+.vu .arc path { animation: tracer 0.9s ease forwards 0.1s; }
+@keyframes tracer { to { stroke-dashoffset: 0; } }
+.arc circle { transform-origin: center; transform: scale(0); }
+.vu .arc circle { animation: pointer 0.4s cubic-bezier(.34,1.56,.64,1) forwards 0.55s; }
+@keyframes pointer { to { transform: scale(1); } }
+
+/* ── LES CARTES ──
+   Le liseré prend la couleur d'accent et la carte se soulève d'un
+   point. Un seul point : au-delà, l'ombre porte plus que l'objet. */
+.carte, .transport, .don, .volet {
+  transition: transform 0.24s cubic-bezier(.22,.61,.36,1),
+              border-color 0.24s, box-shadow 0.24s;
+}
+.carte:hover, .transport:hover, .don:hover, .volet:hover {
+  transform: translateY(-3px);
+  border-color: var(--goutte-trait);
+  box-shadow: 0 10px 30px -14px rgba(0, 60, 140, 0.28);
+}
+.carte .icone { transition: transform 0.32s cubic-bezier(.34,1.56,.64,1); }
+.carte:hover .icone { transform: scale(1.12) rotate(-4deg); }
+
+/* ── LE BOUTON QUI ÉMET ──
+   Une onde part du bouton principal, comme une portée radio. Elle ne
+   tourne PAS en boucle : trois battements à l'arrivée à l'écran, puis
+   plus rien. Un bouton qui pulse en permanence devient un bruit, et
+   on apprend à ne plus le voir. */
+.bouton-plein { position: relative; overflow: visible; }
+.bouton-plein::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid var(--goutte);
+  opacity: 0;
+  pointer-events: none;
+}
+.bouton-plein.emet::after { animation: onde 1.5s ease-out 3; }
+@keyframes onde {
+  0%   { transform: scale(1);    opacity: 0.55; }
+  100% { transform: scale(1.42); opacity: 0; }
+}
+
+/* ── LA NAVIGATION ──
+   La section en cours est soulignée. C'est une information, pas une
+   décoration : sur une page longue, elle dit où l'on est. */
+.nav-liens a { position: relative; padding-bottom: 2px; }
+.nav-liens a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 100%; bottom: 0;
+  height: 1.5px;
+  background: var(--goutte);
+  transition: right 0.28s cubic-bezier(.22,.61,.36,1);
+}
+.nav-liens a.ici { color: var(--encre); }
+.nav-liens a.ici::after { right: 0; }
+
+/* Les chiffres qui défilent ne doivent JAMAIS bousculer la mise en
+   page en changeant de largeur — d'où les chiffres tabulaires. */
+.chiffre-cell .val { font-variant-numeric: tabular-nums; }
+
+/* ── LE POINT D'ANCRAGE LOTTIE ──
+   Vide et invisible tant qu'aucun fichier n'est déposé. Voir la note
+   du chargeur, plus bas. */
+[data-lottie] { min-height: 0; }
+
+/* ══════════════════════════════════════════════════════════════════
+   TÉLÉPHONE
+   ------------------------------------------------------------------
+   ⚠️ CE N'EST PAS LE CAS MARGINAL, C'EST LE CAS PRINCIPAL.
+   Droplet s'adresse à des gens dont le réseau ne passe pas et dont les
+   données coûtent cher : ils arrivent sur ce site depuis un téléphone,
+   pas depuis un bureau. Ces règles ne « rattrapent » donc pas un
+   affichage cassé — elles décrivent l'usage normal.
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 560px) {
+  body { font-size: 16px; }
+
+  /* Une grille qui tente deux colonnes sous 560 px donne des cartes de
+     150 px où plus rien ne tient. On force la colonne unique. */
+  .grille,
+  .transports,
+  .schema,
+  .dons,
+  .chiffres,
+  .gratuit,
+  .pied-grille {
+    grid-template-columns: 1fr;
+  }
+
+  /* Les boutons prennent toute la largeur : deux boutons côte à côte
+     sur 320 px donnent deux cibles trop étroites pour le pouce. */
+  .actions { flex-direction: column; align-items: stretch; }
+  .bouton { justify-content: center; }
+
+  .chiffre-cell .val { font-size: 2.1rem; }
+  .limites { padding-inline: 18px; }
+  .telecharger, .testeurs { padding: 22px 18px; }
+  .protocole li { padding-left: 40px; }
+
+  #etat { font-size: 0.7rem; }
+}
+
+/* Les très petits écrans — encore courants au Cameroun. */
+@media (max-width: 360px) {
+  :root { --marge: 16px; }
+  h1 { font-size: 1.9rem; }
+  .chapeau { font-size: 1rem; }
+  .beta { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  /* ⚠️ Le titre n'a rien à annuler ici : le script qui le décode ne
+     s'exécute même pas en-dessous (garde-fou `immobile`, tout en haut
+     du bloc JS) — le `<h1>` garde alors son texte d'origine, jamais
+     remplacé par des lettres à l'état « brouillé ». `.mot`/`.lettre`
+     ne sont donc là que pour les visiteurs SANS ce réglage. */
+  .anime { opacity: 1 !important; transform: none !important; }
+  .arc path { stroke-dashoffset: 0 !important; }
+  .arc circle { transform: scale(1) !important; }
+  .bouton-plein.emet::after { animation: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LA GOUTTE QUI TOMBE
+   ------------------------------------------------------------------
+   ⚠️ POURQUOI CET EFFET-LÀ PRÉCISÉMENT, ET UNE SEULE FOIS.
+   Droplet porte un nom, et ce nom EST une image : une goutte — c'est
+   elle, immobile, qui sert de logo dans la navigation. Au tout premier
+   affichage de la page, cette même goutte se détache et tombe, comme
+   si la marque faisait elle-même, une fois, le geste qui lui donne
+   son nom — avant de se figer en rond dans l'eau. Le logo de la
+   navigation, lui, ne bouge jamais : ce n'est pas lui qui tombe,
+   c'est une copie.
+
+   Position de départ posée par le script (mesure réelle du logo dans
+   la nav, via les variables `--x`/`--y-depart`) — jamais codée en dur,
+   sinon le moindre changement de mise en page ferait tomber la goutte
+   du mauvais endroit.
+   ══════════════════════════════════════════════════════════════════ */
+.rideau-goutte {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  pointer-events: none;
+}
+.goutte-chute {
+  position: fixed;
+  top: 0; left: 0;
+  width: 19px; height: 19px;
+  color: var(--goutte);
+  opacity: 0;
+  transform: translate(var(--x), var(--y-depart)) translate(-50%, -50%);
+  animation: goutte-tombe 1.05s cubic-bezier(.55,0,.85,.35) forwards;
+}
+/* La chute accélère (une vraie goutte tombe de plus en plus vite), et
+   s'aplatit très légèrement à l'impact — le « squash » qui dit qu'un
+   poids réel vient de heurter une surface, pas qu'une image s'est
+   simplement arrêtée. */
+@keyframes goutte-tombe {
+  0%   { opacity: 1; transform: translate(var(--x), var(--y-depart)) translate(-50%,-50%) scale(1); }
+  80%  { opacity: 1; transform: translate(var(--x), var(--y-impact)) translate(-50%,-50%) scale(1); }
+  90%  { opacity: 1; transform: translate(var(--x), var(--y-impact)) translate(-50%,-50%) scaleX(1.8) scaleY(0.45); }
+  100% { opacity: 0; transform: translate(var(--x), var(--y-impact)) translate(-50%,-50%) scaleX(0.3) scaleY(0.3); }
+}
+/* Les ondes : deux cercles qui s'élargissent et s'effacent, décalés
+   l'un derrière l'autre — la flaque qui encaisse le choc, comme le
+   fait une vraie surface d'eau, jamais un seul cercle isolé. */
+.onde-impact {
+  position: fixed;
+  top: 0; left: 0;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--goutte);
+  opacity: 0;
+  transform: translate(var(--x), var(--y-impact)) translate(-50%,-50%);
+  animation: onde-impact 0.85s cubic-bezier(.16,1,.3,1) forwards;
+  /* 0,84 s = 80 % des 1,05 s de la chute (voir `goutte-tombe`) —
+     l'instant exact où la goutte touche la surface. */
+  animation-delay: 0.84s;
+}
+.onde-impact.deux { animation-delay: 0.94s; border-width: 1px; }
+@keyframes onde-impact {
+  0%   { opacity: 0.55; width: 8px; height: 8px; }
+  100% { opacity: 0; width: 170px; height: 170px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rideau-goutte { display: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   L'AURORE
+   ------------------------------------------------------------------
+   ⚠️ POURQUOI UNE SEULE LUEUR (DANS LE HÉROS) NE SUFFISAIT PAS.
+   Une lueur isolée se voit comme un effet posé sur UNE section ; le
+   reste de la page retombe alors à plat, et c'est justement ce
+   contraste qui trahit un ajout de dernière minute plutôt qu'un parti
+   pris. Linear, Vercel, Raycast partagent tous la même réponse : une
+   nappe de couleur FIXE, qui dérive très lentement sous TOUTE la page
+   — assez discrète pour ne jamais concurrencer le texte, assez
+   présente pour qu'aucune section ne retombe jamais à un blanc (ou un
+   noir) tout à fait plat.
+
+   `position: fixed` plutôt que placée dans le héros : elle reste
+   derrière le contenu qui défile par-dessus, au lieu de faire défiler
+   une lueur qui s'épuiserait après le premier écran.
+   ══════════════════════════════════════════════════════════════════ */
+.aurore {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.aurore i {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  font-style: normal;
+  animation: derive 34s ease-in-out infinite alternate;
+}
+.aurore i:nth-child(1) {
+  top: -12%; left: 6%;
+  width: 46vw; height: 46vw;
+  background: var(--goutte);
+  opacity: 0.10;
+}
+.aurore i:nth-child(2) {
+  top: 28%; right: -8%;
+  width: 38vw; height: 38vw;
+  background: var(--vif);
+  opacity: 0.06;
+  animation-duration: 42s;
+  animation-delay: -8s;
+}
+.aurore i:nth-child(3) {
+  bottom: -14%; left: 24%;
+  width: 42vw; height: 42vw;
+  background: var(--relais);
+  opacity: 0.045;
+  animation-duration: 50s;
+  animation-delay: -20s;
+}
+@keyframes derive {
+  to { transform: translate(4%, 5%) scale(1.08); }
+}
+/* Les trois nappes, un peu plus visibles en sombre : un fond sombre
+   absorbe davantage la couleur qu'un fond clair, à opacité égale la
+   même valeur s'y verrait deux fois moins. Écrites deux fois — choix
+   explicite dans les réglages, et suivi automatique du système —
+   jamais fusionnées en un seul sélecteur : c'est la même paire de
+   règles que partout ailleurs sur cette page (voir les jetons de
+   couleur en tête de fichier). */
+:root[data-theme="dark"] .aurore i:nth-child(1) { opacity: 0.16; }
+:root[data-theme="dark"] .aurore i:nth-child(2) { opacity: 0.10; }
+:root[data-theme="dark"] .aurore i:nth-child(3) { opacity: 0.07; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .aurore i:nth-child(1) { opacity: 0.16; }
+  :root:not([data-theme="light"]) .aurore i:nth-child(2) { opacity: 0.10; }
+  :root:not([data-theme="light"]) .aurore i:nth-child(3) { opacity: 0.07; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aurore i { animation: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LE GRAIN
+   ------------------------------------------------------------------
+   Une texture, pas une décoration : sans elle, les grands aplats de
+   `--fond`/`--surface` ont un aspect numérique un peu froid, très
+   reconnaissable des sites d'agence qui soignent ce détail. Un bruit
+   à 3 % d'opacité suffit — au-delà, la texture SE VOIT, alors qu'elle
+   ne doit être que perçue.
+
+   `feTurbulence` dessiné en SVG plutôt qu'une image PNG : zéro
+   requête réseau, zéro poids, motif qui ne se répète jamais à
+   l'identique visuellement à cette taille.
+   ══════════════════════════════════════════════════════════════════ */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LE CURSEUR
+   ------------------------------------------------------------------
+   ⚠️ UNIQUEMENT LÀ OÙ UNE SOURIS EXISTE VRAIMENT.
+   `(hover: hover) and (pointer: fine)` exclut le tactile ET les
+   pointeurs grossiers (manette, stylet imprécis) — remplacer le
+   curseur système par un curseur qui ne suivrait jamais le doigt
+   laisserait un téléphone sans aucun repère de contact. C'est la
+   classe `.curseur-actif`, posée par le script SEULEMENT après ce
+   test, qui déclenche tout ce bloc : sans JS, le curseur système
+   normal reste affiché partout.
+   ══════════════════════════════════════════════════════════════════ */
+.curseur-actif, .curseur-actif a, .curseur-actif button, .curseur-actif .copier {
+  cursor: none;
+}
+.point-curseur, .halo-curseur {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 210;
+  pointer-events: none;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+.point-curseur {
+  width: 6px; height: 6px;
+  background: var(--goutte);
+}
+.halo-curseur {
+  width: 34px; height: 34px;
+  border: 1.5px solid var(--goutte-trait);
+  transition: width 0.22s cubic-bezier(.22,.61,.36,1),
+              height 0.22s cubic-bezier(.22,.61,.36,1),
+              border-color 0.22s, background 0.22s;
+}
+/* Le halo grossit et s'emplit légèrement au survol d'une cible —
+   c'est lui qui dit « ceci se touche », le pointeur normal ne le
+   disait qu'en changeant de forme, plus discrètement. */
+.halo-curseur.sur-cible {
+  width: 52px; height: 52px;
+  background: var(--goutte-doux);
+  border-color: var(--goutte);
+}
+@media (prefers-reduced-motion: reduce) {
+  .curseur-actif { cursor: auto !important; }
+  .curseur-actif a, .curseur-actif button, .curseur-actif .copier { cursor: pointer !important; }
+  .point-curseur, .halo-curseur { display: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LES BOUTONS MAGNÉTIQUES
+   ------------------------------------------------------------------
+   Le bouton se laisse tirer de quelques pixels vers le pointeur qui
+   s'en approche, et revient se poser dès qu'il s'éloigne — la
+   transition ne s'applique QU'AU RETOUR (posée par le script), pour
+   que la traction elle-même suive la souris sans décalage.
+   ══════════════════════════════════════════════════════════════════ */
+.magnetique { will-change: transform; }
+.magnetique.pose {
+  transition: transform 0.42s cubic-bezier(.22,1.5,.36,1);
+}
+</style>
+
+<div class="aurore" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="bandeau-test">
+  <b>Droplet est en phase de test.</b> Vous n'utilisez pas une version
+  finie — vous en écrivez la première page. <a href="#testeurs">Ce que
+  ça implique</a>
+</div>
+
+<nav class="nav">
+  <div class="nav-int">
+    <a class="marque" href="#haut">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" style="color: var(--goutte)" aria-hidden="true">
+        <path d="M12 2.4c3.6 4.2 6.4 7.6 6.4 10.9A6.4 6.4 0 0 1 12 19.7a6.4 6.4 0 0 1-6.4-6.4C5.6 10 8.4 6.6 12 2.4Z"/>
+      </svg>
+      Droplet
+      <span class="beta">Bêta</span>
+    </a>
+    <div class="nav-liens">
+      <a href="#fonctionnement">Fonctionnement</a>
+      <a href="#apercu">Aperçu</a>
+      <a href="#capacites">Capacités</a>
+      <a href="#trajet">Trajet</a>
+      <a href="#securite">Sécurité</a>
+      <a href="#limites">Limites</a>
+      <a href="#telecharger">Télécharger</a>
+      <a href="#testeurs">Testeurs</a>
+      <a href="#soutenir">Soutenir</a>
+    </div>
+  </div>
+</nav>
+
+<main id="haut">
+
+  <!-- ═══ HÉROS ═══ -->
+  <header class="heros">
+    <div class="enveloppe">
+      <h1 id="titre">Le réseau tombe.<br>Le message, <em>non</em>.</h1>
+      <p class="chapeau">
+        Droplet fait passer vos messages de téléphone en téléphone, par
+        Bluetooth et par Wi-Fi. Sans antenne, sans opérateur, sans
+        forfait, sans compte — et sans le moindre serveur.
+      </p>
+      <div class="actions">
+        <a class="bouton bouton-plein" href="#telecharger">Obtenir Droplet</a>
+        <a class="bouton bouton-vide" href="#fonctionnement">Comment ça marche</a>
+      </div>
+
+      <figure class="scene" style="margin-block-end:0">
+        <div class="scene-tete">
+          <span class="sous">Votre message trouve son chemin, de proche en proche.</span>
+          <span id="etat"><span class="puce"></span><span id="etat-txt">Prêt</span></span>
+        </div>
+        <div class="scene-vue">
+          <canvas id="toile" aria-label="Simulation : un message part d'un téléphone, traverse plusieurs appareils relais du réseau maillé et arrive à son destinataire, sans passer par Internet."></canvas>
+          <div class="bulle" id="bulle-envoi" aria-hidden="true">Salut Sarah&nbsp;👋</div>
+          <div class="bulle recu" id="bulle-recu" aria-hidden="true">Message reçu</div>
+        </div>
+        <div class="scene-pied">
+          <button type="button" id="mesh-envoyer">Envoyer un message</button>
+          <span id="mesh-bilan" role="status" aria-live="polite">
+            <span class="ok">✓&nbsp;Message reçu</span>
+            <span class="sep">·</span>
+            <span id="mesh-relais">3 relais utilisés</span>
+            <span class="sep">·</span>
+            <span>Sans Internet</span>
+          </span>
+          <button type="button" id="mesh-rejouer" hidden>Réinitialiser</button>
+        </div>
+        <figcaption class="scene-legende"><b>Livré sans Internet.</b> Aucune antenne, aucun opérateur, aucun serveur — juste les téléphones à portée les uns des autres.</figcaption>
+      </figure>
+    </div>
+  </header>
+
+  <!-- ═══ LE PROBLÈME ═══ -->
+  <section id="probleme">
+    <div class="enveloppe">
+      <div class="tete-section">
+        <span class="etiquette">
+          <svg class="arc" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 12a6 6 0 0 1 12 0" stroke-dasharray="2.4 2.4"/><circle cx="8" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+          Le point de départ
+        </span>
+        <h2>Une messagerie suppose toujours&nbsp;<br>que le réseau est là</h2>
+      </div>
+      <div class="mesure">
+        <p>
+          WhatsApp, Telegram, Signal : tous excellents, et tous bâtis sur
+          la même hypothèse. Votre message part vers un centre de données,
+          souvent à un continent de distance, avant de redescendre vers
+          quelqu'un qui se trouve peut-être dans la pièce d'à côté.
+        </p>
+        <p>
+          Tant que la couverture tient et que le forfait est chargé, cette
+          hypothèse est invisible. Le jour où l'une des deux lâche —
+          coupure, panne, zone blanche, catastrophe, crédit épuisé — elles
+          s'arrêtent toutes ensemble, exactement au moment où l'on a le
+          plus besoin de joindre quelqu'un.
+        </p>
+        <p>
+          Droplet part de l'hypothèse inverse : <strong>il n'y a pas de
+          réseau</strong>. Tout le reste en découle.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FONCTIONNEMENT ═══ -->
+  <section id="fonctionnement">
+    <div class="enveloppe">
+      <div class="tete-section">
+        <span class="etiquette">
+          <svg class="arc" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 12a6 6 0 0 1 12 0" stroke-dasharray="2.4 2.4"/><circle cx="8" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+          Fonctionnement
+        </span>
+        <h2>Les téléphones se parlent<br>directement</h2>
+        <p>
+          Votre téléphone possède déjà deux radios capables d'atteindre
+          un autre téléphone sans passer par quoi que ce soit. Droplet ne
+          fait rien d'autre que s'en servir.
+        </p>
+      </div>
+
+      <div class="schema">
+        <figure class="volet">
+          <span class="etiquette">Une messagerie ordinaire</span>
+          <svg viewBox="0 0 320 162" role="img" aria-label="Deux téléphones proches communiquent en passant par un serveur lointain.">
+            <g stroke="var(--trait)" stroke-width="1.5" fill="none" stroke-dasharray="4 4">
+              <path d="M46 106 C 46 30, 160 22, 160 40"/>
+              <path d="M274 106 C 274 30, 160 22, 160 40"/>
+            </g>
+            <rect x="128" y="28" width="64" height="34" rx="6" fill="var(--surface)" stroke="var(--trait)" stroke-width="1.5"/>
+            <g fill="var(--brume)">
+              <rect x="138" y="38" width="44" height="3" rx="1.5"/>
+              <rect x="138" y="46" width="30" height="3" rx="1.5"/>
+            </g>
+            <g fill="var(--surface)" stroke="var(--trait)" stroke-width="1.5">
+              <rect x="32" y="94" width="28" height="46" rx="5"/>
+              <rect x="260" y="94" width="28" height="46" rx="5"/>
+            </g>
+            <text x="160" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="var(--brume)">serveur</text>
+            <text x="46" y="152" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="var(--brume)">vous</text>
+            <text x="274" y="152" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="var(--brume)">Michel</text>
+          </svg>
+          <figcaption>
+            Deux mètres séparent les téléphones. Le message, lui, fait
+            plusieurs milliers de kilomètres — et n'arrive plus du tout
+            si le lien vers le serveur est coupé.
+          </figcaption>
+        </figure>
+
+        <figure class="volet">
+          <span class="etiquette">Droplet</span>
+          <svg viewBox="0 0 320 162" role="img" aria-label="Deux téléphones proches communiquent directement, et un relais intermédiaire prolonge la portée.">
+            <g stroke="var(--goutte)" stroke-width="1.6" fill="none">
+              <path d="M60 117 L 146 117"/>
+              <path d="M174 117 L 260 117"/>
+            </g>
+            <circle cx="160" cy="117" r="26" fill="none" stroke="var(--goutte-trait)" stroke-width="1.2" stroke-dasharray="3 3"/>
+            <circle cx="160" cy="117" r="40" fill="none" stroke="var(--goutte-trait)" stroke-width="1" stroke-dasharray="3 3" opacity="0.55"/>
+            <g fill="var(--surface)" stroke="var(--goutte)" stroke-width="1.6">
+              <rect x="32" y="94" width="28" height="46" rx="5"/>
+              <rect x="146" y="94" width="28" height="46" rx="5"/>
+              <rect x="260" y="94" width="28" height="46" rx="5"/>
+            </g>
+            <circle cx="103" cy="117" r="4.5" fill="var(--goutte)"/>
+            <text x="46" y="152" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="var(--brume)">vous</text>
+            <text x="160" y="152" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="var(--brume)">relais</text>
+            <text x="274" y="152" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="var(--brume)">Michel</text>
+            <text x="160" y="52" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="var(--brume)">aucun serveur</text>
+          </svg>
+          <figcaption>
+            Le message va d'un téléphone au suivant. Hors de portée
+            directe, il emprunte les appareils qui se trouvent entre les
+            deux — jusqu'à cinq de suite.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="transports">
+        <div class="transport">
+          <span class="etiquette">Radio 1</span>
+          <b>Bluetooth LE</b>
+          <span>Toujours actif, très peu gourmand. C'est lui qui trouve les appareils autour de vous et qui porte les messages quand il n'y a plus rien d'autre.</span>
+          <div class="portee">Portée ~10 à 100 m</div>
+        </div>
+        <div class="transport">
+          <span class="etiquette">Radio 2</span>
+          <b>Wi-Fi local</b>
+          <span>Sur un même réseau Wi-Fi — une box, un partage de connexion, un routeur sans internet — les appareils se découvrent et échangent bien plus vite.</span>
+          <div class="portee">Débit élevé · fichiers et appels</div>
+        </div>
+        <div class="transport">
+          <span class="etiquette">Radio 3</span>
+          <b>Wi-Fi Direct</b>
+          <span>Deux téléphones montent un lien Wi-Fi entre eux, sans box ni point d'accès. C'est ce qui permet d'envoyer une vidéo là où il n'y a rigoureusement aucune infrastructure.</span>
+          <div class="portee">Portée ~50 à 200 m</div>
+        </div>
+      </div>
+
+      <div class="mesure" style="margin-top:44px">
+        <h3 style="margin-bottom:10px">Et si personne n'est là&nbsp;?</h3>
+        <p>
+          C'est le cas le plus fréquent, et celui que la plupart des
+          systèmes maillés traitent le plus mal. Droplet garde le message.
+          Il attend, en mémoire, sur votre téléphone. Dès qu'un appareil
+          passe à portée — dans la rue, dans un taxi, au marché — le
+          message repart par lui.
+        </p>
+        <p>
+          C'est ce qu'on appelle le <strong>stockage et retransmission</strong>.
+          Votre destinataire n'a même pas besoin d'avoir été là au moment
+          de l'envoi : le message voyage dans la poche de quelqu'un
+          d'autre, chiffré, illisible pour lui, jusqu'à trouver son chemin.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ APERÇU — LE TÉLÉPHONE QUI SUIT LE DÉFILEMENT ═══
+       Quatre vraies captures de l'app, dans `ecrans/`. Le téléphone
+       reste épinglé à l'écran pendant que les légendes défilent à
+       côté, à la façon des pages produit d'Apple — voir le script
+       dédié à cette section pour le mécanisme. -->
+  <section id="apercu">
+    <div class="enveloppe">
+      <div class="tete-section">
+        <span class="etiquette">
+          <svg class="arc" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 12a6 6 0 0 1 12 0" stroke-dasharray="2.4 2.4"/><circle cx="8" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+          Aperçu
+        </span>
+        <h2>Ce que ça donne,<br>à l'écran</h2>
+      </div>
+
+      <div class="vitrine">
+        <div class="vitrine-telephone">
+          <div class="telephone">
+            <div class="telephone-encoche"></div>
+            <div class="telephone-ecran">
+              <img class="ecran-image actif" data-ecran="1" src="ecrans/1-discussions.jpg" alt="La liste des discussions Droplet, avec une conversation en cours." loading="eager">
+              <img class="ecran-image" data-ecran="2" src="ecrans/2-pairs.jpg" alt="L'écran Pairs de Droplet, en train de chercher des appareils à proximité.">
+              <img class="ecran-image" data-ecran="3" src="ecrans/3-urgence.jpg" alt="Le mode urgence de Droplet, avec les boutons « Je suis en sécurité » et « J'ai besoin d'aide ».">
+              <img class="ecran-image" data-ecran="4" src="ecrans/4-cartes.jpg" alt="Les réglages de cartes hors ligne de Droplet, avec les zones consultées stockées sur l'appareil.">
+            </div>
+          </div>
+        </div>
+
+        <div class="vitrine-legendes">
+          <div class="legende" data-ecran="1">
+            <span class="etiquette">Écran 1 sur 4</span>
+            <h3>Vos discussions, à portée de main</h3>
+            <p>Une liste de conversations comme les autres — discussions archivées, discussions verrouillées, tout y est. Rien ne rappelle qu'aucun serveur n'est impliqué.</p>
+          </div>
+          <div class="legende" data-ecran="2">
+            <span class="etiquette">Écran 2 sur 4</span>
+            <h3>Le réseau, cherché en permanence</h3>
+            <p>« Personne à portée » n'est pas une panne — c'est l'état normal entre deux rencontres. Droplet cherche en continu, et le dit honnêtement plutôt que d'afficher un chargement qui ne finit jamais.</p>
+          </div>
+          <div class="legende" data-ecran="3">
+            <span class="etiquette">Écran 3 sur 4</span>
+            <h3>Dire qu'on va bien, en un geste</h3>
+            <p>Un appui diffuse « Je suis en sécurité » à tout le voisinage joignable — sans réseau, sans opérateur. Les check-in reçus des autres apparaissent au même endroit.</p>
+          </div>
+          <div class="legende" data-ecran="4">
+            <span class="etiquette">Écran 4 sur 4</span>
+            <h3>Une carte qui reste sur l'appareil</h3>
+            <p>Les zones consultées se conservent toutes seules, sans qu'aucune région ne soit téléchargée d'avance en cachette. 4 Ko, ici, pour ce qui a déjà été vu.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CAPACITÉS ═══ -->
+  <section id="capacites">
+    <div class="enveloppe">
+      <div class="tete-section">
+        <span class="etiquette">
+          <svg class="arc" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 12a6 6 0 0 1 12 0" stroke-dasharray="2.4 2.4"/><circle cx="8" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+          Capacités
+        </span>
+        <h2>Une vraie messagerie,<br>pas un dépannage</h2>
+        <p>
+          Fonctionner sans réseau ne veut pas dire se contenter de texte
+          brut. Tout ce qu'on attend d'une messagerie est là.
+        </p>
+      </div>
+
+      <div class="grille">
+        <div class="carte">
+          <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.8-.8L3 21l1.9-4.9A8.3 8.3 0 0 1 3.6 11.5 8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4Z"/></svg>
+          <h3>Conversations et groupes</h3>
+          <p>Réponses citées, réactions, accusés de réception, recherche. En groupe, un message reçu avant sa clé n'est pas perdu : la clé manquante est rattrapée.</p>
+        </div>
+        <div class="carte">
+          <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M15.5 10.5 21 7v10l-5.5-3.5Z"/><rect x="3" y="6" width="12.5" height="12" rx="2.5"/></svg>
+          <h3>Appels audio et vidéo</h3>
+          <p>En tête-à-tête ou à plusieurs. Ils demandent une liaison Wi-Fi : le Bluetooth, à dix-neuf octets par écriture, ne peut pas porter de la voix.</p>
+        </div>
+        <div class="carte">
+          <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><circle cx="9" cy="10" r="2"/><path d="m4 17 5-4.2 4.2 3.4L17 13l3 2.6"/></svg>
+          <h3>Photos, vidéos, fichiers</h3>
+          <p>Et des notes vocales avec leur vraie forme d'onde, lisibles en 1×, 1,5× ou 2×. Les vidéos trop lourdes sont recoupées avant d'être envoyées.</p>
+        </div>
+        <div class="carte">
+          <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18" stroke-dasharray="3 2.5"/></svg>
+          <h3>Statuts</h3>
+          <p>Une photo, une vidéo ou un mot, diffusés au voisinage et relayés de proche en proche. Ils s'effacent au bout de vingt-quatre heures.</p>
+        </div>
+        <div class="carte">
+          <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.4"/></svg>
+          <h3>Carte hors ligne</h3>
+          <p>Les zones consultées restent sur le téléphone et s'affichent ensuite sans internet. Les positions partagées arrivent par le maillage, chiffrées.</p>
+        </div>
+        <div class="carte">
+          <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3 4.5 6.2v5.4c0 4.4 3.2 8.2 7.5 9.4 4.3-1.2 7.5-5 7.5-9.4V6.2L12 3Z"/><path d="m9.2 12 2 2 3.6-3.8"/></svg>
+          <h3>Signal de sécurité</h3>
+          <p>« Je vais bien », diffusé à tout le voisinage en un appui, avec ou sans position approximative. Et un mode d'urgence qui insiste jusqu'à passer.</p>
+        </div>
+      </div>
+
+      <div class="defilant">
+        <table>
+          <caption class="etiquette" style="text-align:left;padding:26px 0 12px">Ce qui change, concrètement</caption>
+          <thead>
+            <tr><th scope="col">&nbsp;</th><th scope="col">Messagerie ordinaire</th><th scope="col">Droplet</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Sans couverture réseau</th><td>Ne fonctionne pas</td><td class="oui">Fonctionne</td></tr>
+            <tr><th scope="row">Sans forfait de données</th><td>Ne fonctionne pas</td><td class="oui">Fonctionne</td></tr>
+            <tr><th scope="row">Coût par message</th><td>Données mobiles</td><td class="oui">Aucun</td></tr>
+            <tr><th scope="row">Compte à créer</th><td>Numéro de téléphone</td><td class="oui">Aucun</td></tr>
+            <tr><th scope="row">Où sont vos messages</th><td>Sur des serveurs</td><td class="oui">Sur votre téléphone</td></tr>
+            <tr><th scope="row">Qui peut vous couper</th><td>L'opérateur, l'éditeur</td><td class="oui">Personne</td></tr>
+            <tr><th scope="row">Portée</th><td>Mondiale</td><td>Le voisinage, étendu par les relais</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ LE TRAJET ═══ -->
+  <section id="trajet">
+    <div class="enveloppe">
+      <div class="tete-section">
+        <span class="etiquette">
+          <svg class="arc" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 12a6 6 0 0 1 12 0" stroke-dasharray="2.4 2.4"/><circle cx="8" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+          Le trajet
+        </span>
+        <h2>Droplet vous dit<br>par où c'est passé</h2>
+        <p>
+          Touchez l'heure d'un message reçu : son état, le délai réel jusqu'à
+          la lecture, et les appareils qui l'ont fait suivre, dans l'ordre.
+          Aucune autre messagerie ne peut afficher cela — chez les autres, la
+          réponse est toujours « par nos serveurs ».
+        </p>
+      </div>
+
+      <div class="chiffres">
+        <div class="chiffre-cell">
+          <span class="val">5</span>
+          <span class="lib">relais au maximum. Passé ce compte, le message cesse d'être propagé plutôt que de tourner en rond dans le réseau.</span>
+        </div>
+        <div class="chiffre-cell">
+          <span class="val">19</span>
+          <span class="lib">octets utiles par écriture Bluetooth, sans négociation. C'est cette contrainte, minuscule, qui a façonné tout le protocole.</span>
+        </div>
+        <div class="chiffre-cell">
+          <span class="val">0</span>
+          <span class="lib">serveur, compte, numéro de téléphone ou adresse e-mail. Il n'y a rien à créer, et rien à fermer.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SÉCURITÉ ═══ -->
+  <section id="securite">
+    <div class="enveloppe">
+      <div class="tete-section">
+        <span class="etiquette">
+          <svg class="arc" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 12a6 6 0 0 1 12 0" stroke-dasharray="2.4 2.4"/><circle cx="8" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+          Sécurité
+        </span>
+        <h2>Vos messages traversent<br>les téléphones des autres</h2>
+        <p>
+          C'est le principe même du maillage — et c'est exactement pour
+          cela que le chiffrement n'est pas une option ici, mais la
+          condition pour que le reste tienne debout.
+        </p>
+      </div>
+
+      <dl class="faits">
+        <div class="fait">
+          <dt>Identité</dt>
+          <dd>Une paire de clés X25519 créée sur votre appareil, au premier lancement. La clé privée vit dans le coffre du système (Keystore Android) et ne figure dans aucune base de données.</dd>
+        </div>
+        <div class="fait">
+          <dt>Messages privés</dt>
+          <dd>Un secret partagé dérivé par ECDH, passé dans HKDF, puis chiffrement AES-256-GCM avec un nonce aléatoire par message.</dd>
+        </div>
+        <div class="fait">
+          <dt>Groupes</dt>
+          <dd>Un cliquet à clé d'expéditeur : chaque membre possède sa propre chaîne de clés, dérivée par HMAC à chaque message envoyé.</dd>
+        </div>
+        <div class="fait">
+          <dt>Les relais</dt>
+          <dd>Un téléphone qui fait suivre votre message transporte des octets qu'il ne peut pas lire. Il ne détient aucune clé le concernant.</dd>
+        </div>
+        <div class="fait">
+          <dt>Vérification</dt>
+          <dd>Un code de sécurité par contact, comparable en face à face ou par QR code, pour s'assurer que personne ne s'est intercalé.</dd>
+        </div>
+        <div class="fait">
+          <dt>Journal d'erreurs</dt>
+          <dd>Consultable dans les réglages, conservé sur l'appareil, jamais transmis. C'est vous qui décidez si vous l'envoyez, et à qui.</dd>
+        </div>
+        <div class="fait">
+          <dt>Sauvegarde</dt>
+          <dd>Votre identité s'exporte dans un fichier chiffré par mot de passe. Sans lui, une identité perdue l'est définitivement — il n'existe aucun serveur pour la restituer.</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ═══ LIMITES ═══ -->
+  <section id="limites">
+    <div class="enveloppe">
+      <div class="tete-section">
+        <span class="etiquette">
+          <svg class="arc" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 12a6 6 0 0 1 12 0" stroke-dasharray="2.4 2.4"/><circle cx="8" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+          Limites
+        </span>
+        <h2>Ce que Droplet<br>ne sait pas faire</h2>
+        <p>
+          Une application qui ne parle que de ses qualités demande qu'on
+          la croie sur parole. Voici où elle s'arrête — pour que le reste
+          soit vérifiable.
+        </p>
+      </div>
+
+      <div class="limites">
+        <ul>
+          <li>
+            <b>Il ne remplace pas internet</b>
+            Droplet joint le voisinage, étendu par les relais. Il ne joindra
+            pas quelqu'un à l'autre bout du pays s'il n'existe aucune chaîne
+            d'appareils entre vous deux.
+          </li>
+          <li>
+            <b>Il ne cache pas votre présence</b>
+            Pour se trouver, les appareils doivent s'annoncer. Quelqu'un à
+            portée radio peut constater qu'un appareil Droplet est là. Le
+            contenu est illisible, la présence ne l'est pas.
+          </li>
+          <li>
+            <b>Il ne protège pas un téléphone déverrouillé</b>
+            Tout est chiffré au transport et rangé sur l'appareil. Qui tient
+            votre téléphone déverrouillé lit vos conversations, comme avec
+            n'importe quelle autre application.
+          </li>
+          <li>
+            <b>Il n'a rien pour vous rendre votre identité</b>
+            Pas de serveur signifie aussi pas de récupération de compte.
+            Sans sauvegarde exportée, un téléphone perdu emporte l'identité
+            et l'historique avec lui.
+          </li>
+          <li>
+            <b>Il est plus lent qu'un réseau</b>
+            Un message relayé attend qu'un chemin s'ouvre. Cela peut prendre
+            quelques secondes — ou plusieurs heures, jusqu'à ce que le bon
+            appareil passe à portée.
+          </li>
+          <li>
+            <b>Seul, il ne sert à rien</b>
+            C'est la limite la plus honnête de toutes. Un maillage se
+            construit à plusieurs : la première chose utile à faire après
+            l'installation est d'y amener quelqu'un.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ TÉLÉCHARGER ═══ -->
+  <section id="telecharger">
+    <div class="enveloppe">
+      <div class="tete-section">
+        <span class="etiquette">
+          <svg class="arc" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 12a6 6 0 0 1 12 0" stroke-dasharray="2.4 2.4"/><circle cx="8" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+          Obtenir Droplet
+        </span>
+        <h2>Y compris sans<br>connexion</h2>
+      </div>
+
+      <div class="telecharger">
+        <h3>Android</h3>
+        <p class="mesure">
+          Environ 55 Mo. Android 7.0 ou plus récent. Aucun compte à créer :
+          l'application est utilisable dans les secondes qui suivent
+          l'installation.
+        </p>
+        <p class="mesure">
+          <strong>C'est une version de test.</strong> Elle fonctionne, elle
+          n'est pas finie. Elle peut se fermer toute seule, rater un
+          message, vider la batterie plus vite que prévu.
+          <a href="#testeurs">Lisez ce qui est attendu de vous</a> avant de
+          l'installer.
+        </p>
+        <div class="actions" style="margin-top:22px">
+          <!-- ⚠️ L'ADRESSE POINTE VERS `latest`, PAS VERS UNE VERSION.
+               GitHub garde ce chemin valable à chaque nouvelle
+               publication : le site n'a donc jamais besoin d'être
+               retouché quand une version sort. Le compte est renseigné. -->
+          <a class="bouton bouton-plein" id="lien-apk"
+             href="https://github.com/rito27959-arch/droplet/releases/latest/download/app-arm64-v8a-release.apk">
+            Télécharger l'APK
+          </a>
+          <!-- ⚠️ LE CODE SOURCE PLUTÔT QU'UNE PROMESSE.
+               Ici se trouvait un bouton « Google Play » qui ne menait
+               nulle part, avec une mention « bientôt disponible ».
+               Annoncer ce qui n'existe pas encore n'apporte rien à
+               personne — et sur une application qui affirme chiffrer
+               les messages, pouvoir LIRE LE CODE est un argument de
+               confiance autrement plus solide qu'une date. -->
+          <a class="bouton bouton-vide"
+             href="https://github.com/rito27959-arch/droplet"
+             rel="noopener">
+            Voir le code source
+          </a>
+        </div>
+
+        <div class="avis">
+          <b>Le partage se passe aussi d'internet</b>
+          Depuis l'application, Droplet envoie <em>son propre fichier
+          d'installation</em> par Bluetooth ou Wi-Fi Direct. Ni celui qui
+          donne ni celui qui reçoit n'a besoin de connexion — c'est le seul
+          moyen de distribution cohérent avec ce que fait l'application.
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ LES PREMIERS TESTEURS ═══ -->
+  <section id="testeurs">
+    <div class="enveloppe">
+      <div class="tete-section">
+        <span class="etiquette">
+          <svg class="arc" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 12a6 6 0 0 1 12 0" stroke-dasharray="2.4 2.4"/><circle cx="8" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+          Phase de test
+        </span>
+        <h2>Vous seriez parmi<br>les tout premiers</h2>
+        <p>
+          Droplet n'est pas encore une application finie, et ce n'est pas
+          une précaution de langage : c'est ce qui rend votre place ici
+          intéressante.
+        </p>
+      </div>
+
+      <div class="testeurs">
+        <div class="mesure">
+          <p>
+            Une messagerie ordinaire est testée par une équipe, dans un
+            bureau, sur du bon matériel. Droplet ne peut pas l'être :
+            <strong>il n'existe que s'il y a plusieurs téléphones, à
+            plusieurs endroits, à portée les uns des autres.</strong>
+            Aucune salle d'essai ne reproduit une rue de Yaoundé un
+            vendredi soir, ni un quartier où le réseau vient de tomber.
+          </p>
+          <p>
+            Les premiers testeurs ne rendent donc pas un service : ils
+            sont la condition d'existence du réseau. Ce que vous
+            constaterez dans les prochaines semaines — un message qui met
+            trois heures, un appareil que le vôtre ne voit jamais, une
+            fermeture inexpliquée — est une information que personne
+            d'autre au monde ne détient.
+          </p>
+        </div>
+
+        <div class="rangs">
+          <div>
+            <h3>Votre nom, si vous le voulez</h3>
+            <p>
+              Les personnes qui auront signalé un défaut reproductible
+              figureront dans les remerciements de l'application. Sous le
+              pseudo de votre choix, ou pas du tout — c'est vous qui
+              décidez.
+            </p>
+          </div>
+          <div>
+            <h3>Vous voyez les versions d'abord</h3>
+            <p>
+              Chaque correction part aux testeurs avant tout le monde, et
+              vous saurez laquelle de vos remarques l'a provoquée.
+            </p>
+          </div>
+          <div>
+            <h3>Le réseau commence par vous</h3>
+            <p>
+              Les tout premiers utilisateurs d'un maillage en sont le
+              cœur : c'est autour de vos appareils que les suivants
+              pourront se connecter.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LE PROTOCOLE ──
+           ⚠️ CES ÉTAPES SONT VÉRIFIÉES DANS L'APPLICATION, pas
+           supposées. Le libellé exact de la rangée est bien « Journal
+           des erreurs », et la feuille qui s'ouvre porte bien un bouton
+           « Copier ». Écrire un chemin approximatif ferait chercher les
+           gens à côté, et la plupart abandonneraient là. -->
+      <div class="tete-section" style="margin-top:clamp(46px,6vw,68px)">
+        <h2 style="font-size:clamp(1.5rem,3vw,2rem)">Ce qu'on vous demande</h2>
+        <p>
+          Une seule chose, et elle tient en deux appuis. Droplet n'a
+          aucun serveur : <strong>aucun rapport de plantage ne remonte
+          nulle part.</strong> Quand l'application se ferme toute seule
+          chez vous, la seule trace au monde est un fichier sur votre
+          téléphone. Si vous ne l'envoyez pas, le défaut n'existe pour
+          personne.
+        </p>
+      </div>
+
+      <ol class="protocole">
+        <li>
+          <b>Prenez l'habitude d'y jeter un œil</b>
+          Ouvrez <strong>Réglages → Journal des erreurs</strong>. Une ou
+          deux fois par semaine suffit — et systématiquement après une
+          fermeture inattendue de l'application.
+        </li>
+        <li>
+          <b>S'il est vide, tout va bien</b>
+          Un journal vide est une bonne nouvelle, et n'appelle aucun
+          message. Ne signalez que ce qui s'y trouve réellement.
+        </li>
+        <li>
+          <b>Appuyez sur « Envoyer »</b>
+          Le bouton est en bas de la feuille qui s'ouvre. Le partage du
+          téléphone apparaît : choisissez WhatsApp ou votre messagerie,
+          puis le contact ci-dessous. Le journal part en pièce jointe,
+          entier — les applications de messagerie coupent les textes
+          trop longs, un fichier arrive complet.
+        </li>
+        <li>
+          <b>Ajoutez une phrase</b>
+          <em>Ce que vous étiez en train de faire</em> au moment du
+          problème vaut souvent plus que le journal lui-même. « J'ouvrais
+          la carte », « j'envoyais une photo » : cela suffit à savoir où
+          chercher.
+        </li>
+        <li>
+          <b>Puis effacez-le</b>
+          Le bouton « Effacer » est juste à côté. Ainsi, la prochaine
+          fois, ce que vous verrez sera neuf — et non un mélange
+          d'anciens défauts déjà signalés.
+        </li>
+      </ol>
+
+      <div class="contacts">
+        <a class="contact" href="https://wa.me/237678963221">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.8-.8L3 21l1.9-4.9A8.3 8.3 0 0 1 3.6 11.5 8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4Z"/></svg>
+          <span>
+            <span class="via">WhatsApp ou SMS</span>
+            <span class="quoi">+237 678 963 221</span>
+          </span>
+        </a>
+        <a class="contact" href="mailto:migueleffi4@gmail.com?subject=Droplet%20%E2%80%94%20journal%20des%20erreurs">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="m3 7 9 6 9-6"/></svg>
+          <span>
+            <span class="via">Courriel</span>
+            <span class="quoi">migueleffi4@gmail.com</span>
+          </span>
+        </a>
+      </div>
+
+      <div class="avis" style="margin-top:26px">
+        <b>Ce que contient le journal, et ce qu'il ne contient pas</b>
+        Il enregistre les erreurs techniques de l'application — des noms
+        de fonctions, des numéros de ligne, des horodatages. Il ne
+        contient <strong>ni vos messages, ni vos contacts, ni vos
+        clés</strong> : ceux-là ne quittent jamais votre téléphone, y
+        compris quand vous nous écrivez. Vous pouvez le relire avant de
+        l'envoyer, il est affiché en entier à l'écran.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SOUTENIR ═══ -->
+  <section id="soutenir">
+    <div class="enveloppe">
+      <div class="tete-section">
+        <span class="etiquette">
+          <svg class="arc" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 12a6 6 0 0 1 12 0" stroke-dasharray="2.4 2.4"/><circle cx="8" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+          Soutenir
+        </span>
+        <h2>Droplet n'a rien<br>à vous vendre</h2>
+        <p>
+          Pas de publicité, pas d'abonnement, pas de données revendues —
+          il n'y a même pas de serveur pour les collecter. Ce qui reste,
+          ce sont des coûts réels : un téléphone de test, une clé de
+          signature, du temps. Si l'application vous sert, voici comment
+          y contribuer.
+        </p>
+      </div>
+
+      <div class="dons">
+
+        <!-- ── MTN Mobile Money ── -->
+        <article class="don">
+          <div class="don-tete">
+            <h3>MTN Mobile Money</h3>
+            <span class="jeton local">Cameroun</span>
+          </div>
+          <div class="valeur vide" data-champ="momo">
+            <span>À renseigner</span>
+            <button class="copier" type="button" disabled>Copier</button>
+          </div>
+          <ul class="marches">
+            <li><b>1</b><span>Composez <code>*126#</code> sur votre téléphone.</span></li>
+            <li><b>2</b><span>Choisissez « Transfert d'argent », puis collez ou saisissez le numéro.</span></li>
+            <li><b>3</b><span>Entrez le montant, validez avec votre code secret.</span></li>
+          </ul>
+          <p class="note" data-nom="momo"></p>
+        </article>
+
+        <!-- ── Orange Money ── -->
+        <article class="don">
+          <div class="don-tete">
+            <h3>Orange Money</h3>
+            <span class="jeton local">Cameroun</span>
+          </div>
+          <div class="valeur vide" data-champ="orange">
+            <span>À renseigner</span>
+            <button class="copier" type="button" disabled>Copier</button>
+          </div>
+          <ul class="marches">
+            <li><b>1</b><span>Composez <code>#150#</code> sur votre téléphone.</span></li>
+            <li><b>2</b><span>Choisissez « Transfert d'argent », puis saisissez le numéro.</span></li>
+            <li><b>3</b><span>Entrez le montant, validez avec votre code secret.</span></li>
+          </ul>
+          <p class="note" data-nom="orange"></p>
+        </article>
+
+        <!-- ── Bitcoin, par BTCPay Server ──
+             Le seul moyen de cette page qui soit à la fois entièrement
+             libre et utilisable depuis n'importe quel pays. Voir la
+             note de configuration en tête du script. -->
+        <article class="don">
+          <div class="don-tete">
+            <h3>Bitcoin</h3>
+            <span class="jeton libre">Logiciel libre</span>
+          </div>
+          <div class="valeur vide" data-champ="btc">
+            <span>À renseigner</span>
+            <button class="copier" type="button" disabled>Copier</button>
+          </div>
+          <p class="note">
+            Vérifiez les quatre premiers et les quatre derniers caractères
+            après avoir collé l'adresse. Un virement en bitcoin ne
+            s'annule pas.
+          </p>
+          <div data-champ="btcpay"></div>
+        </article>
+      </div>
+
+      <!-- ── CE QUI NE COÛTE RIEN, ET QUI VAUT PLUS ──
+           Placé sous les dons, et non au-dessus : quelqu'un venu pour
+           donner ne doit pas avoir à traverser un paragraphe qui l'en
+           dissuade. Mais pour une application maillée, c'est bien ici
+           que se trouve la contribution la plus utile. -->
+      <div class="gratuit">
+        <div>
+          <span class="rang">Vaut plus qu'un don</span>
+          <h3>Amenez une personne</h3>
+          <p>
+            Un maillage à un seul appareil ne transporte rien. Chaque
+            installation autour de vous agrandit la portée pour tout le
+            voisinage — y compris la vôtre.
+          </p>
+        </div>
+        <div>
+          <span class="rang">Vaut plus qu'un don</span>
+          <h3>Dites ce qui casse</h3>
+          <p>
+            Droplet dépend de radios, de distances et de téléphones très
+            différents les uns des autres. Un rapport précis vaut des
+            semaines de suppositions.
+          </p>
+        </div>
+        <div>
+          <span class="rang">Vaut plus qu'un don</span>
+          <h3>Faites circuler le fichier</h3>
+          <p>
+            L'application envoie son propre fichier d'installation par
+            Bluetooth. Le transmettre ne consomme aucune donnée mobile,
+            ni chez vous, ni chez la personne qui le reçoit.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var immobile = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (immobile) return;
+
+  /* ══════════════════════════════════════════════════════════════
+     1. L'ENTRÉE DU TITRE — IL SE DÉCHIFFRE
+     ------------------------------------------------------------------
+     Chaque lettre traverse quelques caractères au hasard avant de se
+     fixer sur la bonne, de gauche à droite — le titre se DÉCODE
+     plutôt que de glisser derrière un cache.
+
+     Découpage fait EN JAVASCRIPT et non dans le HTML : le texte
+     source reste une phrase, donc lisible par un lecteur d'écran et
+     sélectionnable d'un bloc. Le `<h1>` porte un `aria-label` qui
+     redonne la phrase complète — sans lui, un lecteur d'écran
+     énoncerait chaque lettre séparément, ce qui ne veut rien dire.
+     ══════════════════════════════════════════════════════════════ */
+  var titre = document.getElementById("titre");
+  if (titre) {
+    var lu = titre.textContent;
+    /* Le jeu de caractères qui « scintille » avant que chaque lettre
+       ne se pose — des majuscules et des symboles, jamais la lettre
+       qui doit y arriver, pour qu'un déchiffrement se distingue
+       clairement d'un simple clignotement. */
+    var JEU_BROUILLAGE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#*+=-/\\<>?";
+
+    var morceaux = [];
+    titre.childNodes.forEach(function (n) {
+      if (n.nodeName === "BR") { morceaux.push({ saut: true }); return; }
+      var accent = n.nodeName === "EM";
+      (n.textContent || "").split(/(\s+)/).forEach(function (t) {
+        if (t.trim() === "") { if (t) morceaux.push({ espace: true }); return; }
+        morceaux.push({ mot: t, accent: accent });
+      });
+    });
+
+    titre.textContent = "";
+    var lettres = [];   /* toutes les lettres du titre, dans l'ordre de lecture */
+    morceaux.forEach(function (m) {
+      if (m.saut) { titre.appendChild(document.createElement("br")); return; }
+      if (m.espace) { titre.appendChild(document.createTextNode(" ")); return; }
+      var enveloppe = document.createElement("span");
+      enveloppe.className = "mot" + (m.accent ? " mot-accent" : "");
+      m.mot.split("").forEach(function (car) {
+        var l = document.createElement("i");
+        l.className = "lettre brouille";
+        l.textContent = car;
+        enveloppe.appendChild(l);
+        lettres.push({ el: l, finale: car });
+      });
+      titre.appendChild(enveloppe);
+    });
+    /* Le titre découpé reste annoncé comme une seule phrase. */
+    titre.setAttribute("aria-label", lu);
+
+    /* Le décalage est calculé à partir de la position dans le titre
+       entier, pas du mot : c'est ce qui fait avancer le déchiffrement
+       comme une seule vague continue de gauche à droite, plutôt que
+       mot par mot avec une pause visible entre chacun. */
+    var DEPART = 140;              /* ms avant que la première lettre ne commence */
+    var DECALAGE_LETTRE = 24;      /* ms entre le départ de deux lettres consécutives */
+    var DUREE_BROUILLAGE = 340;    /* ms pendant lesquels une lettre passe par des caractères au hasard */
+    var INTERVALLE_SCINTILLEMENT = 38;
+
+    lettres.forEach(function (item, i) {
+      setTimeout(function () {
+        var minuteur = setInterval(function () {
+          item.el.textContent = JEU_BROUILLAGE[Math.floor(Math.random() * JEU_BROUILLAGE.length)];
+        }, INTERVALLE_SCINTILLEMENT);
+        setTimeout(function () {
+          clearInterval(minuteur);
+          item.el.textContent = item.finale;
+          item.el.classList.remove("brouille");
+        }, DUREE_BROUILLAGE);
+      }, DEPART + i * DECALAGE_LETTRE);
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     2. LES ARRIVÉES AU DÉFILEMENT
+     ══════════════════════════════════════════════════════════════ */
+  var cibles = document.querySelectorAll(
+    ".tete-section, .carte, .transport, .volet, .fait, .chiffre-cell, " +
+    ".don, .gratuit > div, .limites li, .telecharger, .defilant"
+  );
+
+  /* La classe n'est posée qu'ICI, une fois qu'on sait que le script
+     tourne. Voir la note en tête du bloc CSS. */
+  cibles.forEach(function (el) {
+    el.classList.add("anime");
+    /* Le rang au sein du groupe donne la cascade. */
+    var freres = el.parentElement ? Array.prototype.filter.call(
+      el.parentElement.children,
+      function (f) { return f.tagName === el.tagName; }
+    ) : [];
+    var rang = freres.indexOf(el);
+    if (rang > 0 && rang < 6) el.setAttribute("data-rang", String(rang));
+  });
+
+  var oeil = new IntersectionObserver(function (entrees) {
+    entrees.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      e.target.classList.add("vu");
+      /* On cesse d'observer : une animation d'arrivée ne se rejoue
+         pas quand on remonte, sinon la page clignote au moindre
+         va-et-vient. */
+      oeil.unobserve(e.target);
+    });
+  }, { rootMargin: "0px 0px -12% 0px", threshold: 0.12 });
+
+  cibles.forEach(function (el) { oeil.observe(el); });
+
+  /* ══════════════════════════════════════════════════════════════
+     3. LES CHIFFRES QUI MONTENT
+     ══════════════════════════════════════════════════════════════ */
+  document.querySelectorAll(".chiffre-cell .val").forEach(function (el) {
+    var fin = parseInt(el.textContent, 10);
+    if (isNaN(fin) || fin === 0) return;   /* « 0 » n'a rien à compter */
+    var oeil2 = new IntersectionObserver(function (ent) {
+      if (!ent[0].isIntersecting) return;
+      oeil2.disconnect();
+      var t0 = null, duree = 900;
+      (function pas(ts) {
+        if (t0 === null) t0 = ts;
+        var p = Math.min((ts - t0) / duree, 1);
+        /* Freinage à l'arrivée : un décompte linéaire s'arrête net,
+           celui-ci se pose. */
+        var e = 1 - Math.pow(1 - p, 3);
+        el.textContent = String(Math.round(fin * e));
+        if (p < 1) requestAnimationFrame(pas);
+      })(performance.now());
+    }, { threshold: 0.6 });
+    oeil2.observe(el);
+  });
+
+  /* ══════════════════════════════════════════════════════════════
+     4. L'ONDE DU BOUTON PRINCIPAL
+     Trois battements quand il arrive à l'écran, puis plus rien.
+     ══════════════════════════════════════════════════════════════ */
+  var cta = document.querySelector(".heros .bouton-plein");
+  if (cta) {
+    var oeil3 = new IntersectionObserver(function (ent) {
+      if (!ent[0].isIntersecting) return;
+      oeil3.disconnect();
+      setTimeout(function () { cta.classList.add("emet"); }, 900);
+    }, { threshold: 1 });
+    oeil3.observe(cta);
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     5. LA SECTION EN COURS, DANS LA NAVIGATION
+     ══════════════════════════════════════════════════════════════ */
+  var liens = {};
+  document.querySelectorAll(".nav-liens a").forEach(function (a) {
+    var id = a.getAttribute("href").slice(1);
+    if (id) liens[id] = a;
+  });
+  var oeil4 = new IntersectionObserver(function (entrees) {
+    entrees.forEach(function (e) {
+      var a = liens[e.target.id];
+      if (!a) return;
+      if (e.isIntersecting) {
+        Object.keys(liens).forEach(function (k) { liens[k].classList.remove("ici"); });
+        a.classList.add("ici");
+      }
+    });
+  }, { rootMargin: "-45% 0px -50% 0px" });
+  Object.keys(liens).forEach(function (id) {
+    var sec = document.getElementById(id);
+    if (sec) oeil4.observe(sec);
+  });
+
+  /* ══════════════════════════════════════════════════════════════
+     6. LOTTIE — CHARGEMENT PARESSEUX
+     ------------------------------------------------------------------
+     ⚠️ POURQUOI LE RUNTIME N'EST PAS EMBARQUÉ DANS LA PAGE.
+     `lottie_light.min.js` pèse 168 Ko — presque trois fois le poids de
+     tout ce site. Le charger d'office sur le site d'une application
+     dont l'argument est de ne pas gaspiller les données de ses
+     utilisateurs se retournerait contre le propos, et le retournerait
+     surtout contre ceux qui paient leur méga-octet.
+     Il n'est donc téléchargé QUE si une animation existe vraiment ET
+     qu'elle arrive à l'écran. Sans fichier déposé, ce bloc ne coûte
+     rien du tout.
+
+     POUR AJOUTER UNE ANIMATION :
+       1. déposez `lottie_light.min.js` à la racine du site ;
+       2. déposez votre animation dans `animations/` ;
+       3. écrivez dans la page :
+          <div data-lottie="animations/relais.json" style="height:220px"></div>
+     ══════════════════════════════════════════════════════════════ */
+  var boites = document.querySelectorAll("[data-lottie]");
+  if (boites.length) {
+    var promesse = null;
+    function runtime() {
+      if (promesse) return promesse;
+      promesse = new Promise(function (ok, non) {
+        var s = document.createElement("script");
+        s.src = "lottie_light.min.js";
+        s.onload = ok;
+        s.onerror = non;
+        document.head.appendChild(s);
+      });
+      return promesse;
+    }
+    var oeil5 = new IntersectionObserver(function (entrees) {
+      entrees.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        oeil5.unobserve(e.target);
+        var boite = e.target;
+        runtime().then(function () {
+          window.lottie.loadAnimation({
+            container: boite,
+            renderer: "svg",
+            loop: true,
+            autoplay: true,
+            path: boite.getAttribute("data-lottie")
+          });
+        }).catch(function () {
+          /* Runtime absent (aperçu hors ligne, fichier non déposé) :
+             la boîte reste vide plutôt que d'afficher une erreur. Le
+             reste de la page ne s'en aperçoit pas. */
+          boite.style.display = "none";
+        });
+      });
+    }, { rootMargin: "200px" });
+    boites.forEach(function (b) { oeil5.observe(b); });
+  }
+})();
+</script>
+
+<script>
+(function () {
+  "use strict";
+  /* ── LA NAVIGATION QUI SE SOULÈVE ──
+     Un filet plat en haut de page — la page n'a encore rien à séparer
+     d'elle. Dès le premier pixel défilé, une ombre très légère et son
+     filet redeviennent visibles : c'est ce détail, pas une décoration
+     de plus, qui dit que la barre flotte AU-DESSUS du contenu plutôt
+     que d'être posée à côté de lui.
+     Volontairement hors du bloc `immobile` plus haut : ce n'est pas une
+     animation, seulement un état qui reflète la position de défilement
+     — les personnes qui ont demandé moins de mouvement y ont autant
+     droit qu'aux autres. */
+  var nav = document.querySelector(".nav");
+  if (!nav) return;
+  function accorder() { nav.classList.toggle("defile", window.scrollY > 4); }
+  accorder();
+  window.addEventListener("scroll", accorder, { passive: true });
+})();
+</script>
+
+<script>
+(function () {
+  "use strict";
+  /* ══════════════════════════════════════════════════════════════
+     LA VITRINE — QUEL ÉCRAN LE TÉLÉPHONE MONTRE
+     ------------------------------------------------------------------
+     Hors du garde-fou `immobile` : ce n'est pas seulement une
+     animation, c'est ce qui décide QUEL CONTENU le téléphone affiche
+     — une information, pas une décoration. Le fondu enchaîné entre
+     deux écrans, lui, s'efface tout seul avec le reste des transitions
+     CSS quand moins de mouvement a été demandé ; ce qui compte, savoir
+     quelle légende est active, continue de fonctionner. */
+  var legendes = document.querySelectorAll(".legende");
+  var ecrans = document.querySelectorAll(".ecran-image");
+  if (!legendes.length || !ecrans.length) return;
+
+  function activer(numero) {
+    ecrans.forEach(function (g) {
+      g.classList.toggle("actif", g.getAttribute("data-ecran") === numero);
+    });
+    legendes.forEach(function (l) {
+      l.classList.toggle("actif", l.getAttribute("data-ecran") === numero);
+    });
+  }
+  /* Le tout premier écran est actif dès le chargement — sinon le
+     téléphone resterait vide tant que personne n'a fait défiler
+     jusqu'à cette section. */
+  activer("1");
+
+  var oeilVitrine = new IntersectionObserver(function (entrees) {
+    entrees.forEach(function (e) {
+      if (e.isIntersecting) activer(e.target.getAttribute("data-ecran"));
+    });
+    /* La bande centrale (`rootMargin` négatif des deux côtés) : sur
+       une page aussi longue, plusieurs légendes peuvent être «
+       visibles » à la fois — seule celle qui traverse le MILIEU de
+       l'écran doit décider ce que montre le téléphone. */
+  }, { rootMargin: "-45% 0px -45% 0px" });
+  legendes.forEach(function (l) { oeilVitrine.observe(l); });
+})();
+</script>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ══════════════════════════════════════════════════════════════
+     LA GOUTTE QUI TOMBE — UNE SEULE FOIS, AU PREMIER AFFICHAGE
+     ------------------------------------------------------------------
+     Voir la note CSS pour le pourquoi. Ici, uniquement la mécanique :
+     mesurer où le VRAI logo se trouve à l'écran, poser une copie à
+     cet endroit précis, la laisser tomber, puis nettoyer.
+     ══════════════════════════════════════════════════════════════ */
+  var reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var logo = document.querySelector(".marque svg");
+  if (reduit || !logo) return;
+
+  var r = logo.getBoundingClientRect();
+  var x = r.left + r.width / 2;
+  var yDepart = r.top + r.height / 2;
+  var CHUTE = 236;   /* px parcourus avant l'impact */
+  var yImpact = yDepart + CHUTE;
+
+  var rideau = document.createElement("div");
+  rideau.className = "rideau-goutte";
+  rideau.setAttribute("aria-hidden", "true");
+
+  var goutte = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  goutte.setAttribute("viewBox", "0 0 24 24");
+  goutte.setAttribute("fill", "currentColor");
+  /* `classList` plutôt que `className =` : sur un élément SVG,
+     l'affectation directe de `className` ne pose pas une chaîne mais
+     un objet `SVGAnimatedString` — l'erreur classique de qui vient du
+     HTML. `classList` fonctionne identiquement sur les deux. */
+  goutte.classList.add("goutte-chute");
+  goutte.style.setProperty("--x", x + "px");
+  goutte.style.setProperty("--y-depart", yDepart + "px");
+  goutte.style.setProperty("--y-impact", yImpact + "px");
+  var chemin = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  /* Le même tracé que le logo de la navigation — c'est important
+     qu'on reconnaisse la marque elle-même en train de tomber, pas une
+     goutte générique qui lui ressemble vaguement. */
+  chemin.setAttribute("d", "M12 2.4c3.6 4.2 6.4 7.6 6.4 10.9A6.4 6.4 0 0 1 12 19.7a6.4 6.4 0 0 1-6.4-6.4C5.6 10 8.4 6.6 12 2.4Z");
+  goutte.appendChild(chemin);
+  rideau.appendChild(goutte);
+
+  ["une", "deux"].forEach(function (classe) {
+    var onde = document.createElement("div");
+    onde.className = "onde-impact" + (classe === "deux" ? " deux" : "");
+    onde.style.setProperty("--x", x + "px");
+    onde.style.setProperty("--y-impact", yImpact + "px");
+    rideau.appendChild(onde);
+  });
+
+  document.body.appendChild(rideau);
+
+  /* Nettoyage après coup — la goutte a joué son rôle une fois, rien ne
+     doit rester dans le DOM à traîner indéfiniment. 1,05 s (la chute)
+     + 0,9 s (la deuxième onde, la plus tardive) + une marge. */
+  setTimeout(function () { rideau.remove(); }, 2100);
+})();
+</script>
+
+<footer>
+  <div class="enveloppe">
+    <div class="pied-grille">
+      <div>
+        <b>Le produit</b>
+        <a href="#fonctionnement">Fonctionnement</a>
+        <a href="#capacites">Capacités</a>
+        <a href="#trajet">Le trajet affiché</a>
+        <a href="#telecharger">Télécharger</a>
+        <a href="#soutenir">Soutenir Droplet</a>
+      </div>
+      <div>
+        <b>La confiance</b>
+        <a href="#securite">Chiffrement</a>
+        <a href="#limites">Limites connues</a>
+        <a href="#testeurs">Signaler un défaut</a>
+        <a href="https://github.com/rito27959-arch/droplet" rel="noopener">Code source</a>
+      </div>
+      <div>
+        <b>Le principe</b>
+        <a href="#probleme">Pourquoi sans serveur</a>
+      </div>
+    </div>
+    <p style="max-width:60ch">
+      Droplet ne collecte rien, ne mesure rien et n'envoie rien nulle part.
+      Il n'y a aucun serveur à interroger : la question de ce qu'on ferait
+      de vos données ne se pose pas.
+    </p>
+    <p class="etiquette" style="margin-top:20px">Conçu à Yaoundé</p>
+  </div>
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   ▼▼▼  LES SIX VALEURS À RENSEIGNER  ▼▼▼
+   ------------------------------------------------------------------
+   C'est le SEUL endroit à modifier pour que les dons fonctionnent.
+   Laissez vide ce que vous n'avez pas : la carte correspondante
+   affichera « À renseigner » au lieu de casser ou de mentir.
+
+   ── ⚠️ POURQUOI PAS LIBERAPAY, COMME BRIAR ────────────────────────
+
+   Liberapay ne verse que par Stripe ou PayPal, et aucun des deux ne
+   permet d'ENCAISSER au Cameroun. Le montage habituel du logiciel
+   libre occidental ne vous est donc pas transposable : il collecterait
+   de l'argent que vous ne pourriez pas retirer.
+
+   D'où les deux familles ci-dessous, et leur ordre :
+
+     • Le MOBILE MONEY d'abord, parce que c'est ainsi que les gens
+       autour de vous paient réellement. Aucun intermédiaire, aucun
+       frais, aucune inscription : un numéro et un code USSD.
+
+     • BITCOIN ensuite, via BTCPay Server — le seul système de
+       paiement à la fois entièrement libre (licence MIT), auto-
+       hébergeable, sans commission et sans vérification d'identité,
+       parce qu'il ne dépend des rails bancaires d'aucun pays. C'est
+       ce qu'utilisent les projets libres qui refusent de dépendre
+       d'un intermédiaire.
+   ══════════════════════════════════════════════════════════════════ */
+var DONS = {
+  /* Votre numéro MTN Mobile Money, et le nom qui s'affichera à
+     l'expéditeur au moment de confirmer — c'est ce nom qui rassure. */
+  momoNumero:   "678963221",
+  momoNom:      "",
+
+  /* Idem pour Orange Money. */
+  orangeNumero: "696910012",
+  orangeNom:    "",
+
+  /* Votre adresse Bitcoin. */
+  bitcoin:      "",
+
+  /* L'adresse de votre instance BTCPay Server, si vous en montez une.
+     Renseignée, elle ajoute un vrai bouton de paiement (montant libre,
+     Lightning compris) au lieu de la simple adresse à recopier.
+     Exemple : "https://btcpay.exemple.org/api/v1/invoices?storeId=XXXX" */
+  btcpay:       ""
+};
+
+(function () {
+  "use strict";
+
+  /* ── Remplissage des cartes ─────────────────────────────────────
+     Tout est piloté par l'objet ci-dessus : le HTML ne contient
+     aucune valeur en dur. Une valeur absente laisse la carte dans son
+     état « À renseigner », visiblement inactif — jamais un champ vide
+     qu'on pourrait prendre pour un bogue. */
+  function garnir(champ, valeur, affichage) {
+    var boite = document.querySelector('[data-champ="' + champ + '"]');
+    if (!boite || !valeur) return;
+    boite.classList.remove("vide");
+    boite.querySelector("span").textContent = affichage || valeur;
+    var bouton = boite.querySelector(".copier");
+    bouton.disabled = false;
+    /* ⚠️ ON COPIE LES CHIFFRES BRUTS, PAS CE QUI EST AFFICHÉ.
+       Le numéro est montré par groupes parce que c'est ainsi qu'on le
+       lit et qu'on le vérifie — mais collé tel quel dans un menu USSD,
+       avec ses espaces, il serait refusé. */
+    bouton.addEventListener("click", function () { copier(valeur, bouton); });
+  }
+
+  /* 6XX XX XX XX : le découpage camerounais usuel. */
+  function grouper(n) {
+    return n.length === 9
+      ? n.slice(0, 3) + " " + n.slice(3, 5) + " " + n.slice(5, 7) + " " + n.slice(7)
+      : n;
+  }
+
+  garnir("momo", DONS.momoNumero, grouper(DONS.momoNumero));
+  garnir("orange", DONS.orangeNumero, grouper(DONS.orangeNumero));
+  garnir("btc", DONS.bitcoin);
+
+  function nommer(cle, nom) {
+    var p = document.querySelector('[data-nom="' + cle + '"]');
+    if (!p) return;
+    p.textContent = nom ? "Le compte est au nom de " + nom + "." : "";
+  }
+  nommer("momo", DONS.momoNom);
+  nommer("orange", DONS.orangeNom);
+
+  /* Le bouton BTCPay n'apparaît QUE si une instance est renseignée.
+     C'est un formulaire HTML qui poste vers votre propre serveur :
+     aucun script tiers, rien à charger, et le site reste entièrement
+     statique. */
+  if (DONS.btcpay) {
+    var hote = document.querySelector('[data-champ="btcpay"]');
+    var f = document.createElement("form");
+    f.method = "POST";
+    f.action = DONS.btcpay;
+    f.target = "_blank";
+    f.rel = "noopener";
+    f.style.marginTop = "4px";
+    var b = document.createElement("button");
+    b.type = "submit";
+    b.className = "bouton bouton-plein";
+    b.style.width = "100%";
+    b.style.justifyContent = "center";
+    b.textContent = "Donner par BTCPay";
+    f.appendChild(b);
+    hote.appendChild(f);
+  }
+
+  /* ── Copier ─────────────────────────────────────────────────────
+     ⚠️ DEUX CHEMINS, ET LE SECOURS N'EST PAS DÉCORATIF.
+     `navigator.clipboard` exige un contexte sécurisé et se voit
+     refuser dans certains cadres embarqués. Sans le repli par
+     `execCommand`, le bouton ne ferait rien du tout chez une partie
+     des visiteurs — sur un numéro à recopier, c'est l'échec complet.
+     Et si les deux échouent, le bloc reste sélectionnable d'un appui
+     long grâce à `user-select: all`. */
+  function copier(texte, bouton) {
+    function reussi() {
+      var avant = bouton.textContent;
+      bouton.textContent = "Copié";
+      bouton.classList.add("fait");
+      setTimeout(function () {
+        bouton.textContent = avant;
+        bouton.classList.remove("fait");
+      }, 1600);
+    }
+    function secours() {
+      var z = document.createElement("textarea");
+      z.value = texte;
+      z.setAttribute("readonly", "");
+      z.style.position = "fixed";
+      z.style.opacity = "0";
+      document.body.appendChild(z);
+      z.select();
+      try { document.execCommand("copy"); reussi(); }
+      catch (e) { bouton.textContent = "Sélectionnez"; }
+      document.body.removeChild(z);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texte).then(reussi, secours);
+    } else {
+      secours();
+    }
+  }
+})();
+</script>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ══════════════════════════════════════════════════════════════════
+     LA SCÈNE — « le message trouve son chemin »
+     ------------------------------------------------------------------
+     Une simulation d'un réseau maillé, peinte à la main sur un canvas
+     2D. Pas de WebGL, pas de dépendance : une douzaine de nœuds, une
+     poignée de liaisons, une particule. Le poids reste sous la
+     milliseconde par image, même sur un téléphone d'entrée de gamme.
+
+     Ce qu'elle doit faire comprendre en moins de cinq secondes :
+       1. pas d'Internet ;
+       2. les appareils s'entraident ;
+       3. le message trouve son propre chemin.
+     ══════════════════════════════════════════════════════════════════ */
+
+  var toile = document.getElementById("toile");
+  if (!toile) return;
+  var ctx = toile.getContext("2d");
+  var vue = document.querySelector(".scene-vue");
+  var scene = document.querySelector(".scene");
+
+  var etat = document.getElementById("etat");
+  var etatTxt = document.getElementById("etat-txt");
+  var btnEnvoyer = document.getElementById("mesh-envoyer");
+  var btnRejouer = document.getElementById("mesh-rejouer");
+  var bilan = document.getElementById("mesh-bilan");
+  var bilanRelais = document.getElementById("mesh-relais");
+  var bulleEnvoi = document.getElementById("bulle-envoi");
+  var bulleRecu = document.getElementById("bulle-recu");
+
+  var reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ── LES DISPOSITIONS ──────────────────────────────────────────────
+     Écrites à la main, jamais tirées au sort : la démonstration DOIT
+     rater le chemin direct (expéditeur et destinataire hors de portée
+     l'un de l'autre) pour avoir un sens. Une par gabarit — le mobile
+     n'est pas une version compressée du bureau, c'est le même concept
+     avec moins de nœuds et plus d'air.
+     Chaque nœud : [x, y, profondeur]. profondeur 0 = loin (petit,
+     pâle, bouge peu), 1 = près. Premier = expéditeur, dernier =
+     destinataire. */
+  var DISPOS = {
+    grand: {
+      portee: 0.235,
+      noeuds: [
+        [0.07, 0.60, 0.90], [0.20, 0.30, 0.52], [0.19, 0.84, 0.70],
+        [0.34, 0.52, 0.95], [0.33, 0.16, 0.40], [0.47, 0.76, 0.72],
+        [0.50, 0.35, 0.50], [0.63, 0.56, 0.88], [0.66, 0.19, 0.44],
+        [0.80, 0.72, 0.66], [0.93, 0.42, 0.95]
+      ]
+    },
+    moyen: {
+      portee: 0.30,
+      noeuds: [
+        [0.08, 0.64, 0.90], [0.26, 0.30, 0.55], [0.28, 0.83, 0.70],
+        [0.48, 0.54, 0.95], [0.50, 0.19, 0.44], [0.68, 0.75, 0.68],
+        [0.72, 0.36, 0.54], [0.93, 0.48, 0.95]
+      ]
+    },
+    petit: {
+      portee: 0.44,
+      noeuds: [
+        [0.12, 0.70, 0.90], [0.32, 0.31, 0.58], [0.40, 0.67, 0.82],
+        [0.60, 0.30, 0.55], [0.66, 0.63, 0.76], [0.87, 0.42, 0.95]
+      ]
+    }
+  };
+
+  function gabarit() {
+    var w = toile.clientWidth || 800;
+    if (w < 560) return DISPOS.petit;
+    if (w < 920) return DISPOS.moyen;
+    return DISPOS.grand;
+  }
+
+  /* ── ÉTAT ────────────────────────────────────────────────────────── */
+  var L = 0, H = 0, dpr = 1;
+  var N = [];               // nœuds
+  var liens = [];           // { a, b, d, vivant, reveal, w }
+  var dispo = null;
+  var porteePx = 0;
+  var iMoi = 0, iCible = 0;
+
+  var phase = "repos";      // repos | cherche | transmet | livre
+  var t0 = 0;               // horodatage du début de séquence
+  var chemin = null;        // tableau d'index de nœuds
+  var hop = {};             // nœud -> distance en sauts depuis l'expéditeur
+  var tOnde = 0;            // durée de la phase de découverte
+  var tArrivee = 0;         // instant (relatif à t0) où le message arrive
+  var segDurees = [];       // durée de chaque segment du chemin
+  var ripples = [];         // { x, y, r0, rMax, t, duree, coul, ligne }
+  var ackRing = null;       // l'onde d'accusé de réception finale
+  var relaisUtilises = 0;
+
+  var pointeur = { x: 0, y: 0, actif: false };
+  var vueX = 0, vueY = 0, vueCibleX = 0, vueCibleY = 0;
+  var glisse = null;        // { noeud|null, x0, y0, bouge, panX0, panY0 }
+  var panX = 0, panY = 0;
+
+  var tournePas = false;    // la boucle rAF est-elle armée ?
+  var visible = true;
+
+  /* ── OUTILS ──────────────────────────────────────────────────────── */
+  function now() { return performance.now(); }
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function lerp(a, b, p) { return a + (b - a) * p; }
+  function easeOut(p) { return 1 - Math.pow(1 - p, 3); }
+  function easeInOut(p) { return p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; }
+  function easeRessort(p) {
+    var c1 = 1.70158, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2);
+  }
+  function baseX(n) { return n.nx * L + panX; }
+  function baseY(n) { return n.ny * H + panY; }
+  function distBase(i, j) {
+    var dx = (N[i].nx - N[j].nx) * L;
+    var dy = (N[i].ny - N[j].ny) * H;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  /* ── DIMENSIONNEMENT + DISPOSITION ───────────────────────────────── */
+  function dimensionner() {
+    var r = toile.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    L = Math.max(1, r.width);
+    H = Math.max(1, r.height);
+    toile.width = Math.round(L * dpr);
+    toile.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    var g = gabarit();
+    if (g !== dispo) {
+      dispo = g;
+      construire();
+    }
+    porteePx = dispo.portee * L;
+    calculerLiens();
+    /* Filet de sécurité : si la portée choisie ne relie pas
+       l'expéditeur au destinataire (canevas très étroit, très large),
+       on l'élargit par crans jusqu'à ce qu'un chemin existe. */
+    var tentative = 0;
+    while (tentative < 5 && !router(iMoi, iCible)) {
+      porteePx *= 1.18;
+      calculerLiens();
+      tentative++;
+    }
+    positionnerBulles();
+  }
+
+  function construire() {
+    N = [];
+    var arr = dispo.noeuds;
+    for (var i = 0; i < arr.length; i++) {
+      var role = i === 0 ? "moi" : (i === arr.length - 1 ? "cible" : "relais");
+      N.push({
+        nx: arr[i][0], ny: arr[i][1], z: arr[i][2],
+        role: role,
+        nom: role === "moi" ? "Vous" : (role === "cible" ? "Sarah" : ""),
+        x: arr[i][0] * L, y: arr[i][1] * H, vx: 0, vy: 0,
+        phase: i * 1.7,
+        eveil: 0, pulse: 0, inspecte: false, drag: null
+      });
+    }
+    iMoi = 0; iCible = N.length - 1;
+    panX = panY = 0;
+  }
+
+  function calculerLiens() {
+    liens = [];
+    for (var i = 0; i < N.length; i++) {
+      for (var j = i + 1; j < N.length; j++) {
+        var d = distBase(i, j);
+        if (d <= porteePx) liens.push({ a: i, b: j, d: d, vivant: true, reveal: 0, w: d });
+      }
+    }
+  }
+
+  function adjacence(vivantsSeuls) {
+    var adj = {};
+    for (var i = 0; i < N.length; i++) adj[i] = [];
+    for (var k = 0; k < liens.length; k++) {
+      var e = liens[k];
+      if (vivantsSeuls && !e.vivant) continue;
+      adj[e.a].push({ v: e.b, w: e.w, e: e });
+      adj[e.b].push({ v: e.a, w: e.w, e: e });
+    }
+    return adj;
+  }
+
+  /* Dijkstra sur les liaisons vivantes. Renvoie un tableau d'index, ou
+     `null` si le destinataire est injoignable. */
+  function router(depart, arrivee) {
+    var adj = adjacence(true);
+    var d = {}, prev = {}, vu = {};
+    for (var i = 0; i < N.length; i++) d[i] = Infinity;
+    d[depart] = 0;
+    for (var it = 0; it < N.length; it++) {
+      var u = -1, best = Infinity;
+      for (var x = 0; x < N.length; x++) if (!vu[x] && d[x] < best) { best = d[x]; u = x; }
+      if (u === -1) break;
+      vu[u] = true;
+      if (u === arrivee) break;
+      var vs = adj[u];
+      for (var m = 0; m < vs.length; m++) {
+        var nd = d[u] + vs[m].w;
+        if (nd < d[vs[m].v]) { d[vs[m].v] = nd; prev[vs[m].v] = u; }
+      }
+    }
+    if (d[arrivee] === Infinity) return null;
+    var path = [arrivee], c = arrivee;
+    while (c !== depart) { c = prev[c]; if (c === undefined) return null; path.unshift(c); }
+    return path;
+  }
+
+  /* Avant chaque envoi : on rebat les cartes. Poids réattribués avec un
+     grain d'aléatoire (le chemin le plus court varie légèrement d'un
+     envoi à l'autre) et 1 à 3 liaisons coupées au hasard — mais jamais
+     une liaison dont la coupure isolerait le destinataire. C'est ce qui
+     fait qu'on « voit » le système contourner un trou plutôt que
+     suivre un tracé gravé d'avance. */
+  function rebattre() {
+    for (var k = 0; k < liens.length; k++) {
+      liens[k].vivant = true;
+      liens[k].reveal = 0;
+      liens[k].w = liens[k].d * (0.80 + Math.random() * 0.55);
+    }
+    var vise = 1 + Math.floor(Math.random() * 3);
+    var coupes = 0, essais = 0;
+    while (coupes < vise && essais < 50) {
+      essais++;
+      var e = liens[Math.floor(Math.random() * liens.length)];
+      if (!e.vivant) continue;
+      e.vivant = false;
+      if (router(iMoi, iCible)) coupes++;
+      else e.vivant = true;
+    }
+  }
+
+  function ondeDecouverte() {
+    hop = {};
+    hop[iMoi] = 0;
+    var file = [iMoi], maxH = 0;
+    var adj = adjacence(true);
+    while (file.length) {
+      var u = file.shift();
+      for (var m = 0; m < adj[u].length; m++) {
+        var v = adj[u][m].v;
+        if (hop[v] === undefined) { hop[v] = hop[u] + 1; maxH = Math.max(maxH, hop[v]); file.push(v); }
+      }
+    }
+    return maxH;
+  }
+
+  /* ── SÉQUENCE D'ENVOI ────────────────────────────────────────────── */
+  var PAS_ONDE = 150;       // ms entre deux « couronnes » de sauts qui se réveillent
+  var VITESSE = 0.34;       // px/ms de la particule (avant ralentissement près des relais)
+  var SEG_MIN = 240;        // durée plancher d'un segment
+
+  function envoyer() {
+    if (phase !== "repos") return;
+
+    rebattre();
+    chemin = router(iMoi, iCible);
+    if (!chemin) { for (var k = 0; k < liens.length; k++) liens[k].vivant = true; chemin = router(iMoi, iCible); }
+    relaisUtilises = Math.max(0, chemin.length - 2);
+
+    var maxH = ondeDecouverte();
+    tOnde = 260 + maxH * PAS_ONDE + 260;
+
+    segDurees = [];
+    for (var s = 0; s < chemin.length - 1; s++) {
+      var a = N[chemin[s]], b = N[chemin[s + 1]];
+      var seg = Math.hypot(baseX(b) - baseX(a), baseY(b) - baseY(a));
+      segDurees.push(Math.max(SEG_MIN, seg / VITESSE));
+    }
+    var tTransmit = 0;
+    for (var q = 0; q < segDurees.length; q++) tTransmit += segDurees[q];
+    tArrivee = tOnde + 180 + tTransmit;
+
+    phase = "cherche";
+    t0 = now();
+    ripples.length = 0;
+    ackRing = null;
+    ajouterRipple(baseX(N[iMoi]), baseY(N[iMoi]), 6, porteePx * 0.42, 720, "bleu", true);
+    N[iMoi].pulse = 1;
+    /* Les voisins directs de l'expéditeur « s'allument » tout de suite —
+       avant même la découverte du chemin : les appareils à portée
+       réagissent à la présence, pas à l'itinéraire. */
+    for (var vk = 0; vk < liens.length; vk++) {
+      var lk = liens[vk];
+      if (!lk.vivant) continue;
+      if (lk.a === iMoi) N[lk.b].eveil = Math.max(N[lk.b].eveil, 0.6);
+      else if (lk.b === iMoi) N[lk.a].eveil = Math.max(N[lk.a].eveil, 0.6);
+    }
+
+    setEtat("cherche", "Recherche d’un chemin…");
+    montrerBulle(bulleEnvoi, N[iMoi], false);
+    bilan.classList.remove("visible");
+    bilan.hidden = true;
+    btnRejouer.hidden = true;
+    btnEnvoyer.disabled = true;
+    btnEnvoyer.textContent = "Transmission…";
+
+    armer();
+  }
+
+  function ajouterRipple(x, y, r0, rMax, duree, coul, ligne) {
+    ripples.push({ x: x, y: y, r0: r0, rMax: rMax, t: now(), duree: duree, coul: coul || "bleu", ligne: !!ligne });
+  }
+
+  function positionSurChemin(tRel) {
+    // tRel = ms écoulées depuis le début de la transmission
+    var acc = 0;
+    for (var s = 0; s < segDurees.length; s++) {
+      if (tRel < acc + segDurees[s] || s === segDurees.length - 1) {
+        var p = clamp((tRel - acc) / segDurees[s], 0, 1);
+        var a = N[chemin[s]], b = N[chemin[s + 1]];
+        /* Accélère, puis ralentit à l'approche du relais suivant —
+           la même inflexion qu'un objet lancé qu'on rattrape. */
+        var e = easeInOut(p);
+        return {
+          x: lerp(baseX(a), baseX(b), e),
+          y: lerp(baseY(a), baseY(b), e),
+          seg: s, p: p
+        };
+      }
+      acc += segDurees[s];
+    }
+    var last = N[chemin[chemin.length - 1]];
+    return { x: baseX(last), y: baseY(last), seg: segDurees.length - 1, p: 1 };
+  }
+
+  /* ── BOUCLE ──────────────────────────────────────────────────────── */
+  function armer() {
+    if (tournePas) return;
+    tournePas = true;
+    requestAnimationFrame(boucle);
+  }
+
+  var dernierSeg = -1;
+
+  function boucle(ts) {
+    tournePas = false;
+    var tRel = ts - t0;
+
+    /* — physique des nœuds (ressort + respiration + aimant + parallaxe) — */
+    vueX = lerp(vueX, vueCibleX, 0.12);
+    vueY = lerp(vueY, vueCibleY, 0.12);
+    for (var i = 0; i < N.length; i++) {
+      var n = N[i];
+      var bx = baseX(n), by = baseY(n);
+      var resp = n.role === "relais" ? 1.6 : 1.0;
+      var tx = bx + Math.sin(ts * 0.0011 + n.phase) * resp * (0.4 + n.z * 0.6);
+      var ty = by + Math.cos(ts * 0.0009 + n.phase * 1.3) * resp * (0.4 + n.z * 0.6);
+      tx += vueX * (0.35 + n.z * 0.8);
+      ty += vueY * (0.35 + n.z * 0.8);
+
+      if (n.drag) {
+        tx = pointeur.x + n.drag.dx;
+        ty = pointeur.y + n.drag.dy;
+      } else if (pointeur.actif) {
+        var pdx = pointeur.x - bx, pdy = pointeur.y - by;
+        var pd = Math.sqrt(pdx * pdx + pdy * pdy);
+        var R = 120;
+        if (pd < R) {
+          var f = (1 - pd / R);
+          f = f * f;
+          tx += pdx * f * 0.14;
+          ty += pdy * f * 0.14;
+        }
+      }
+
+      var k = n.drag ? 0.30 : 0.14;
+      n.vx += (tx - n.x) * k; n.vx *= n.drag ? 0.6 : 0.80; n.x += n.vx;
+      n.vy += (ty - n.y) * k; n.vy *= n.drag ? 0.6 : 0.80; n.y += n.vy;
+
+      n.eveil *= 0.94;
+      n.pulse *= 0.90;
+    }
+
+    /* — machine à états — */
+    if (phase === "cherche") {
+      var pOnde = clamp((tRel - 260) / Math.max(1, tOnde - 520), 0, 1);
+      for (var h in hop) {
+        var seuil = hop[h] / Math.max(1, ondeMax());
+        if (pOnde >= seuil) N[h].eveil = Math.max(N[h].eveil, 1 - (pOnde - seuil) * 1.4);
+      }
+      for (var L2 = 0; L2 < liens.length; L2++) {
+        var e = liens[L2];
+        if (!e.vivant) continue;
+        var ha = hop[e.a], hb = hop[e.b];
+        if (ha === undefined || hb === undefined) continue;
+        var seuilE = Math.max(ha, hb) / Math.max(1, ondeMax());
+        e.reveal = clamp((pOnde - seuilE) * 3, 0, 1);
+      }
+      if (tRel >= tOnde) {
+        phase = "transmet";
+        dernierSeg = -1;
+        setEtat("transmet", "Transmission…");
+      }
+    } else if (phase === "transmet") {
+      var tT = tRel - tOnde - 180;
+      if (tT >= 0) {
+        var pc = positionSurChemin(tT);
+        if (pc.seg !== dernierSeg && pc.seg > 0) {
+          dernierSeg = pc.seg;
+          var relai = N[chemin[pc.seg]];
+          relai.pulse = 1; relai.eveil = 1;
+          ajouterRipple(baseX(relai), baseY(relai), 4, 26, 460, "bleu", true);
+        }
+        for (var L3 = 0; L3 < liens.length; L3++) if (liens[L3].vivant) liens[L3].reveal = Math.max(liens[L3].reveal * 0.98, 0.12);
+      }
+      if (tRel >= tArrivee) {
+        phase = "livre";
+        var cbl = N[iCible];
+        cbl.pulse = 1; cbl.eveil = 1;
+        ajouterRipple(baseX(cbl), baseY(cbl), 6, porteePx * 0.7, 900, "vert", true);
+        ackRing = { t: ts, duree: 420 };
+        setEtat("arrive", "Message reçu.");
+        montrerBulle(bulleRecu, cbl, true);
+        setTimeout(function () {
+          bilanRelais.textContent = relaisUtilises + (relaisUtilises > 1 ? " relais utilisés" : " relais utilisé");
+          bilan.hidden = false;
+          requestAnimationFrame(function () { bilan.classList.add("visible"); });
+          btnRejouer.hidden = false;
+          btnEnvoyer.disabled = false;
+          btnEnvoyer.textContent = "Renvoyer";
+        }, 850);
+        setTimeout(function () { phase = "repos"; }, 1600);
+      }
+    }
+
+    /* — l'onde d'accusé de réception : ~420 ms, puis le réseau se calme — */
+    if (ackRing) {
+      var ap = (ts - ackRing.t) / ackRing.duree;
+      if (ap >= 1) ackRing = null;
+      else {
+        var cbl2 = N[iCible];
+        var rr = easeOut(ap) * porteePx * 1.9;
+        for (var a2 = 0; a2 < N.length; a2++) {
+          var dd = Math.hypot(N[a2].x - baseX(cbl2), N[a2].y - baseY(cbl2));
+          if (Math.abs(dd - rr) < 34) N[a2].eveil = Math.max(N[a2].eveil, (1 - ap) * 0.7);
+        }
+      }
+    }
+
+    dessiner(ts);
+
+    var besoin = phase !== "repos" || ackRing || pointeur.actif || glisse ||
+      Math.abs(vueX) > 0.3 || Math.abs(vueY) > 0.3;
+    // la respiration tourne en permanence tant que la scène est visible
+    if (visible && !reduit) besoin = true;
+    for (var b2 = 0; b2 < N.length && !besoin; b2++) if (N[b2].eveil > 0.01 || N[b2].pulse > 0.01) besoin = true;
+    if (besoin) armer();
+  }
+
+  function ondeMax() {
+    var m = 1;
+    for (var h in hop) m = Math.max(m, hop[h]);
+    return m;
+  }
+
+  /* ── RENDU ───────────────────────────────────────────────────────── */
+  function coul(nom, a) {
+    if (nom === "vert") return "rgba(52,217,100," + a + ")";
+    return "rgba(59,155,255," + a + ")";
+  }
+
+  function dessiner(ts) {
+    ctx.clearRect(0, 0, L, H);
+
+    var surChemin = {};
+    if (chemin && (phase === "transmet" || phase === "livre")) {
+      for (var s = 0; s < chemin.length; s++) surChemin[chemin[s]] = s;
+    }
+    var pcNow = (chemin && phase === "transmet")
+      ? positionSurChemin(Math.max(0, ts - t0 - tOnde - 180)) : null;
+
+    /* — cercles de portée : seulement autour des nœuds réveillés — */
+    for (var i = 0; i < N.length; i++) {
+      var n = N[i];
+      if (n.eveil < 0.04) continue;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, porteePx, 0, Math.PI * 2);
+      ctx.strokeStyle = coul("bleu", 0.05 * n.eveil);
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    /* — liaisons — */
+    for (var k = 0; k < liens.length; k++) {
+      var e = liens[k];
+      var a = N[e.a], b = N[e.b];
+      var prof = Math.min(a.z, b.z);
+      if (!e.vivant) {
+        ctx.setLineDash([2, 6]);
+        ctx.strokeStyle = "rgba(255,255,255,0.045)";
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        ctx.setLineDash([]);
+        continue;
+      }
+      var estRoute = (surChemin[e.a] !== undefined && surChemin[e.b] !== undefined &&
+        Math.abs(surChemin[e.a] - surChemin[e.b]) === 1);
+      var base = 0.05 + 0.06 * prof + 0.06 * e.reveal;
+      if (estRoute) {
+        var franchi = pcNow ? Math.min(surChemin[e.a], surChemin[e.b]) < pcNow.seg ||
+          (Math.min(surChemin[e.a], surChemin[e.b]) === pcNow.seg) : true;
+        ctx.strokeStyle = coul(phase === "livre" ? "vert" : "bleu", franchi ? 0.55 : 0.20);
+        ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        ctx.strokeStyle = coul(phase === "livre" ? "vert" : "bleu", 0.10);
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      } else {
+        ctx.strokeStyle = "rgba(210,228,247," + base + ")";
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+    }
+
+    /* — ondulations — */
+    for (var r = ripples.length - 1; r >= 0; r--) {
+      var rp = ripples[r];
+      var p = (ts - rp.t) / rp.duree;
+      if (p >= 1) { ripples.splice(r, 1); continue; }
+      var rad = lerp(rp.r0, rp.rMax, easeOut(p));
+      var al = (1 - p) * (1 - p);
+      ctx.beginPath();
+      ctx.arc(rp.x, rp.y, rad, 0, Math.PI * 2);
+      ctx.strokeStyle = coul(rp.coul, 0.4 * al);
+      ctx.lineWidth = lerp(1.6, 0.4, p);
+      ctx.stroke();
+    }
+
+    /* — nœuds — */
+    for (var j = 0; j < N.length; j++) dessinerNoeud(N[j], ts);
+
+    /* — la particule — */
+    if (pcNow) {
+      var tr = 5;
+      for (var g = tr; g >= 1; g--) {
+        var back = positionSurChemin(Math.max(0, ts - t0 - tOnde - 180 - g * 26));
+        ctx.beginPath();
+        ctx.arc(back.x, back.y, 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = coul("bleu", 0.05 * (tr - g + 1));
+        ctx.fill();
+      }
+      ctx.beginPath();
+      ctx.arc(pcNow.x, pcNow.y, 11, 0, Math.PI * 2);
+      ctx.fillStyle = coul("bleu", 0.16);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(pcNow.x, pcNow.y, 3.6, 0, Math.PI * 2);
+      ctx.fillStyle = "#9CCBFF";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(pcNow.x, pcNow.y, 1.6, 0, Math.PI * 2);
+      ctx.fillStyle = "#F2F8FF";
+      ctx.fill();
+    }
+  }
+
+  function dessinerNoeud(n, ts) {
+    var grand = n.role !== "relais";
+    var sc = 0.66 + n.z * 0.42;
+    var w = (grand ? 26 : 20) * sc;
+    var h = (grand ? 46 : 34) * sc;
+    var el = (n.inspecte ? 3 : 0);
+    var x = n.x, y = n.y - el;
+
+    /* halo, seulement quand le nœud réagit */
+    if (n.pulse > 0.02 || (n.role === "cible" && phase === "livre")) {
+      var hp = Math.max(n.pulse, phase === "livre" && n.role === "cible" ? 0.5 : 0);
+      var col = (n.role === "cible" && phase === "livre") ? "vert" : "bleu";
+      var grd = ctx.createRadialGradient(x, y, 2, x, y, w * 2.4);
+      grd.addColorStop(0, coul(col, 0.18 * hp));
+      grd.addColorStop(1, coul(col, 0));
+      ctx.fillStyle = grd;
+      ctx.beginPath(); ctx.arc(x, y, w * 2.4, 0, Math.PI * 2); ctx.fill();
+    }
+
+    /* le téléphone */
+    var bord;
+    if (n.role === "cible" && phase === "livre") bord = "rgba(52,217,100,0.85)";
+    else {
+      var vie = Math.max(n.eveil * 0.7, n.pulse);
+      var r0 = 0.11 + 0.06 * n.z;
+      bord = "rgba(" + lerp(210, 130, vie) + "," + lerp(228, 190, vie) + "," + lerp(247, 255, vie) + "," + (r0 + vie * 0.5) + ")";
+      if (n.role === "moi") bord = "rgba(120,175,255," + (0.35 + vie * 0.4) + ")";
+    }
+    roundRect(x - w / 2, y - h / 2, w, h, 4 * sc);
+    ctx.fillStyle = "#0A1420";
+    ctx.fill();
+    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = bord;
+    ctx.stroke();
+
+    /* l'écran : un rectangle un peu plus clair à l'intérieur */
+    roundRect(x - w / 2 + 3 * sc, y - h / 2 + 5 * sc, w - 6 * sc, h - 10 * sc, 2 * sc);
+    ctx.fillStyle = (n.role === "cible" && phase === "livre")
+      ? "rgba(52,217,100,0.10)"
+      : "rgba(150,190,240," + (0.04 + Math.max(n.eveil, n.pulse) * 0.14) + ")";
+    ctx.fill();
+
+    /* étiquette : toujours pour l'expéditeur et le destinataire ;
+       à la demande pour un relais qu'on inspecte */
+    var libelle = n.nom;
+    if (!libelle && n.inspecte) libelle = "Relais · " + degre(n) + " à portée";
+    else if (n.role === "moi" && n.inspecte) libelle = "Vous · l’expéditeur";
+    else if (n.role === "cible" && n.inspecte) libelle = "Sarah · la destinataire";
+    if (libelle) {
+      ctx.font = '600 10px "JetBrains Mono", ui-monospace, monospace';
+      ctx.textAlign = "center";
+      ctx.fillStyle = n.inspecte ? "rgba(201,216,234,0.95)" : "rgba(98,118,142,0.9)";
+      ctx.fillText(libelle, x, y + h / 2 + 15);
+    }
+  }
+
+  function degre(n) {
+    var idx = N.indexOf(n), c = 0;
+    for (var k = 0; k < liens.length; k++) if (liens[k].vivant && (liens[k].a === idx || liens[k].b === idx)) c++;
+    return c;
+  }
+
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    if (ctx.roundRect) { ctx.roundRect(x, y, w, h, r); return; }
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  /* ── ÉTAT LISIBLE + BULLES ───────────────────────────────────────── */
+  function setEtat(cls, txt) {
+    etat.className = "";
+    if (cls) etat.classList.add(cls);
+    etatTxt.textContent = txt;
+  }
+
+  function montrerBulle(el, n, recu) {
+    positionnerUneBulle(el, n, recu);
+    el.classList.add("visible");
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.classList.remove("visible"); }, recu ? 3200 : 2600);
+  }
+
+  function positionnerUneBulle(el, n, recu) {
+    if (!vue) return;
+    /* ⚠️ `.scene` a `overflow: hidden` (pour arrondir le canvas) : une
+       bulle qui dépasse un bord est COUPÉE. On calcule donc le bord
+       gauche réel de la bulle — largeur comprise — et on le borne à
+       l'intérieur du cadre. L'ancrage se fait toujours par le bas
+       (`translate: 0 -100%`), jamais par un décalage horizontal qui
+       pourrait repousser la bulle hors champ. */
+    var marge = 10;
+    var larg = vue.clientWidth || L;
+    var bw = el.offsetWidth || 120;
+    var bh = el.offsetHeight || 34;
+    var y = n.y - (n.role !== "relais" ? 28 : 20);
+    /* expéditeur (à gauche) → la bulle s'étend vers la DROITE ;
+       destinataire (à droite) → vers la GAUCHE. */
+    var left = recu ? (n.x - 12 - bw) : (n.x + 12);
+    left = Math.max(marge, Math.min(left, larg - bw - marge));
+    var top = Math.max(marge + bh, y);
+    el.style.left = Math.round(left) + "px";
+    el.style.top = Math.round(top) + "px";
+    el.style.translate = "0 -100%";
+  }
+
+  function positionnerBulles() {
+    if (bulleEnvoi.classList.contains("visible")) positionnerUneBulle(bulleEnvoi, N[iMoi], false);
+    if (bulleRecu.classList.contains("visible")) positionnerUneBulle(bulleRecu, N[iCible], true);
+  }
+
+  /* ── POINTEUR : AIMANT, GLISSER, INSPECTER ───────────────────────── */
+  function posLocale(ev) {
+    var r = toile.getBoundingClientRect();
+    return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+  }
+  function noeudSous(x, y) {
+    for (var i = N.length - 1; i >= 0; i--) {
+      var n = N[i];
+      var grand = n.role !== "relais";
+      var rr = (grand ? 24 : 18) * (0.66 + n.z * 0.42);
+      if (Math.hypot(n.x - x, n.y - y) < rr) return n;
+    }
+    return null;
+  }
+
+  toile.addEventListener("pointermove", function (ev) {
+    var p = posLocale(ev);
+    pointeur.x = p.x; pointeur.y = p.y; pointeur.actif = true;
+    if (glisse) {
+      glisse.bouge = glisse.bouge || Math.hypot(p.x - glisse.x0, p.y - glisse.y0) > 4;
+      if (!glisse.noeud) {
+        vueCibleX = clamp(glisse.panX0 + (p.x - glisse.x0), -46, 46);
+        vueCibleY = clamp(glisse.panY0 + (p.y - glisse.y0), -40, 40);
+      }
+    } else {
+      toile.classList.toggle("survol-noeud", !!noeudSous(p.x, p.y));
+    }
+    armer();
+  });
+
+  toile.addEventListener("pointerdown", function (ev) {
+    var p = posLocale(ev);
+    pointeur.x = p.x; pointeur.y = p.y; pointeur.actif = true;
+    var n = noeudSous(p.x, p.y);
+    glisse = { noeud: n, x0: p.x, y0: p.y, bouge: false, panX0: vueCibleX, panY0: vueCibleY };
+    if (n) n.drag = { dx: n.x - p.x, dy: n.y - p.y };
+    toile.classList.add("saisie");
+    try { toile.setPointerCapture(ev.pointerId); } catch (e) {}
+    armer();
+  });
+
+  function relacher(ev) {
+    if (ev && ev.pointerType && ev.pointerType !== "mouse") pointeur.actif = false;
+    if (!glisse) return;
+    var wasNode = glisse.noeud, moved = glisse.bouge;
+    if (wasNode) wasNode.drag = null;
+    if (!moved) {
+      // tap : inspecter (un seul à la fois)
+      for (var i = 0; i < N.length; i++) if (N[i] !== wasNode) N[i].inspecte = false;
+      if (wasNode) wasNode.inspecte = !wasNode.inspecte;
+    }
+    if (!wasNode) { vueCibleX = 0; vueCibleY = 0; }
+    glisse = null;
+    toile.classList.remove("saisie");
+    armer();
+  }
+  toile.addEventListener("pointerup", relacher);
+  toile.addEventListener("pointercancel", relacher);
+  toile.addEventListener("pointerleave", function () {
+    pointeur.actif = false;
+    if (!glisse) toile.classList.remove("survol-noeud");
+  });
+
+  /* ── COMMANDES ───────────────────────────────────────────────────── */
+  btnEnvoyer.addEventListener("click", function () {
+    if (reduit) { renduStatique(true); return; }
+    envoyer();
+  });
+  btnRejouer.addEventListener("click", function () {
+    reinit();
+  });
+
+  function reinit() {
+    phase = "repos";
+    chemin = null; ackRing = null; ripples.length = 0;
+    for (var i = 0; i < N.length; i++) { N[i].eveil = 0; N[i].pulse = 0; N[i].inspecte = false; }
+    for (var k = 0; k < liens.length; k++) { liens[k].vivant = true; liens[k].reveal = 0; }
+    bulleEnvoi.classList.remove("visible");
+    bulleRecu.classList.remove("visible");
+    bilan.classList.remove("visible");
+    bilan.hidden = true;
+    btnRejouer.hidden = true;
+    btnEnvoyer.disabled = false;
+    btnEnvoyer.textContent = "Envoyer un message";
+    setEtat("", "Prêt");
+    if (reduit) { for (var m = 0; m < N.length; m++) { N[m].x = N[m].nx * L; N[m].y = N[m].ny * H; } ctx.clearRect(0, 0, L, H); for (var d = 0; d < N.length; d++) dessinerNoeud(N[d], 0); return; }
+    armer();
+  }
+
+  /* ── MOUVEMENT RÉDUIT : un état fixe, lisible, honnête ────────────── */
+  function renduStatique(avecBilan) {
+    dimensionner();
+    for (var k = 0; k < liens.length; k++) { liens[k].vivant = true; liens[k].w = liens[k].d; }
+    chemin = router(iMoi, iCible);
+    relaisUtilises = chemin ? Math.max(0, chemin.length - 2) : 3;
+    phase = "livre";
+    ctx.clearRect(0, 0, L, H);
+    // liaisons
+    for (var i = 0; i < liens.length; i++) {
+      var a = N[liens[i].a], b = N[liens[i].b];
+      ctx.strokeStyle = "rgba(210,228,247,0.07)";
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(a.nx * L, a.ny * H); ctx.lineTo(b.nx * L, b.ny * H); ctx.stroke();
+    }
+    if (chemin) for (var s = 0; s < chemin.length - 1; s++) {
+      var p1 = N[chemin[s]], p2 = N[chemin[s + 1]];
+      ctx.strokeStyle = "rgba(52,217,100,0.5)";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(p1.nx * L, p1.ny * H); ctx.lineTo(p2.nx * L, p2.ny * H); ctx.stroke();
+    }
+    for (var j = 0; j < N.length; j++) {
+      var n = N[j];
+      n.x = n.nx * L; n.y = n.ny * H;
+      n.eveil = chemin && chemin.indexOf(j) !== -1 ? 0.5 : 0;
+      dessinerNoeud(n, 0);
+    }
+    setEtat("arrive", "Message reçu.");
+    if (avecBilan) {
+      bilanRelais.textContent = relaisUtilises + (relaisUtilises > 1 ? " relais utilisés" : " relais utilisé");
+      bilan.classList.add("visible");
+      btnRejouer.hidden = false;
+    }
+  }
+
+  /* ── DÉMARRAGE + REDIMENSIONNEMENT + VISIBILITÉ ──────────────────── */
+  function demarrer() {
+    dimensionner();
+    for (var i = 0; i < N.length; i++) { N[i].x = baseX(N[i]); N[i].y = baseY(N[i]); }
+    if (reduit) { renduStatique(false); return; }
+    armer();
+  }
+
+  var minuteur;
+  window.addEventListener("resize", function () {
+    clearTimeout(minuteur);
+    minuteur = setTimeout(function () {
+      var enCours = phase;
+      dimensionner();
+      for (var i = 0; i < N.length; i++) { N[i].x = baseX(N[i]); N[i].y = baseY(N[i]); }
+      if (reduit) renduStatique(bilan.classList.contains("visible"));
+      else if (enCours === "repos") armer();
+    }, 140);
+  });
+
+  document.addEventListener("visibilitychange", function () {
+    visible = !document.hidden;
+    if (visible && !reduit) armer();
+  });
+
+  if ("IntersectionObserver" in window) {
+    var vu = false;
+    var io = new IntersectionObserver(function (entrees) {
+      entrees.forEach(function (e) {
+        visible = e.isIntersecting && e.intersectionRatio > 0.2;
+        if (visible && !reduit) armer();
+        if (visible && !vu && !reduit) {
+          vu = true;
+          setTimeout(function () { if (phase === "repos") envoyer(); }, 900);
+        }
+      });
+    }, { threshold: [0, 0.25, 0.6] });
+    if (scene) io.observe(scene);
+  }
+
+  demarrer();
+})();
+</script>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ══════════════════════════════════════════════════════════════
+     LE CURSEUR ET LES BOUTONS MAGNÉTIQUES
+     ------------------------------------------------------------------
+     ⚠️ POURQUOI CE BLOC EST SÉPARÉ DES AUTRES.
+     Les autres scripts de la page tournent PARTOUT (téléphone compris)
+     dès que le mouvement n'est pas réduit. Celui-ci ne doit tourner
+     QUE là où une vraie souris existe : `(hover: hover) and
+     (pointer: fine)` exclut le tactile, et une manette ou un stylet
+     imprécis avec lui. Sans ce test, un doigt sur l'écran verrait le
+     curseur système remplacé par un rond qui ne le suit jamais.
+     ══════════════════════════════════════════════════════════════ */
+  var reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var vraieSouris = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if (reduit || !vraieSouris) return;
+
+  /* ── LE CURSEUR À DEUX VITESSES ──
+     Le point colle exactement au pointeur système ; le halo le suit
+     avec un léger retard (interpolation linéaire vers la cible à
+     chaque image) — c'est ce retard, et lui seul, qui donne
+     l'impression d'un objet avec un peu d'inertie plutôt que d'un
+     second pointeur superposé au premier. */
+  var point = document.createElement("div");
+  point.className = "point-curseur";
+  var halo = document.createElement("div");
+  halo.className = "halo-curseur";
+  document.body.appendChild(point);
+  document.body.appendChild(halo);
+  document.documentElement.classList.add("curseur-actif");
+
+  var sx = window.innerWidth / 2, sy = window.innerHeight / 2;   /* cible (souris) */
+  var hx = sx, hy = sy;                                          /* position actuelle du halo */
+
+  window.addEventListener("mousemove", function (e) {
+    sx = e.clientX; sy = e.clientY;
+    point.style.transform = "translate(" + sx + "px," + sy + "px) translate(-50%,-50%)";
+  }, { passive: true });
+
+  /* Le curseur système réapparaît si la souris quitte la fenêtre
+     (bascule vers un autre écran, une barre d'outils du navigateur) —
+     sinon le point resterait figé au bord, visiblement abandonné. */
+  document.addEventListener("mouseleave", function () {
+    point.style.opacity = "0"; halo.style.opacity = "0";
+  });
+  document.addEventListener("mouseenter", function () {
+    point.style.opacity = "1"; halo.style.opacity = "1";
+  });
+
+  (function suivre() {
+    hx += (sx - hx) * 0.16;
+    hy += (sy - hy) * 0.16;
+    halo.style.transform = "translate(" + hx + "px," + hy + "px) translate(-50%,-50%)";
+    requestAnimationFrame(suivre);
+  })();
+
+  /* Le halo grossit sur tout ce qui se touche — cartes comprises, pas
+     seulement les liens : sur cette page, une carte entière est
+     souvent la cible réelle même quand seul son titre est un lien. */
+  var CIBLES = "a, button, .carte, .transport, .don, .volet, .copier, input";
+  document.addEventListener("mouseover", function (e) {
+    if (e.target.closest && e.target.closest(CIBLES)) halo.classList.add("sur-cible");
+  });
+  document.addEventListener("mouseout", function (e) {
+    if (e.target.closest && e.target.closest(CIBLES) &&
+        !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(CIBLES))) {
+      halo.classList.remove("sur-cible");
+    }
+  });
+
+  /* ── LES BOUTONS MAGNÉTIQUES ──
+     Seuls les boutons d'appel à l'action, pas chaque lien de la page :
+     appliqué partout, l'effet devient un bruit de fond plutôt qu'une
+     signature réservée aux gestes qui comptent.
+
+     ⚠️ POURQUOI CECI VIT DANS LA BOUCLE `suivre()`, PAS DANS UN
+     `mousemove` POSÉ SUR CHAQUE BOUTON.
+     Un `mousemove` attaché au bouton lui-même ne reçoit d'événements
+     qu'une fois le pointeur DÉJÀ à l'intérieur de son rectangle — la
+     portée `PORTEE`, censée agir un peu AVANT que la souris n'entre
+     dans le bouton, ne se déclencherait donc jamais. La position du
+     pointeur (`sx`, `sy`) est déjà suivie en continu plus haut ; il
+     suffit de comparer, à chaque image, la distance de chaque bouton
+     à cette position. */
+  var PORTEE = 46;   /* px au-delà du bord du bouton où l'attraction agit encore */
+  var boutons = Array.prototype.slice.call(document.querySelectorAll(".bouton"));
+  boutons.forEach(function (bouton) { bouton.classList.add("magnetique"); });
+
+  function attirerBoutons() {
+    boutons.forEach(function (bouton) {
+      var r = bouton.getBoundingClientRect();
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      var dx = sx - cx, dy = sy - cy;
+      var dehors = Math.max(0, Math.abs(dx) - r.width / 2, Math.abs(dy) - r.height / 2);
+      if (dehors > PORTEE) {
+        if (bouton.style.transform) {
+          bouton.classList.add("pose");
+          bouton.style.transform = "";
+        }
+        return;
+      }
+      bouton.classList.remove("pose");
+      bouton.style.transform = "translate(" + (dx * 0.28).toFixed(1) + "px," + (dy * 0.28).toFixed(1) + "px)";
+    });
+    requestAnimationFrame(attirerBoutons);
+  }
+  attirerBoutons();
+
+  /* ── LE BASCULEMENT 3D DES CARTES ──
+     La carte s'incline très légèrement vers le pointeur qui la
+     survole, comme posée sur une charnière invisible — l'écart entre
+     une carte qui « réagit » et une carte qui se contente de changer
+     de couleur. `perspective` vit sur la carte elle-même (pas sur un
+     parent commun) : chacune bascule dans son propre repère, sans
+     qu'une carte voisine influence la fuite de perspective d'une autre.
+     Bornée à 6° : au-delà, l'inclinaison déforme le texte au lieu de
+     simplement lui donner du relief. */
+  var INCLINAISON_MAX = 6;
+  document.querySelectorAll(".carte, .transport, .don, .volet").forEach(function (carte) {
+    carte.style.transformStyle = "preserve-3d";
+    carte.addEventListener("mousemove", function (e) {
+      var r = carte.getBoundingClientRect();
+      var px = (e.clientX - r.left) / r.width;   /* 0 à 1 */
+      var py = (e.clientY - r.top) / r.height;
+      var rx = (0.5 - py) * INCLINAISON_MAX * 2;
+      var ry = (px - 0.5) * INCLINAISON_MAX * 2;
+      carte.style.transition = "none";
+      carte.style.transform =
+        "perspective(700px) rotateX(" + rx.toFixed(2) + "deg) rotateY(" + ry.toFixed(2) + "deg) translateY(-3px)";
+    });
+    carte.addEventListener("mouseleave", function () {
+      carte.style.transition = "";   /* rend la main à la transition CSS déjà définie pour le retour */
+      carte.style.transform = "";
+    });
+  });
+})();
+</script>
