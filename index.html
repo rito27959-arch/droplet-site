@@ -732,12 +732,39 @@ td.oui { color: var(--encre); }
 .legende h3 { font-size: clamp(1.2rem, 2.6vw, 1.5rem); margin-bottom: 10px; }
 .legende p { color: var(--brume); max-width: 46ch; }
 
+/* ⚠️ SUR MOBILE, LE TÉLÉPHONE RESTE ÉPINGLÉ — IL NE PASSE PAS EN
+   `static`. C'était le défaut : en `static`, le téléphone défilait hors
+   de l'écran dès la deuxième légende, si bien que le changement d'écran
+   déclenché par le défilement se produisait pendant qu'il était
+   invisible. La mécanique Apple fonctionne aussi sur mobile — il faut
+   juste garder le téléphone à l'écran. */
 @media (max-width: 760px) {
-  .vitrine { grid-template-columns: 1fr; }
-  .vitrine-telephone { position: static; margin-bottom: 12px; }
-  .telephone { width: 200px; }
-  .legende { min-height: 0; opacity: 1; transform: none; padding-block: 18px; }
-  .legende:last-child { min-height: 0; }
+  .vitrine { grid-template-columns: 1fr; gap: 0; }
+  .vitrine-telephone {
+    position: sticky;
+    top: 72px;
+    align-self: stretch;
+    margin: 0;
+    padding: 10px 0 14px;
+    z-index: 3;
+    /* Un fond pleine largeur : le téléphone ne remplit pas la colonne,
+       et sans ça les légendes défileraient visiblement dans l'espace
+       laissé libre à ses côtés. Dégradé en bas pour un raccord doux. */
+    background: linear-gradient(var(--fond) 78%, color-mix(in srgb, var(--fond) 0%, transparent));
+  }
+  .telephone { width: 148px; }
+  .vitrine-legendes { text-align: center; }
+  .legende {
+    /* Assez haut pour laisser le temps de lire avant que l'écran suivant
+       ne prenne le relais — comme sur bureau, mais réduit. */
+    min-height: 58vh;
+    opacity: 0.3;
+    transform: none;
+    padding-block: 14px;
+  }
+  .legende.actif { opacity: 1; }
+  .legende:last-child { min-height: 36vh; }
+  .legende p { margin-inline: auto; }
 }
 
 /* ── Le schéma comparatif ── */
@@ -2590,16 +2617,32 @@ footer {
      jusqu'à cette section. */
   activer("1");
 
-  var oeilVitrine = new IntersectionObserver(function (entrees) {
-    entrees.forEach(function (e) {
-      if (e.isIntersecting) activer(e.target.getAttribute("data-ecran"));
-    });
-    /* La bande centrale (`rootMargin` négatif des deux côtés) : sur
-       une page aussi longue, plusieurs légendes peuvent être «
-       visibles » à la fois — seule celle qui traverse le MILIEU de
-       l'écran doit décider ce que montre le téléphone. */
-  }, { rootMargin: "-45% 0px -45% 0px" });
-  legendes.forEach(function (l) { oeilVitrine.observe(l); });
+  /* ⚠️ LA BANDE DE DÉCLENCHEMENT DÉPEND DU GABARIT.
+     Bureau : le téléphone est épinglé À CÔTÉ, la légende active est
+     celle qui traverse le MILIEU vertical → bande centrale étroite.
+     Mobile : le téléphone est épinglé EN HAUT (il occupe ~0-55 % de la
+     hauteur) ; la légende active est celle qui vient d'émerger EN
+     DESSOUS de lui → bande basse. Une seule bande figée mettait, sur
+     mobile, la légende « active » derrière le téléphone. */
+  var oeil = null;
+  function poser() {
+    if (oeil) oeil.disconnect();
+    var mobile = window.matchMedia("(max-width: 760px)").matches;
+    var marge = mobile ? "-54% 0px -12% 0px" : "-45% 0px -45% 0px";
+    oeil = new IntersectionObserver(function (entrees) {
+      entrees.forEach(function (e) {
+        if (e.isIntersecting) activer(e.target.getAttribute("data-ecran"));
+      });
+    }, { rootMargin: marge });
+    legendes.forEach(function (l) { oeil.observe(l); });
+  }
+  poser();
+
+  var minuteur;
+  window.addEventListener("resize", function () {
+    clearTimeout(minuteur);
+    minuteur = setTimeout(poser, 180);
+  });
 })();
 </script>
 
