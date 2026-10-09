@@ -1,0 +1,114 @@
+---
+// Les questions : des <details>, donc lisibles sans JavaScript, au clavier
+// et par les lecteurs d'écran. L'ouverture est animée en CSS seulement.
+import type { Textes } from '../i18n/fr';
+interface Props { t: Textes }
+const { t } = Astro.props;
+const questions = [
+  { q: t.q1, r: t.r1 },
+  { q: t.q2, r: t.r2 },
+  { q: t.q3, r: t.r3 },
+  { q: t.q4, r: t.r4 },
+];
+---
+<section id="questions" class="questions fond-gris" aria-labelledby="questions-titre">
+  <div class="questions__grille contenu">
+    <h2 id="questions-titre" class="questions__titre titre-section">{t.faqTitre}</h2>
+    <div class="questions__liste">
+      {questions.map((x, i) => (
+        <details name="faq" open={i === 0}>
+          <summary>
+            <span>{x.q}</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+          </summary>
+          <div class="reponse"><p>{x.r}</p></div>
+        </details>
+      ))}
+      <a class="lien-fleche questions__toutes" href="support/">{t.faqToutes}</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .questions {
+    padding: clamp(88px, 11vw, 150px) 0;
+  }
+  .questions__grille {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(28px, 6vw, 88px);
+    align-items: start;
+  }
+  .questions__titre {
+    font-size: var(--t-4);
+    max-width: 10ch;
+  }
+  .questions__toutes {
+    margin-top: 26px;
+  }
+  details {
+    border-bottom: 1px solid var(--trait-jour);
+  }
+  details:first-child {
+    border-top: 1px solid var(--trait-jour);
+  }
+  summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 24px 0;
+    cursor: pointer;
+    font-family: var(--f-titre);
+    font-size: var(--t-2);
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    line-height: 1.3;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary svg {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    fill: none;
+    stroke: var(--goutte);
+    stroke-width: 2;
+    stroke-linecap: round;
+    transition: transform 0.35s var(--ease);
+  }
+  details[open] summary svg {
+    transform: rotate(45deg);
+  }
+  .reponse {
+    padding: 0 0 26px;
+    color: var(--texte-jour-2);
+    max-width: 40rem;
+  }
+  /* L'ouverture qui glisse, là où le navigateur sait l'animer. */
+  @supports (interpolate-size: allow-keywords) {
+    details {
+      interpolate-size: allow-keywords;
+    }
+    details::details-content {
+      height: 0;
+      overflow: clip;
+      transition:
+        height 0.4s var(--ease),
+        content-visibility 0.4s allow-discrete;
+    }
+    details[open]::details-content {
+      height: auto;
+    }
+  }
+  @media (max-width: 860px) {
+    .questions__grille {
+      grid-template-columns: 1fr;
+    }
+    .questions__titre {
+      max-width: none;
+    }
+  }
+</style>

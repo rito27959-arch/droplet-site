@@ -1,9 +1,6 @@
-# Sortie de construction — régénérée par construire.py, produite par Vercel au déploiement
-/public/
-
-# Vercel
+node_modules/
+dist/
+.astro/
 .vercel
-
-# Archives / divers
 *.zip
 .DS_Store

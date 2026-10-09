@@ -1,0 +1,279 @@
+/* ==========================================================================
+   LE SYSTÈME DU SITE — sur le modèle d'apple.com
+   --------------------------------------------------------------------------
+   • Le produit au centre et en grand ; le texte centré, court, monumental.
+   • Deux fonds seulement : le noir (la nuit, le maillage) et le gris très
+     clair d'Apple (#f5f5f7). Les sections alternent pour rythmer la page.
+   • Une couleur d'action : la goutte de Droplet. Le bleu signal ne sert
+     qu'aux liens du maillage et aux liens texte.
+   • Inter Tight pour les titres, Inter pour le texte : la neutralité de SF
+     Pro, dont le site ne peut pas se servir.
+   ========================================================================== */
+
+/* LA COULEUR DU THÈME, ANIMÉE.
+   Déclarée comme une vraie couleur (`@property`), elle peut glisser d'une
+   teinte à l'autre au lieu de basculer : quand on choisit une couleur, tout
+   le site — boutons, lueurs, maillage — vire en douceur, comme les photos
+   d'un iPhone quand on change de finition sur apple.com. */
+@property --goutte {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ff2d55;
+}
+
+:root {
+  --noir: #000;
+  --nuit: #050b1c;
+  --gris: #f5f5f7;
+  --blanc: #fff;
+  --encre: #1d1d1f;
+  --encre-2: #6e6e73;
+  --clair: #f5f5f7;
+  --clair-2: #a1a1a6;
+  --carte-sombre: #141418;
+  /* La goutte : LA couleur du site. Toutes ses nuances en DÉRIVENT, pour
+     qu'un seul changement (le sélecteur de couleur) les emporte toutes. */
+  --goutte: #ff2d55;
+  --goutte-fonce: color-mix(in srgb, var(--goutte) 86%, #000);
+  --goutte-pale: color-mix(in srgb, var(--goutte) 72%, #fff);
+  --goutte-nuit: color-mix(in srgb, var(--goutte) 22%, #000);
+  --goutte-encre: color-mix(in srgb, var(--goutte) 9%, #000);
+  transition: --goutte 0.7s var(--ease, ease);
+  --signal: #4cc3ff;
+  --lien-clair: #0071e3;
+  --lien-sombre: #2997ff;
+
+  /* Les noms de la première version, gardés pour les sections qui les
+     emploient encore. */
+  --texte-nuit: #f5f5f7;
+  --texte-nuit-2: #a1a1a6;
+  --texte-jour: #1d1d1f;
+  --texte-jour-2: #6e6e73;
+  --trait-nuit: rgba(255, 255, 255, 0.12);
+  --trait-jour: rgba(0, 0, 0, 0.1);
+  --brume: #f5f5f7;
+
+  --f-titre: 'Inter Tight Variable', 'Inter Tight', -apple-system, BlinkMacSystemFont, 'SF Pro Display',
+    'Segoe UI', 'Noto Sans', 'Noto Sans Arabic', 'Noto Sans Devanagari', 'PingFang SC',
+    'Microsoft YaHei', sans-serif;
+  --f-texte: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI',
+    'Noto Sans', 'Noto Sans Arabic', 'Noto Sans Devanagari', 'PingFang SC', 'Microsoft YaHei',
+    sans-serif;
+
+  /* L'échelle d'apple.com : 17 / 21 / 28 / 40 / 56 / 80. */
+  --t-0: 0.8125rem;
+  --t-1: 1.0625rem;
+  --t-2: clamp(1.1875rem, 1rem + 0.5vw, 1.3125rem);
+  --t-3: clamp(1.5rem, 1.1rem + 1.2vw, 1.75rem);
+  --t-4: clamp(2rem, 1.2rem + 2.6vw, 3.5rem);
+  --t-5: clamp(2.75rem, 1.3rem + 5vw, 5rem);
+  --t-6: clamp(3.2rem, 1rem + 8vw, 7.5rem);
+
+  --largeur: 980px;
+  --large: 1260px;
+  --gouttiere: clamp(20px, 5vw, 40px);
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-sortie: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--noir);
+}
+
+body {
+  margin: 0;
+  font-family: var(--f-texte);
+  font-size: var(--t-1);
+  line-height: 1.47;
+  letter-spacing: -0.011em;
+  color: var(--clair);
+  background: var(--noir);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+  font-feature-settings: 'ss01', 'cv11';
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--f-titre);
+  /* 600, pas 700 : Apple titre en SF Pro Display semi-gras. Plus lourd,
+     avec l'approche serrée d'Inter Tight, les lettres se touchaient. */
+  font-weight: 600;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lien-sombre);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.contenu {
+  width: min(100% - 2 * var(--gouttiere), var(--largeur));
+  margin-inline: auto;
+}
+
+.contenu--large {
+  width: min(100% - 2 * var(--gouttiere), var(--large));
+  margin-inline: auto;
+}
+
+/* Les deux fonds d'Apple. */
+.fond-noir {
+  background: var(--noir);
+  color: var(--clair);
+}
+
+.fond-gris {
+  background: var(--gris);
+  color: var(--encre);
+}
+
+.fond-blanc {
+  background: var(--blanc);
+  color: var(--encre);
+}
+
+/* ── Les titres de section, comme sur apple.com ───────────────────── */
+.titre-section {
+  font-size: var(--t-5);
+  line-height: 1.07;
+  letter-spacing: -0.022em;
+  font-weight: 600;
+}
+
+.chapo {
+  font-size: var(--t-3);
+  line-height: 1.24;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+.fond-noir .chapo {
+  color: var(--clair-2);
+}
+
+.fond-gris .chapo,
+.fond-blanc .chapo {
+  color: var(--encre-2);
+}
+
+/* ── Les boutons et les liens d'action ───────────────────────────── */
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 980px;
+  font-family: var(--f-texte);
+  font-size: var(--t-1);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  background: var(--goutte);
+  color: #fff;
+  transition:
+    background-color 0.25s var(--ease),
+    transform 0.2s var(--ease);
+}
+
+.bouton:hover {
+  background: var(--goutte-fonce);
+}
+
+.bouton:active {
+  transform: scale(0.97);
+}
+
+.bouton svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Le « En savoir plus › » d'Apple : un lien, pas un bouton. */
+.lien-fleche {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--t-1);
+  text-decoration: none;
+  color: var(--lien-sombre);
+}
+
+.fond-gris .lien-fleche,
+.fond-blanc .lien-fleche {
+  color: var(--lien-clair);
+}
+
+.lien-fleche:hover {
+  text-decoration: underline;
+}
+
+.lien-fleche::after {
+  content: '›';
+  font-size: 1.25em;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+[dir='rtl'] .lien-fleche::after {
+  content: '‹';
+}
+
+/* ── Apparition au défilement ─────────────────────────────────────
+   Réservée aux titres de section : un léger lever, une seule fois.
+   (Le reste du mouvement de la page est piloté par le défilement.) */
+.apparait {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity 1s var(--ease-sortie),
+    transform 1s var(--ease-sortie);
+}
+
+.apparait.est-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .apparait {
+    opacity: 1;
+    transform: none;
+  }
+}

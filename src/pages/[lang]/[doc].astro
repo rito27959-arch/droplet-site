@@ -1,0 +1,16 @@
+---
+// /en/privacy/, /de/support/… : chaque document dans chaque langue.
+import DocPage from '../../components/DocPage.astro';
+import { LANGUES, LANGUE_PAR_DEFAUT, type Langue } from '../../i18n';
+import { CLES_DOCS } from '../../docs';
+import type { CleDoc } from '../../docs/types';
+
+export function getStaticPaths() {
+  return LANGUES.filter((l) => l.code !== LANGUE_PAR_DEFAUT).flatMap((l) =>
+    CLES_DOCS.map((cle) => ({ params: { lang: l.code, doc: cle } })),
+  );
+}
+const langue = Astro.params.lang as Langue;
+const cle = Astro.params.doc as CleDoc;
+---
+<DocPage langue={langue} cle={cle} />

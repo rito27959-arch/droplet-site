@@ -1,0 +1,264 @@
+---
+// La barre du produit, à la manière d'apple.com : le nom à gauche, trois
+// liens et l'action à droite, en petit. Elle devient du verre dès qu'on
+// défile, sombre sur les sections noires, clair sur les claires.
+import Logo from './Logo.astro';
+import SelecteurCouleur from './SelecteurCouleur.astro';
+import { LIEN_ANDROID } from '../config';
+import type { Textes } from '../i18n/fr';
+
+interface Props {
+  t: Textes;
+  accueil: string;
+  /** Sur une page de document : les liens pointent vers l'accueil, et la
+   *  barre est claire dès le haut de la page (le fond y est blanc). */
+  surAccueil?: boolean;
+  /** La page commence sur un fond clair : texte sombre dès le départ. */
+  clairEnHaut?: boolean;
+}
+const { t, accueil, surAccueil = true, clairEnHaut = false } = Astro.props;
+const base = surAccueil ? '' : accueil;
+const liens = [
+  { texte: t.galerieTitre.replace(/[.。]$/, ''), href: `${base}#galerie` },
+  { texte: t.navFonctionnement, href: `${base}#parcours` },
+  { texte: t.navConfidentialite, href: `${base}#confidentialite` },
+  { texte: t.piedAssistance, href: `${accueil}support/` },
+];
+---
+<header class:list={['nav', { 'sur-clair': clairEnHaut }]} data-nav>
+  <div class="nav__dedans contenu--large">
+    <a class="nav__marque" href={accueil}>
+      <Logo taille={20} />
+      <span>Droplet</span>
+    </a>
+    <nav class="nav__liens" aria-label="Droplet">
+      {liens.map((l) => <a href={l.href}>{l.texte}</a>)}
+    </nav>
+    <SelecteurCouleur t={t} variante="nav" />
+    <!-- Sur téléphone, les liens passent derrière ce chevron, comme dans la
+         barre de produit d'apple.com. -->
+    <button class="nav__menu" type="button" aria-expanded="false" aria-controls="nav-tiroir" aria-label={t.menu} data-menu>
+      <svg viewBox="0 0 14 8" aria-hidden="true"><path d="M1 1l6 6 6-6" /></svg>
+    </button>
+    <a class="nav__bouton" href={LIEN_ANDROID}>{t.telecharger}</a>
+  </div>
+  <div class="nav__tiroir" id="nav-tiroir" data-tiroir>
+    <nav aria-label="Droplet">
+      {liens.map((l) => <a href={l.href}>{l.texte}</a>)}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    color: var(--clair);
+    transition:
+      background-color 0.5s var(--ease),
+      color 0.5s var(--ease),
+      box-shadow 0.5s var(--ease);
+  }
+  .nav.est-defilee {
+    background: rgba(22, 22, 23, 0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  /* Sur un fond clair, même transparente, la barre écrit en sombre. */
+  .nav.sur-clair {
+    color: var(--encre);
+  }
+  .nav.est-defilee.sur-clair {
+    background: rgba(251, 251, 253, 0.8);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+    color: var(--encre);
+  }
+  .nav__dedans {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .nav__marque {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-inline-end: auto;
+    text-decoration: none;
+    font-family: var(--f-titre);
+    font-size: 1.3rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+  .nav__liens {
+    display: flex;
+    gap: 24px;
+  }
+  .nav__liens a {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .nav__liens a:hover {
+    opacity: 1;
+  }
+  .nav__bouton {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 980px;
+    background: var(--goutte);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.2s;
+  }
+  .nav__bouton:hover {
+    background: var(--goutte-fonce);
+  }
+  .nav__menu {
+    display: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+  .nav__menu svg {
+    width: 12px;
+    height: 7px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.8;
+    transition: transform 0.35s var(--ease-sortie);
+  }
+  .nav__menu[aria-expanded='true'] svg {
+    transform: rotate(180deg);
+  }
+  /* Le tiroir : il se déroule sous la barre, en verre, et ses liens
+     arrivent l'un après l'autre. */
+  .nav__tiroir {
+    display: grid;
+    grid-template-rows: 0fr;
+    background: inherit;
+    transition: grid-template-rows 0.4s var(--ease-sortie);
+  }
+  .nav__tiroir > nav {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-inline: var(--gouttiere);
+  }
+  .nav.est-ouverte .nav__tiroir {
+    grid-template-rows: 1fr;
+  }
+  .nav.est-ouverte {
+    background: rgba(22, 22, 23, 0.92);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    height: auto;
+  }
+  .nav.est-ouverte.sur-clair {
+    background: rgba(251, 251, 253, 0.94);
+  }
+  .nav__tiroir a {
+    padding: 13px 0;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    border-bottom: 1px solid var(--trait-nuit);
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+      opacity 0.3s var(--ease),
+      transform 0.4s var(--ease-sortie);
+  }
+  .sur-clair .nav__tiroir a {
+    border-bottom-color: var(--trait-jour);
+  }
+  .nav__tiroir a:last-child {
+    border-bottom: 0;
+    margin-bottom: 10px;
+  }
+  .nav.est-ouverte .nav__tiroir a {
+    opacity: 1;
+    transform: none;
+  }
+  .nav.est-ouverte .nav__tiroir a:nth-child(2) { transition-delay: 0.04s; }
+  .nav.est-ouverte .nav__tiroir a:nth-child(3) { transition-delay: 0.08s; }
+  .nav.est-ouverte .nav__tiroir a:nth-child(4) { transition-delay: 0.12s; }
+  @media (max-width: 760px) {
+    .nav__liens {
+      display: none;
+    }
+    .nav__menu {
+      display: grid;
+    }
+    .nav__dedans {
+      gap: 14px;
+    }
+  }
+  @media (min-width: 761px) {
+    .nav__tiroir {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const nav = document.querySelector<HTMLElement>('[data-nav]');
+  if (nav) {
+    const clairs = [...document.querySelectorAll<HTMLElement>('.fond-gris, .fond-blanc')];
+    let attente = false;
+    const maj = () => {
+      attente = false;
+      nav.classList.toggle('est-defilee', window.scrollY > 10);
+      const milieu = 26;
+      nav.classList.toggle(
+        'sur-clair',
+        clairs.some((s) => {
+          const r = s.getBoundingClientRect();
+          return r.top <= milieu && r.bottom > milieu;
+        }),
+      );
+    };
+    maj();
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!attente) {
+          attente = true;
+          requestAnimationFrame(maj);
+        }
+      },
+      { passive: true },
+    );
+  }
+
+  // Le tiroir du menu, sur téléphone.
+  const bouton = document.querySelector<HTMLButtonElement>('[data-menu]');
+  if (nav && bouton) {
+    const basculer = (ouvrir: boolean) => {
+      nav.classList.toggle('est-ouverte', ouvrir);
+      bouton.setAttribute('aria-expanded', String(ouvrir));
+    };
+    bouton.addEventListener('click', () => basculer(!nav.classList.contains('est-ouverte')));
+    nav.querySelectorAll('[data-tiroir] a').forEach((a) => a.addEventListener('click', () => basculer(false)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && nav.classList.contains('est-ouverte')) {
+        basculer(false);
+        bouton.focus();
+      }
+    });
+  }
+</script>

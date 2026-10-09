@@ -1,0 +1,188 @@
+---
+// La confidentialité, montrée plutôt qu'affirmée : la même phrase, telle
+// que vous l'écrivez, puis telle qu'un relais la voit passer.
+import type { Textes } from '../i18n/fr';
+interface Props { t: Textes }
+const { t } = Astro.props;
+
+// Un faux chiffré, mais calculé à partir de la phrase : il change avec la
+// langue et garde la longueur d'un vrai message chiffré.
+function chiffre(texte: string): string {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  let graine = 0;
+  for (const c of texte) graine = (graine * 31 + c.codePointAt(0)!) >>> 0;
+  let sortie = '';
+  const longueur = Math.max(44, Math.round(texte.length * 1.6));
+  for (let i = 0; i < longueur; i++) {
+    graine = (graine * 1103515245 + 12345) >>> 0;
+    sortie += alphabet[(graine >>> 16) % 64];
+  }
+  return sortie;
+}
+const brouille = chiffre(t.confClair);
+
+const cles = [
+  { titre: t.conf1Titre, texte: t.conf1Texte },
+  { titre: t.conf2Titre, texte: t.conf2Texte },
+  { titre: t.conf3Titre, texte: t.conf3Texte },
+];
+---
+<section id="confidentialite" class="conf fond-noir" aria-labelledby="conf-titre">
+  <div class="contenu">
+    <div class="conf__haut">
+      <h2 id="conf-titre" class="conf__titre titre-section apparait">{t.confTitre}</h2>
+      <p class="conf__texte">{t.confTexte}</p>
+      <!-- Relatif : l'accueil se termine toujours par « / » (/, /en/…). -->
+      <a class="lien-fleche conf__lien" href="security/">{t.confPlus}</a>
+    </div>
+
+    <div class="demonstration">
+      <div class="demonstration__cote">
+        <div class="bulle-claire">{t.confClair}</div>
+      </div>
+      <svg class="demonstration__fleche" viewBox="0 0 120 24" aria-hidden="true">
+        <path d="M2 12h108M100 4l10 8-10 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 5"/>
+      </svg>
+      <div class="demonstration__cote">
+        <p class="demonstration__legende">{t.confVuRelais}</p>
+        <div class="bulle-chiffree" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <code>{brouille}</code>
+        </div>
+      </div>
+    </div>
+
+    <ul class="cles">
+      {cles.map((c) => (
+        <li>
+          <h3>{c.titre}</h3>
+          <p>{c.texte}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .conf {
+    padding: clamp(96px, 12vw, 170px) 0;
+    background: radial-gradient(60% 40% at 50% 0%, color-mix(in srgb, var(--goutte) 12%, transparent), transparent 70%), #000;
+  }
+  .conf .contenu {
+    width: min(100% - 2 * var(--gouttiere), 1100px);
+  }
+  .conf__haut {
+    text-align: center;
+  }
+  .conf__titre {
+    max-width: 15ch;
+    margin: 0 auto;
+    color: #fff;
+  }
+  .conf__texte {
+    margin: 24px auto 0;
+    max-width: 38rem;
+    font-size: var(--t-2);
+    color: var(--clair-2);
+  }
+  .conf__lien {
+    margin-top: 18px;
+  }
+
+  .demonstration {
+    margin-top: clamp(48px, 7vw, 88px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 120px minmax(0, 1fr);
+    align-items: center;
+    gap: 24px;
+    padding: clamp(28px, 4vw, 48px);
+    border-radius: 30px;
+    background: #1c1c1e;
+  }
+  .demonstration__cote {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .demonstration__fleche {
+    color: var(--signal);
+    width: 100%;
+  }
+  :global([dir='rtl']) .demonstration__fleche {
+    transform: scaleX(-1);
+  }
+  .bulle-claire {
+    align-self: flex-start;
+    padding: 12px 16px;
+    border-radius: 20px 20px 20px 6px;
+    background: var(--goutte);
+    color: #fff;
+    font-size: var(--t-2);
+    line-height: 1.3;
+  }
+  .demonstration__legende {
+    font-size: var(--t-0);
+    color: var(--texte-nuit-2);
+  }
+  .bulle-chiffree {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: #000;
+    box-shadow: inset 0 0 0 1px rgba(76, 195, 255, 0.3);
+    color: var(--signal);
+  }
+  .bulle-chiffree svg {
+    flex: none;
+    margin-top: 3px;
+  }
+  .bulle-chiffree code {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    word-break: break-all;
+    color: rgba(233, 238, 249, 0.75);
+    direction: ltr;
+  }
+
+  .cles {
+    list-style: none;
+    margin: clamp(40px, 6vw, 64px) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 32px;
+  }
+  .cles li {
+    padding-top: 20px;
+    border-top: 1px solid var(--trait-nuit);
+  }
+  .cles h3 {
+    font-size: var(--t-3);
+    letter-spacing: -0.025em;
+    color: #fff;
+  }
+  .cles p {
+    margin-top: 6px;
+    color: var(--texte-nuit-2);
+  }
+
+  @media (max-width: 860px) {
+    .cles {
+      grid-template-columns: 1fr;
+    }
+    .demonstration {
+      grid-template-columns: 1fr;
+    }
+    .demonstration__fleche {
+      width: 64px;
+      transform: rotate(90deg);
+      justify-self: center;
+    }
+    :global([dir='rtl']) .demonstration__fleche {
+      transform: rotate(90deg);
+    }
+  }
+</style>

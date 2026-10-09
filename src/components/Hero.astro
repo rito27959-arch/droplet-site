@@ -1,0 +1,222 @@
+---
+// L'OUVERTURE, À LA MANIÈRE D'UNE PAGE PRODUIT D'APPLE.
+//
+//   • Le nom du produit, puis une phrase énorme, centrée.
+//   • Une action, et le « En savoir plus › ».
+//   • Le PRODUIT, en grand : trois écrans de Droplet. Celui du milieu
+//     raconte une conversation sans réseau ; les deux autres s'écartent
+//     quand on commence à défiler, comme une main qui ouvre un éventail.
+//
+// Derrière, le maillage : discret, il donne le sujet sans voler la scène.
+import { LIEN_ANDROID } from '../config';
+import type { Textes } from '../i18n/fr';
+import Appareil from './Appareil.astro';
+import Ecran from './Ecran.astro';
+import Logo from './Logo.astro';
+import SelecteurCouleur from './SelecteurCouleur.astro';
+
+interface Props { t: Textes }
+const { t } = Astro.props;
+---
+<section class="hero fond-noir" data-hero aria-labelledby="hero-titre">
+  <canvas class="hero__maillage" data-maillage aria-hidden="true"></canvas>
+
+  <div class="hero__texte contenu">
+    <p class="hero__nom"><Logo taille={30} /> Droplet</p>
+    <h1 id="hero-titre" class="hero__titre">{t.heroTitre}</h1>
+    <p class="hero__chapo">{t.heroTexte}</p>
+    <div class="hero__actions">
+      <a class="bouton" href={LIEN_ANDROID}>{t.telechargerAndroid}</a>
+      <a class="lien-fleche" href="#galerie">{t.enSavoirPlus}</a>
+    </div>
+  </div>
+
+  <div class="hero__scene" aria-hidden="true">
+    <div class="hero__tel hero__tel--gauche" data-tel="gauche">
+      <Appareil largeur="var(--l-tel)"><Ecran t={t} vue="liste" /></Appareil>
+    </div>
+    <div class="hero__tel hero__tel--droite" data-tel="droite">
+      <Appareil largeur="var(--l-tel)"><Ecran t={t} vue="vocal" /></Appareil>
+    </div>
+    <div class="hero__tel hero__tel--centre" data-tel="centre">
+      <Appareil largeur="calc(var(--l-tel) * 1.08)"><Ecran t={t} vue="discussion" anime /></Appareil>
+    </div>
+  </div>
+  <SelecteurCouleur t={t} variante="scene" />
+  <p class="hero__note">{t.heroNote}</p>
+</section>
+
+<style>
+  .hero {
+    --l-tel: clamp(210px, 25vw, 330px);
+    --ouvert: 0;
+    position: relative;
+    padding: 108px 0 64px;
+    overflow: hidden;
+    isolation: isolate;
+    text-align: center;
+    background:
+      radial-gradient(60% 50% at 50% 78%, color-mix(in srgb, var(--goutte) 14%, transparent), transparent 70%),
+      radial-gradient(80% 60% at 50% 100%, rgba(41, 151, 255, 0.12), transparent 70%),
+      #000;
+  }
+  .hero__maillage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+  }
+  .hero__nom {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--f-titre);
+    font-size: var(--t-3);
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    animation: monter 1.2s var(--ease-sortie) both;
+  }
+  .hero__titre {
+    margin: 18px auto 0;
+    max-width: 17ch;
+    font-size: clamp(2.9rem, 1rem + 5.4vw, 5.6rem);
+    line-height: 1.04;
+    letter-spacing: -0.028em;
+    font-weight: 650;
+    /* Le titre d'Apple : blanc en haut, qui se perd dans le gris en bas. */
+    background: linear-gradient(180deg, #fff 30%, #a1a1a6 120%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: monter 1.2s 0.08s var(--ease-sortie) both;
+  }
+  .hero__chapo {
+    margin: 26px auto 0;
+    max-width: 38rem;
+    font-size: var(--t-2);
+    line-height: 1.42;
+    color: var(--clair-2);
+    animation: monter 1.2s 0.16s var(--ease-sortie) both;
+  }
+  .hero__actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px 28px;
+    margin-top: 34px;
+    animation: monter 1.2s 0.24s var(--ease-sortie) both;
+  }
+
+  /* ── La scène des trois téléphones ─────────────────────────────── */
+  .hero__scene {
+    position: relative;
+    /* La hauteur du téléphone du milieu (1,08 × 19,5 / 9 de sa largeur),
+       et un peu d'air : la mention dessous ne doit jamais le chevaucher. */
+    height: calc(var(--l-tel) * 2.42);
+    margin-top: clamp(44px, 5vw, 64px);
+    display: flex;
+    justify-content: center;
+    perspective: 1600px;
+  }
+  .hero__tel {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    will-change: transform;
+  }
+  .hero__tel--centre {
+    z-index: 3;
+    transform: translateX(-50%) translateY(calc((1 - var(--ouvert)) * 12px));
+    animation: entrer-centre 1.6s 0.25s var(--ease-sortie) both;
+  }
+  .hero__tel--gauche,
+  .hero__tel--droite {
+    z-index: 2;
+    top: calc(var(--l-tel) * 0.12);
+    filter: brightness(calc(0.62 + var(--ouvert) * 0.25));
+  }
+  /* Repliés derrière celui du milieu, ils s'écartent à mesure qu'on
+     défile (`--ouvert`, de 0 à 1). */
+  .hero__tel--gauche {
+    transform: translateX(calc(-50% - var(--l-tel) * (0.42 + var(--ouvert) * 0.5)))
+      rotate(calc(-4deg - var(--ouvert) * 4deg)) scale(0.92);
+    animation: entrer-cote 1.6s 0.4s var(--ease-sortie) both;
+  }
+  .hero__tel--droite {
+    transform: translateX(calc(-50% + var(--l-tel) * (0.42 + var(--ouvert) * 0.5)))
+      rotate(calc(4deg + var(--ouvert) * 4deg)) scale(0.92);
+    animation: entrer-cote 1.6s 0.4s var(--ease-sortie) both;
+  }
+  .hero__note {
+    margin-top: 28px;
+    font-size: var(--t-0);
+    color: #86868b;
+  }
+
+  @keyframes monter {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+  }
+  @keyframes entrer-centre {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(140px) scale(0.94);
+    }
+  }
+  @keyframes entrer-cote {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .hero {
+      --l-tel: 62vw;
+      padding-top: 112px;
+    }
+    .hero__scene {
+      height: calc(var(--l-tel) * 2.42);
+    }
+    .hero__tel--gauche {
+      transform: translateX(calc(-50% - var(--l-tel) * (0.36 + var(--ouvert) * 0.18)))
+        rotate(-6deg) scale(0.86);
+    }
+    .hero__tel--droite {
+      transform: translateX(calc(-50% + var(--l-tel) * (0.36 + var(--ouvert) * 0.18)))
+        rotate(6deg) scale(0.86);
+    }
+  }
+</style>
+
+<script>
+  import '../scripts/maillage';
+
+  // L'éventail : les deux téléphones de côté s'écartent pendant le premier
+  // écran de défilement.
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (hero && !reduit) {
+    let attente = false;
+    const maj = () => {
+      attente = false;
+      const p = Math.min(1, Math.max(0, window.scrollY / (window.innerHeight * 0.7)));
+      hero.style.setProperty('--ouvert', (1 - Math.pow(1 - p, 3)).toFixed(4));
+    };
+    maj();
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!attente) {
+          attente = true;
+          requestAnimationFrame(maj);
+        }
+      },
+      { passive: true },
+    );
+  }
+</script>

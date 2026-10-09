@@ -1,0 +1,90 @@
+---
+// Un téléphone, dessiné en CSS : un cadre en métal brossé, un écran aux
+// coins de 2026, la caméra en pastille et les boutons sur la tranche. Il
+// porte n'importe quel écran (voir `Ecran.astro`) et reste net à toutes
+// les tailles — une photo ne le serait qu'à une seule.
+interface Props {
+  /** Largeur en pixels CSS (ou toute longueur CSS). */
+  largeur?: string;
+  class?: string;
+  style?: string;
+}
+const { largeur = '300px', class: classe = '', style = '' } = Astro.props;
+---
+<div class={`appareil ${classe}`} style={`--l:${largeur};${style}`} aria-hidden="true">
+  <span class="appareil__bouton appareil__bouton--a"></span>
+  <span class="appareil__bouton appareil__bouton--b"></span>
+  <span class="appareil__bouton appareil__bouton--c"></span>
+  <div class="appareil__ecran">
+    <slot />
+    <span class="appareil__camera"></span>
+    <span class="appareil__reflet"></span>
+  </div>
+</div>
+
+<style>
+  .appareil {
+    position: relative;
+    width: var(--l);
+    aspect-ratio: 9 / 19.5;
+    padding: calc(var(--l) * 0.026);
+    border-radius: calc(var(--l) * 0.165);
+    background:
+      linear-gradient(140deg, #5d5f66 0%, #2b2c30 18%, #1a1b1e 50%, #2e3035 82%, #64666d 100%);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+      inset 0 0 0 calc(var(--l) * 0.012) #0b0b0d,
+      0 calc(var(--l) * 0.12) calc(var(--l) * 0.25) calc(var(--l) * -0.07) rgba(0, 0, 0, 0.55),
+      0 calc(var(--l) * 0.04) calc(var(--l) * 0.08) rgba(0, 0, 0, 0.25);
+    flex: none;
+  }
+  .appareil__ecran {
+    position: relative;
+    height: 100%;
+    border-radius: calc(var(--l) * 0.14);
+    overflow: hidden;
+    background: #000;
+    container-type: inline-size;
+  }
+  .appareil__camera {
+    position: absolute;
+    top: calc(var(--l) * 0.03);
+    left: 50%;
+    width: calc(var(--l) * 0.042);
+    aspect-ratio: 1;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #2b3448 0, #07090e 60%);
+    box-shadow: 0 0 0 1.5px #000;
+    z-index: 5;
+  }
+  /* Un reflet très léger, en diagonale : c'est lui qui fait « verre ». */
+  .appareil__reflet {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 38%);
+    pointer-events: none;
+    z-index: 6;
+  }
+  .appareil__bouton {
+    position: absolute;
+    width: calc(var(--l) * 0.012);
+    border-radius: 2px;
+    background: linear-gradient(90deg, #45474d, #2a2b2f);
+  }
+  .appareil__bouton--a {
+    right: calc(var(--l) * -0.008);
+    top: 22%;
+    height: 9%;
+  }
+  .appareil__bouton--b {
+    right: calc(var(--l) * -0.008);
+    top: 34%;
+    height: 14%;
+  }
+  .appareil__bouton--c {
+    left: calc(var(--l) * -0.008);
+    top: 26%;
+    height: 7%;
+  }
+</style>

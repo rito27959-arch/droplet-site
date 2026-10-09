@@ -1,0 +1,410 @@
+---
+// LE PARCOURS D'UN MESSAGE — la seule séquence pilotée par le défilement.
+// La section est haute (quatre écrans) et son contenu reste collé à
+// l'écran : c'est le défilement qui fait avancer la goutte, de « Vous » à
+// « Papa », relais par relais. Les étapes sont numérotées parce que c'en
+// est vraiment une suite.
+import type { Textes } from '../i18n/fr';
+interface Props { t: Textes }
+const { t } = Astro.props;
+
+const etapes = [
+  { titre: t.etape1Titre, texte: t.etape1Texte },
+  { titre: t.etape2Titre, texte: t.etape2Texte },
+  { titre: t.etape3Titre, texte: t.etape3Texte },
+  { titre: t.etape4Titre, texte: t.etape4Texte },
+];
+
+// Les téléphones de la scène, dans un repère de 600 × 360.
+const noeuds = [
+  { x: 52, y: 250, nom: t.parcoursVous, role: 'depart' },
+  { x: 170, y: 150, nom: t.parcoursRelais, role: 'relais' },
+  { x: 300, y: 236, nom: t.parcoursRelais, role: 'relais' },
+  { x: 428, y: 132, nom: t.parcoursRelais, role: 'relais' },
+  { x: 548, y: 222, nom: t.parcoursDest, role: 'arrivee' },
+];
+const trace = noeuds.map((n, i) => `${i ? 'L' : 'M'}${n.x} ${n.y}`).join(' ');
+---
+<section id="parcours" class="parcours fond-blanc" data-parcours aria-labelledby="parcours-titre">
+  <div class="parcours__collant">
+    <div class="parcours__grille contenu">
+      <div class="parcours__texte">
+        <h2 id="parcours-titre" class="parcours__titre titre-section">{t.parcoursTitre}</h2>
+        <ol class="etapes">
+          {etapes.map((e, i) => (
+            <li class="etape" data-etape={i}>
+              <span class="etape__num" aria-hidden="true">{i + 1}</span>
+              <div>
+                <h3>{e.titre}</h3>
+                <p>{e.texte}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <div class="scene" aria-hidden="true">
+        <svg viewBox="0 0 600 360" class="scene__svg">
+          <defs>
+            <radialGradient id="halo">
+              <stop offset="0" stop-opacity=".95" style="stop-color: var(--goutte)" />
+              <stop offset="1" stop-opacity="0" style="stop-color: var(--goutte)" />
+            </radialGradient>
+            <linearGradient id="nuage" x1="0" x2="1">
+              <stop offset="0" stop-color="#0071e3" stop-opacity=".0" />
+              <stop offset=".5" stop-color="#0071e3" stop-opacity=".9" />
+              <stop offset="1" stop-color="#0071e3" stop-opacity=".0" />
+            </linearGradient>
+          </defs>
+
+          <!-- La portée de chaque téléphone. -->
+          {noeuds.map((n) => (
+            <circle cx={n.x} cy={n.y} r="86" class="portee" />
+          ))}
+
+          <!-- Le chemin entier, en pointillés, puis la part déjà parcourue. -->
+          <path d={trace} class="trace" />
+          <path d={trace} class="trace-parcourue" data-trace pathLength="1" />
+
+          <!-- Le détour par Internet ou Tor, à la dernière étape. -->
+          <path d="M52 250 C 140 20, 460 20, 548 222" class="internet" pathLength="1" />
+          <g class="internet__etiquette">
+            <rect x="250" y="14" width="100" height="28" rx="14" />
+            <text x="300" y="33">Internet / Tor</text>
+          </g>
+
+          {noeuds.map((n, i) => (
+            <g class={`noeud noeud--${n.role}`} data-noeud={i} transform={`translate(${n.x} ${n.y})`}>
+              <circle r="30" class="noeud__onde" />
+              <rect x="-13" y="-22" width="26" height="44" rx="6" class="noeud__tel" />
+              <rect x="-9" y="-17" width="18" height="30" rx="2.5" class="noeud__ecran" />
+              <text y="44" class="noeud__nom">{n.nom}</text>
+            </g>
+          ))}
+
+          <g class="coches" transform="translate(548 222)">
+            <path d="M-14 -36l4 4 8-8M-6 -32l8-8" />
+          </g>
+
+          <g data-goutte class="goutte">
+            <circle r="18" fill="url(#halo)" />
+            <circle r="4" fill="#fff" />
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .parcours {
+    position: relative;
+    height: 420svh;
+    --p: 0;
+  }
+  .parcours__collant {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    display: grid;
+    align-items: center;
+    overflow: hidden;
+  }
+  .parcours__grille {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(28px, 5vw, 72px);
+    align-items: center;
+  }
+  .parcours__titre {
+    font-size: var(--t-4);
+    max-width: 15ch;
+    margin-bottom: 40px;
+  }
+  .etapes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 26px;
+  }
+  .etape {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 16px;
+    opacity: 0.28;
+    transition: opacity 0.5s var(--ease);
+  }
+  .etape.est-active {
+    opacity: 1;
+  }
+  .etape__num {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: var(--f-titre);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--encre-2);
+    box-shadow: inset 0 0 0 1.5px var(--trait-jour);
+    transition:
+      background-color 0.5s var(--ease),
+      color 0.5s var(--ease);
+  }
+  .etape.est-active .etape__num {
+    background: var(--goutte);
+    color: #fff;
+    box-shadow: none;
+  }
+  .etape h3 {
+    font-size: var(--t-2);
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+  .etape p {
+    margin-top: 6px;
+    color: var(--encre-2);
+    max-width: 32rem;
+  }
+
+  .scene__svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .portee {
+    fill: rgba(0, 113, 227, 0.035);
+    stroke: rgba(0, 113, 227, 0.14);
+    stroke-dasharray: 2 5;
+  }
+  .trace {
+    fill: none;
+    stroke: rgba(0, 0, 0, 0.22);
+    stroke-width: 1.5;
+    stroke-dasharray: 3 6;
+  }
+  .trace-parcourue {
+    fill: none;
+    stroke: var(--goutte);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: calc(1 - var(--trajet, 0));
+  }
+  .internet {
+    fill: none;
+    stroke: url(#nuage);
+    stroke-width: 2;
+    stroke-dasharray: 1;
+    stroke-dashoffset: calc(1 - var(--internet, 0));
+  }
+  .internet__etiquette {
+    opacity: var(--internet, 0);
+  }
+  .internet__etiquette rect {
+    fill: rgba(0, 113, 227, 0.08);
+    stroke: rgba(0, 113, 227, 0.4);
+  }
+  .internet__etiquette text {
+    fill: var(--lien-clair);
+    font: 600 12px var(--f-texte);
+    text-anchor: middle;
+  }
+  .noeud__tel {
+    fill: #e8e8ed;
+    stroke: #aeaeb2;
+    stroke-width: 1.2;
+    transition: stroke 0.4s;
+  }
+  .noeud__ecran {
+    fill: #1d1d1f;
+  }
+  .noeud__nom {
+    fill: var(--encre-2);
+    font: 500 13px var(--f-texte);
+    text-anchor: middle;
+  }
+  .noeud--depart .noeud__nom,
+  .noeud--arrivee .noeud__nom {
+    fill: var(--encre);
+    font-weight: 600;
+  }
+  .noeud__onde {
+    fill: none;
+    stroke: var(--goutte);
+    stroke-width: 1.5;
+    opacity: 0;
+    transform: scale(0.5);
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .noeud.est-atteint .noeud__tel {
+    stroke: var(--goutte);
+  }
+  .noeud.est-atteint .noeud__ecran {
+    fill: var(--goutte);
+  }
+  .noeud.vient-d-etre-atteint .noeud__onde {
+    animation: onde 1s var(--ease);
+  }
+  .coches path {
+    fill: none;
+    stroke: var(--lien-clair);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: var(--arrive, 0);
+    transition: opacity 0.4s;
+  }
+  .goutte {
+    transition: opacity 0.3s;
+  }
+  @keyframes onde {
+    from {
+      opacity: 0.9;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1.6);
+    }
+  }
+
+  @media (max-width: 920px) {
+    .parcours {
+      height: 460svh;
+    }
+    .parcours__grille {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .parcours__texte {
+      order: 2;
+    }
+    .scene {
+      order: 1;
+      margin-inline: -8px;
+    }
+    /* La scène est réduite de moitié sur téléphone : les noms des
+       téléphones doivent grossir d'autant pour rester lisibles. */
+    .noeud__nom {
+      font-size: 22px;
+    }
+    .internet__etiquette text {
+      font-size: 17px;
+    }
+    .internet__etiquette rect {
+      x: 222px;
+      width: 156px;
+      y: 8px;
+      height: 38px;
+      rx: 19px;
+    }
+    .parcours__titre {
+      margin-bottom: 16px;
+      font-size: clamp(1.7rem, 1.2rem + 3vw, 2.4rem);
+    }
+    /* Sur téléphone, une seule étape à la fois : la place manque pour
+       quatre, et la scène dit déjà où on en est. */
+    .etapes {
+      display: block;
+      position: relative;
+      min-height: 9.5em;
+    }
+    .etape {
+      position: absolute;
+      inset: 0 0 auto;
+      opacity: 0;
+      transform: translateY(8px);
+      transition:
+        opacity 0.4s var(--ease),
+        transform 0.4s var(--ease);
+    }
+    .etape.est-active {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  // Le défilement → l'avancée du message.
+  //
+  //   0    → 0,15 : le message est écrit, la goutte attend chez « Vous » ;
+  //   0,15 → 0,62 : elle saute de relais en relais ;
+  //   0,62 → 0,78 : elle est arrivée, les coches s'allument ;
+  //   0,78 → 1    : le détour par Internet ou Tor se dessine.
+  const section = document.querySelector<HTMLElement>('[data-parcours]');
+  const trace = section?.querySelector<SVGPathElement>('[data-trace]');
+  const goutte = section?.querySelector<SVGGElement>('[data-goutte]');
+  const etapes = section ? [...section.querySelectorAll<HTMLElement>('[data-etape]')] : [];
+  const noeuds = section ? [...section.querySelectorAll<SVGGElement>('[data-noeud]')] : [];
+
+  if (section && trace && goutte) {
+    const longueur = trace.getTotalLength();
+    // Où se trouve chaque nœud le long du tracé (0 → 1).
+    const reperes = noeuds.map((n) => {
+      const m = n.getAttribute('transform')!.match(/translate\(([\d.]+) ([\d.]+)\)/)!;
+      const x = +m[1];
+      const y = +m[2];
+      let meilleur = 0;
+      let distance = Infinity;
+      for (let s = 0; s <= 200; s++) {
+        const p = trace.getPointAtLength((s / 200) * longueur);
+        const d = Math.hypot(p.x - x, p.y - y);
+        if (d < distance) {
+          distance = d;
+          meilleur = s / 200;
+        }
+      }
+      return meilleur;
+    });
+    const atteints = new Set<number>();
+    let attente = false;
+
+    const borne = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+
+    function maj() {
+      attente = false;
+      const r = section!.getBoundingClientRect();
+      const course = r.height - window.innerHeight;
+      const p = borne(-r.top / course);
+      const trajet = borne((p - 0.15) / 0.47);
+      const internet = borne((p - 0.78) / 0.18);
+      section!.style.setProperty('--trajet', trajet.toFixed(4));
+      section!.style.setProperty('--internet', internet.toFixed(4));
+      section!.style.setProperty('--arrive', p > 0.62 ? '1' : '0');
+
+      const pt = trace!.getPointAtLength(trajet * longueur);
+      goutte!.setAttribute('transform', `translate(${pt.x} ${pt.y})`);
+
+      const active = p < 0.15 ? 0 : p < 0.62 ? 1 : p < 0.78 ? 2 : 3;
+      etapes.forEach((e, i) => e.classList.toggle('est-active', i === active));
+
+      reperes.forEach((rep, i) => {
+        const ok = trajet >= rep - 0.002;
+        noeuds[i].classList.toggle('est-atteint', ok);
+        if (ok && !atteints.has(i)) {
+          atteints.add(i);
+          noeuds[i].classList.remove('vient-d-etre-atteint');
+          void noeuds[i].getBBox();
+          noeuds[i].classList.add('vient-d-etre-atteint');
+        } else if (!ok) {
+          atteints.delete(i);
+        }
+      });
+    }
+
+    const demander = () => {
+      if (!attente) {
+        attente = true;
+        requestAnimationFrame(maj);
+      }
+    };
+    maj();
+    window.addEventListener('scroll', demander, { passive: true });
+    window.addEventListener('resize', demander);
+  }
+</script>

@@ -1,0 +1,83 @@
+---
+// La fin : une seule phrase, un seul bouton. Le pied de page vit à part
+// (`Pied.astro`), commun à toutes les pages.
+import Logo from './Logo.astro';
+import { LIEN_ANDROID } from '../config';
+import type { Langue } from '../i18n';
+import type { Textes } from '../i18n/fr';
+
+interface Props { t: Textes; langue: Langue }
+const { t, langue } = Astro.props;
+---
+<section class="fin fond-noir" aria-labelledby="fin-titre">
+  <div class="fin__ondes" aria-hidden="true">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="fin__dedans contenu">
+    <Logo taille={56} />
+    <h2 id="fin-titre" class="fin__titre">{t.finTitre}</h2>
+    <p class="fin__texte">{t.finTexte}</p>
+    <a class="bouton bouton--goutte" href={LIEN_ANDROID}>{t.telechargerAndroid}</a>
+  </div>
+</section>
+
+
+<style>
+  .fin {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(110px, 14vw, 190px) 0;
+    text-align: center;
+    isolation: isolate;
+  }
+  /* Trois ondes concentriques, immobiles : la goutte vient de tomber. */
+  .fin__ondes {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: -1;
+  }
+  .fin__ondes span {
+    grid-area: 1 / 1;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+  .fin__ondes span:nth-child(1) {
+    width: 360px;
+    height: 360px;
+  }
+  .fin__ondes span:nth-child(2) {
+    width: 640px;
+    height: 640px;
+    opacity: 0.7;
+  }
+  .fin__ondes span:nth-child(3) {
+    width: 980px;
+    height: 980px;
+    opacity: 0.45;
+  }
+  .fin__dedans {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .fin__titre {
+    margin-top: 28px;
+    font-size: var(--t-6);
+    line-height: 1.04;
+    letter-spacing: -0.028em;
+    font-weight: 650;
+    max-width: 13ch;
+    background: linear-gradient(180deg, #fff 30%, #a1a1a6 120%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .fin__texte {
+    margin: 22px 0 36px;
+    font-size: var(--t-2);
+    color: var(--texte-nuit-2);
+    max-width: 30rem;
+  }
+</style>

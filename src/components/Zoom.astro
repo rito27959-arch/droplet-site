@@ -1,0 +1,201 @@
+---
+// « UN TÉLÉPHONE. PUIS TOUS CEUX AUTOUR. »
+//
+// La mise en scène que fait Apple quand l'écran d'un appareil recule pour
+// révéler l'objet entier. Ici, c'est l'idée même de Droplet : on part de
+// la conversation, en très grand ; en défilant, le téléphone recule, et
+// on découvre les téléphones autour de lui, puis les liens qui les
+// unissent. Le réseau, c'est eux.
+import type { Textes } from '../i18n/fr';
+import Appareil from './Appareil.astro';
+import Ecran from './Ecran.astro';
+
+interface Props { t: Textes }
+const { t } = Astro.props;
+
+// Les voisins, en largeurs de téléphone depuis le centre.
+const voisins = [
+  { x: -1.55, y: -0.55, r: -8 },
+  { x: -2.75, y: 0.15, r: 6 },
+  { x: -1.45, y: 0.62, r: 4 },
+  { x: 1.55, y: -0.5, r: 7 },
+  { x: 2.8, y: 0.05, r: -5 },
+  { x: 1.5, y: 0.66, r: -6 },
+  { x: -3.9, y: -0.6, r: -4 },
+  { x: 3.95, y: -0.55, r: 5 },
+];
+// Les liens : centre (indice -1) et voisins.
+const liens: [number, number][] = [[-1, 0], [-1, 2], [-1, 3], [-1, 5], [0, 1], [1, 2], [3, 4], [4, 5], [0, 6], [1, 6], [3, 7], [4, 7]];
+const pos = (i: number) => (i < 0 ? { x: 0, y: 0 } : voisins[i]);
+---
+<section class="zoom fond-noir" data-zoom aria-labelledby="zoom-titre">
+  <div class="zoom__collant">
+    <h2 id="zoom-titre" class="zoom__titre titre-section">{t.zoomTitre}</h2>
+
+    <div class="zoom__scene" aria-hidden="true">
+      <svg class="zoom__liens" viewBox="-500 -120 1000 240" preserveAspectRatio="xMidYMid meet">
+        {liens.map(([a, b]) => (
+          <line
+            x1={pos(a).x * 120} y1={pos(a).y * 120}
+            x2={pos(b).x * 120} y2={pos(b).y * 120}
+            pathLength="1"
+          />
+        ))}
+      </svg>
+      {voisins.map((v, i) => (
+        <div
+          class="zoom__voisin"
+          style={`--x:${v.x};--y:${v.y};--r:${v.r}deg;--i:${i}`}
+        >
+          <div class="mini">
+            <span class="mini__ecran"><i></i><i></i><i></i></span>
+          </div>
+        </div>
+      ))}
+      <div class="zoom__centre">
+        <Appareil largeur="var(--w)"><Ecran t={t} vue="discussion" /></Appareil>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .zoom {
+    --p: 0;
+    height: 300svh;
+    position: relative;
+  }
+  .zoom__collant {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .zoom__titre {
+    position: absolute;
+    top: clamp(84px, 13vh, 140px);
+    left: 0;
+    right: 0;
+    padding: 0 var(--gouttiere);
+    text-align: center;
+    z-index: 4;
+    /* Il n'apparaît qu'une fois le recul presque fini. */
+    opacity: clamp(0, (var(--p) - 0.55) * 5, 1);
+    transform: translateY(calc((1 - clamp(0, (var(--p) - 0.55) * 5, 1)) * 30px));
+  }
+  .zoom__scene {
+    --w: clamp(150px, 17vw, 230px);
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    margin-top: 9vh;
+  }
+  /* Le recul : de 2,6 fois sa taille (l'écran remplit la vue) à 1. */
+  .zoom__centre {
+    position: absolute;
+    z-index: 3;
+    transform: scale(calc(2.6 - min(var(--p) / 0.55, 1) * 1.6));
+    will-change: transform;
+  }
+  .zoom__voisin {
+    position: absolute;
+    z-index: 2;
+    --apparition: clamp(0, (var(--p) - 0.32 - var(--i) * 0.025) * 4, 1);
+    opacity: var(--apparition);
+    transform: translate(calc(var(--x) * var(--w) * (0.55 + var(--apparition) * 0.45)), calc(var(--y) * var(--w) * (0.55 + var(--apparition) * 0.45)))
+      rotate(var(--r)) scale(0.62);
+  }
+  .mini {
+    width: var(--w);
+    aspect-ratio: 9 / 19.5;
+    padding: calc(var(--w) * 0.026);
+    border-radius: calc(var(--w) * 0.165);
+    background: linear-gradient(140deg, #4a4c52, #1a1b1e 50%, #46484e);
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
+  }
+  .mini__ecran {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 7%;
+    height: 100%;
+    padding: 18% 10%;
+    border-radius: calc(var(--w) * 0.14);
+    background: linear-gradient(180deg, #0b1636, #000);
+  }
+  .mini__ecran i {
+    display: block;
+    height: 5%;
+    border-radius: 999px;
+    background: #26262a;
+    width: 62%;
+  }
+  .mini__ecran i:nth-child(2) {
+    align-self: flex-end;
+    background: color-mix(in srgb, var(--goutte) 75%, transparent);
+    width: 55%;
+  }
+  .mini__ecran i:nth-child(3) {
+    width: 40%;
+  }
+  .zoom__liens {
+    position: absolute;
+    width: calc(var(--w) * 8.4);
+    height: calc(var(--w) * 2);
+    overflow: visible;
+    z-index: 1;
+  }
+  .zoom__liens line {
+    stroke: var(--signal);
+    stroke-width: 1.4;
+    stroke-dasharray: 1;
+    stroke-dashoffset: calc(1 - var(--liens, 0));
+    opacity: 0.55;
+    vector-effect: non-scaling-stroke;
+  }
+  @media (max-width: 700px) {
+    .zoom__scene {
+      --w: 34vw;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .zoom {
+      --p: 1 !important;
+      --liens: 1 !important;
+      height: auto;
+    }
+    .zoom__collant {
+      position: relative;
+    }
+  }
+</style>
+
+<script>
+  const zoom = document.querySelector<HTMLElement>('[data-zoom]');
+  const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (zoom && !reduit) {
+    let attente = false;
+    const maj = () => {
+      attente = false;
+      const r = zoom.getBoundingClientRect();
+      const course = r.height - window.innerHeight;
+      const p = Math.min(1, Math.max(0, -r.top / course));
+      zoom.style.setProperty('--p', p.toFixed(4));
+      // Les liens se tracent une fois les voisins arrivés.
+      zoom.style.setProperty('--liens', Math.min(1, Math.max(0, (p - 0.62) * 3.2)).toFixed(4));
+    };
+    maj();
+    const demander = () => {
+      if (!attente) {
+        attente = true;
+        requestAnimationFrame(maj);
+      }
+    };
+    window.addEventListener('scroll', demander, { passive: true });
+    window.addEventListener('resize', demander);
+  }
+</script>

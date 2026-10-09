@@ -1,0 +1,489 @@
+---
+// « LES POINTS FORTS » — le carrousel d'apple.com, presque à l'identique.
+//
+//   • de grandes cartes sombres, une idée chacune : la phrase en haut (le
+//     titre en blanc, la suite en gris, dans le même paragraphe), l'image
+//     en bas ;
+//   • elles défilent toutes seules quand la section est à l'écran, avec
+//     des points dont celui du moment s'allonge et se remplit ;
+//   • un bouton lecture / pause, des flèches sur ordinateur, et le doigt
+//     sur téléphone (défilement natif, aimanté carte par carte).
+import type { Textes } from '../i18n/fr';
+import Appareil from './Appareil.astro';
+import Ecran from './Ecran.astro';
+
+interface Props { t: Textes }
+const { t } = Astro.props;
+
+const cartes = [
+  { id: 'maillage', titre: t.etape2Titre, texte: t.etape2Texte },
+  { id: 'vocal', titre: t.fVocauxTitre, texte: t.fVocauxTexte },
+  { id: 'appel', titre: t.fAppelsTitre, texte: t.fAppelsTexte },
+  { id: 'chiffre', titre: t.conf1Titre, texte: t.conf1Texte + ' ' + t.conf3Texte },
+  { id: 'liste', titre: t.fGroupesTitre, texte: t.fGroupesTexte },
+];
+
+// Le petit maillage de la première carte : des nœuds fixes et un chemin.
+const noeuds = [
+  [40, 250], [110, 170], [190, 230], [150, 320], [260, 150], [300, 260], [370, 190], [240, 330], [340, 330], [60, 360],
+];
+const liens = [[0, 1], [1, 2], [2, 3], [1, 4], [2, 5], [4, 6], [5, 6], [3, 7], [7, 8], [5, 8], [0, 9], [9, 3], [2, 4]];
+const chemin = [0, 1, 2, 5, 6];
+---
+<section id="galerie" class="galerie fond-gris" data-galerie aria-roledescription="carrousel" aria-labelledby="galerie-titre">
+  <h2 id="galerie-titre" class="titre-section galerie__titre contenu--large apparait">{t.galerieTitre}</h2>
+
+  <div class="galerie__piste" data-piste tabindex="0">
+    {cartes.map((c, i) => (
+      <article class={`carte carte--${c.id}`} aria-roledescription="diapositive" aria-label={`${i + 1} / ${cartes.length}`}>
+        <p class="carte__texte"><strong>{c.titre}.</strong> {c.texte}</p>
+        <div class="carte__visuel" aria-hidden="true">
+          {c.id === 'maillage' && (
+            <svg viewBox="0 0 410 420" class="mini-maillage">
+              {liens.map(([a, b]) => (
+                <line x1={noeuds[a][0]} y1={noeuds[a][1]} x2={noeuds[b][0]} y2={noeuds[b][1]} class="mini-maillage__lien" />
+              ))}
+              <polyline points={chemin.map((n) => noeuds[n].join(',')).join(' ')} class="mini-maillage__chemin" pathLength="1" />
+              {noeuds.map(([x, y], k) => (
+                <g transform={`translate(${x} ${y})`}>
+                  <rect x="-9" y="-15" width="18" height="30" rx="4.5" class={chemin.includes(k) ? 'mini-maillage__tel est-sur-chemin' : 'mini-maillage__tel'} />
+                </g>
+              ))}
+            </svg>
+          )}
+          {c.id === 'vocal' && <Appareil largeur="min(250px, 62vw)" class="carte__tel"><Ecran t={t} vue="vocal" /></Appareil>}
+          {c.id === 'appel' && <Appareil largeur="min(250px, 62vw)" class="carte__tel"><Ecran t={t} vue="appel" /></Appareil>}
+          {c.id === 'liste' && <Appareil largeur="min(250px, 62vw)" class="carte__tel"><Ecran t={t} vue="liste" theme="clair" /></Appareil>}
+          {c.id === 'chiffre' && (
+            <div class="coffre">
+              <svg viewBox="0 0 120 140" class="coffre__cadenas">
+                <defs>
+                  <linearGradient id="cadenas-metal" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#ff7a93" />
+                    <stop offset="1" style="stop-color: var(--goutte)" />
+                  </linearGradient>
+                </defs>
+                <path d="M32 62V44a28 28 0 0 1 56 0v18" fill="none" stroke="#d1d1d6" stroke-width="11" stroke-linecap="round" />
+                <rect x="14" y="58" width="92" height="74" rx="20" fill="url(#cadenas-metal)" />
+                <circle cx="60" cy="90" r="9" fill="#fff" />
+                <rect x="56" y="94" width="8" height="18" rx="4" fill="#fff" />
+              </svg>
+              <code class="coffre__chiffre">b+TfWdGWBsp9w+EFtwGvhQZCLcaHINLKRcJLafr0HNAewKeJ307NE</code>
+            </div>
+          )}
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <div class="galerie__commandes contenu--large">
+    <div class="points" role="tablist">
+      {cartes.map((c, i) => (
+        <button class="point" role="tab" data-point={i} aria-label={`${i + 1} / ${cartes.length} : ${c.titre}`}><span></span></button>
+      ))}
+    </div>
+    <button class="rond" data-lecture aria-label={t.galeriePause} data-l-lecture={t.galerieLecture} data-l-pause={t.galeriePause}>
+      <svg viewBox="0 0 24 24" class="icone-pause"><path d="M7 5h3.5v14H7zm6.5 0H17v14h-3.5z" fill="currentColor"/></svg>
+      <svg viewBox="0 0 24 24" class="icone-lecture"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+    </button>
+    <span class="galerie__fleches">
+      <button class="rond" data-prec aria-label={t.galeriePrecedent}><svg viewBox="0 0 24 24"><path d="M14.5 6 8.5 12l6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="rond" data-suiv aria-label={t.galerieSuivant}><svg viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </span>
+  </div>
+</section>
+
+<style>
+  .galerie {
+    padding: clamp(80px, 10vw, 140px) 0 clamp(64px, 8vw, 110px);
+    overflow: hidden;
+  }
+  .galerie__titre {
+    margin-bottom: clamp(32px, 4vw, 56px);
+  }
+  .galerie__piste {
+    --largeur-carte: clamp(290px, 31vw, 420px);
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding: 0 max(var(--gouttiere), calc((100vw - var(--large)) / 2));
+    scroll-padding-inline: max(var(--gouttiere), calc((100vw - var(--large)) / 2));
+    outline: none;
+  }
+  .galerie__piste::-webkit-scrollbar {
+    display: none;
+  }
+  .carte {
+    position: relative;
+    flex: none;
+    width: var(--largeur-carte);
+    height: calc(var(--largeur-carte) * 1.62);
+    border-radius: 28px;
+    padding: 34px 30px 0;
+    scroll-snap-align: start;
+    overflow: hidden;
+    background: #000;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+  .carte--maillage {
+    background: radial-gradient(90% 60% at 50% 100%, #0f2a5c, #000 70%);
+  }
+  .carte--vocal {
+    background: linear-gradient(180deg, var(--goutte-encre) 0%, var(--goutte-nuit) 100%);
+  }
+  .carte--appel {
+    background: linear-gradient(180deg, #050b1c 0%, #10204a 100%);
+  }
+  .carte--chiffre {
+    background: radial-gradient(70% 50% at 50% 70%, #2a0b16, #000 75%);
+  }
+  .carte--liste {
+    background: linear-gradient(180deg, #e8ecf4 0%, #cfd6e4 100%);
+    color: var(--encre);
+  }
+  .carte__texte {
+    font-size: var(--t-2);
+    line-height: 1.33;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: #a1a1a6;
+    max-width: 22ch;
+  }
+  .carte__texte strong {
+    color: #fff;
+    font-weight: 600;
+  }
+  .carte--liste .carte__texte {
+    color: #6e6e73;
+  }
+  .carte--liste .carte__texte strong {
+    color: var(--encre);
+  }
+  .carte__visuel {
+    flex: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    margin-top: 24px;
+  }
+  /* Le téléphone sort par le bas de la carte, comme sur apple.com. */
+  :global(.carte__tel) {
+    margin-bottom: calc(min(250px, 62vw) * -0.62);
+  }
+  .mini-maillage {
+    width: 100%;
+    height: 100%;
+  }
+  .mini-maillage__lien {
+    stroke: rgba(76, 195, 255, 0.28);
+    stroke-width: 1.4;
+  }
+  .mini-maillage__chemin {
+    fill: none;
+    stroke: var(--goutte);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .carte.est-courante .mini-maillage__chemin {
+    animation: tracer 2.2s 0.3s var(--ease-sortie) forwards;
+  }
+  .mini-maillage__tel {
+    fill: #1c1c1e;
+    stroke: rgba(245, 245, 247, 0.5);
+    stroke-width: 1.4;
+  }
+  .mini-maillage__tel.est-sur-chemin {
+    stroke: var(--goutte);
+    fill: var(--goutte-nuit);
+  }
+  .coffre {
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    padding-bottom: 40px;
+  }
+  .coffre__cadenas {
+    width: 120px;
+    filter: drop-shadow(0 20px 40px color-mix(in srgb, var(--goutte) 45%, transparent));
+  }
+  .coffre__chiffre {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: rgba(245, 245, 247, 0.45);
+    word-break: break-all;
+    max-width: 18rem;
+    text-align: center;
+    direction: ltr;
+  }
+
+  /* ── Les commandes ── */
+  .galerie__commandes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 30px;
+    position: relative;
+  }
+  .points {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 56px;
+    padding: 0 20px;
+    border-radius: 999px;
+    background: rgba(232, 232, 237, 0.85);
+    backdrop-filter: blur(10px);
+  }
+  .point {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: #8e8e93;
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+      width 0.5s var(--ease),
+      background-color 0.3s;
+  }
+  .point.est-courant {
+    width: 48px;
+    background: rgba(0, 0, 0, 0.18);
+  }
+  /* Le remplissage : la durée restante avant la carte suivante. */
+  .point span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    border-radius: inherit;
+    background: #1d1d1f;
+  }
+  .point.est-courant span {
+    width: calc(var(--avance, 0) * 100%);
+  }
+  .rond {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(232, 232, 237, 0.85);
+    color: #1d1d1f;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  .rond:hover {
+    background: #dcdce1;
+  }
+  .rond svg {
+    width: 22px;
+    height: 22px;
+  }
+  .rond:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .icone-lecture {
+    display: none;
+  }
+  .galerie.est-en-pause .icone-lecture {
+    display: block;
+  }
+  .galerie.est-en-pause .icone-pause {
+    display: none;
+  }
+  .galerie__fleches {
+    position: absolute;
+    inset-inline-end: 0;
+    display: flex;
+    gap: 14px;
+  }
+  :global([dir='rtl']) .galerie__fleches svg {
+    transform: scaleX(-1);
+  }
+  @keyframes tracer {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @media (max-width: 760px) {
+    .galerie__fleches {
+      display: none;
+    }
+    .galerie__piste {
+      --largeur-carte: 82vw;
+    }
+  }
+</style>
+
+<script>
+  // Le carrousel : 6 s par carte quand la section est visible ; un geste de
+  // l'utilisateur (flèche, point, doigt) l'arrête, comme sur apple.com.
+  const DUREE = 6000;
+  const galerie = document.querySelector<HTMLElement>('[data-galerie]');
+  const piste = galerie?.querySelector<HTMLElement>('[data-piste]');
+  if (galerie && piste) {
+    const cartes = [...piste.querySelectorAll<HTMLElement>('.carte')];
+    const points = [...galerie.querySelectorAll<HTMLButtonElement>('[data-point]')];
+    const boutonLecture = galerie.querySelector<HTMLButtonElement>('[data-lecture]')!;
+    const prec = galerie.querySelector<HTMLButtonElement>('[data-prec]')!;
+    const suiv = galerie.querySelector<HTMLButtonElement>('[data-suiv]')!;
+    const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const rtl = document.documentElement.dir === 'rtl';
+
+    let courante = 0;
+    let enLecture = !reduit;
+    let visible = false;
+    let debut = 0;
+    let ecoule = 0;
+    let image = 0;
+    let defilementProgramme = false;
+
+    function marquer(i: number) {
+      courante = i;
+      cartes.forEach((c, k) => c.classList.toggle('est-courante', k === i));
+      points.forEach((p, k) => {
+        p.classList.toggle('est-courant', k === i);
+        p.setAttribute('aria-selected', String(k === i));
+      });
+      prec.disabled = i === 0;
+      suiv.disabled = i === cartes.length - 1;
+    }
+
+    function aller(i: number) {
+      const cible = cartes[Math.max(0, Math.min(cartes.length - 1, i))];
+      defilementProgramme = true;
+      const origine = cartes[0].offsetLeft;
+      const decalage = cible.offsetLeft - origine;
+      piste!.scrollTo({ left: rtl ? -decalage : decalage, behavior: reduit ? 'auto' : 'smooth' });
+      marquer(cartes.indexOf(cible));
+      ecoule = 0;
+      debut = performance.now();
+      setTimeout(() => (defilementProgramme = false), 700);
+    }
+
+    function pause(manuelle: boolean) {
+      enLecture = false;
+      galerie!.classList.add('est-en-pause');
+      boutonLecture.setAttribute('aria-label', boutonLecture.dataset.lLecture!);
+      if (manuelle) galerie!.style.setProperty('--avance', '0');
+    }
+
+    function lecture() {
+      enLecture = true;
+      galerie!.classList.remove('est-en-pause');
+      boutonLecture.setAttribute('aria-label', boutonLecture.dataset.lPause!);
+      debut = performance.now() - ecoule;
+      boucle();
+    }
+
+    function boucle() {
+      cancelAnimationFrame(image);
+      const pas = (maintenant: number) => {
+        if (!enLecture || !visible) return;
+        ecoule = maintenant - debut;
+        galerie!.style.setProperty('--avance', Math.min(1, ecoule / DUREE).toFixed(3));
+        if (ecoule >= DUREE) {
+          if (courante === cartes.length - 1) {
+            // Arrivé au bout : on s'arrête, prêt à rejouer — comme Apple.
+            pause(false);
+            galerie!.style.setProperty('--avance', '1');
+            return;
+          }
+          aller(courante + 1);
+        }
+        image = requestAnimationFrame(pas);
+      };
+      image = requestAnimationFrame(pas);
+    }
+
+    boutonLecture.addEventListener('click', () => {
+      if (enLecture) {
+        pause(false);
+      } else {
+        if (courante === cartes.length - 1 && ecoule >= DUREE) aller(0);
+        lecture();
+      }
+    });
+    prec.addEventListener('click', () => {
+      pause(true);
+      aller(courante - 1);
+    });
+    suiv.addEventListener('click', () => {
+      pause(true);
+      aller(courante + 1);
+    });
+    points.forEach((p, i) =>
+      p.addEventListener('click', () => {
+        pause(true);
+        aller(i);
+      }),
+    );
+
+    // Le doigt : la carte la plus à gauche devient la courante.
+    let attente = 0;
+    piste.addEventListener(
+      'scroll',
+      () => {
+        if (defilementProgramme) return;
+        clearTimeout(attente);
+        attente = window.setTimeout(() => {
+          const origine = piste!.getBoundingClientRect().left;
+          let meilleur = 0;
+          let distance = Infinity;
+          cartes.forEach((c, k) => {
+            const d = Math.abs(c.getBoundingClientRect().left - origine - parseFloat(getComputedStyle(piste!).paddingLeft));
+            if (d < distance) {
+              distance = d;
+              meilleur = k;
+            }
+          });
+          if (meilleur !== courante) {
+            pause(true);
+            marquer(meilleur);
+          }
+        }, 120);
+      },
+      { passive: true },
+    );
+    piste.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        pause(true);
+        const avant = (e.key === 'ArrowRight') !== rtl;
+        aller(courante + (avant ? 1 : -1));
+      }
+    });
+
+    new IntersectionObserver(
+      ([e]) => {
+        visible = e.isIntersecting;
+        if (visible && enLecture) {
+          debut = performance.now() - ecoule;
+          boucle();
+        }
+      },
+      { threshold: 0.4 },
+    ).observe(piste);
+
+    marquer(0);
+    if (!enLecture) pause(false);
+  }
+</script>

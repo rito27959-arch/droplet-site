@@ -1,0 +1,9 @@
+---
+// La goutte : un message, et l'onde qu'il fait en arrivant.
+interface Props { taille?: number }
+const { taille = 28 } = Astro.props;
+---
+<svg width={taille} height={taille} viewBox="0 0 64 64" aria-hidden="true">
+  <path d="M32 6c7.6 9.6 18 20 18 31.5a18 18 0 0 1-36 0C14 26 24.4 15.6 32 6z" style="fill: var(--goutte)" />
+  <circle cx="32" cy="38" r="6.5" fill="none" stroke="#fff" stroke-width="3" opacity=".92" />
+</svg>

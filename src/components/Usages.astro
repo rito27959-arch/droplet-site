@@ -1,0 +1,115 @@
+---
+// Quand s'en sert-on ? Quatre situations, côte à côte, séparées par un
+// filet — pas des cartes : ce sont des exemples, pas des produits.
+import type { Textes } from '../i18n/fr';
+interface Props { t: Textes }
+const { t } = Astro.props;
+
+const usages = [
+  {
+    titre: t.u1Titre,
+    texte: t.u1Texte,
+    // Une antenne barrée.
+    signe: '<path d="M16 28V14M10 8a8.5 8.5 0 0 1 12 0M6.5 4.5a13.5 13.5 0 0 1 19 0"/><circle cx="16" cy="12" r="2"/><path d="M5 27 27 5"/>',
+  },
+  {
+    titre: t.u2Titre,
+    texte: t.u2Texte,
+    // Une foule.
+    signe: '<circle cx="8" cy="11" r="3"/><circle cx="16" cy="9" r="3.4"/><circle cx="24" cy="11" r="3"/><path d="M2.5 25c.6-4.2 2.8-6.5 5.5-6.5M29.5 25c-.6-4.2-2.8-6.5-5.5-6.5M9.5 27c.8-5 3.3-7.6 6.5-7.6s5.7 2.6 6.5 7.6"/>',
+  },
+  {
+    titre: t.u3Titre,
+    texte: t.u3Texte,
+    // Des montagnes.
+    signe: '<path d="M2 26 11 11l6 9 4-5 9 11z"/><path d="M9 14.5l2-3.5 2.2 3.2"/>',
+  },
+  {
+    titre: t.u4Titre,
+    texte: t.u4Texte,
+    // Une valise.
+    signe: '<rect x="4" y="10" width="24" height="16" rx="3"/><path d="M12 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3M4 17h24"/>',
+  },
+];
+---
+<section class="usages fond-blanc" aria-labelledby="usages-titre">
+  <div class="contenu">
+    <h2 id="usages-titre" class="usages__titre titre-section apparait">{t.usagesTitre}</h2>
+    <ul class="usages__liste">
+      {usages.map((u) => (
+        <li>
+          <svg viewBox="0 0 32 32" aria-hidden="true" set:html={u.signe} />
+          <h3>{u.titre}</h3>
+          <p>{u.texte}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .usages {
+    padding: clamp(88px, 11vw, 150px) 0;
+  }
+  .usages .contenu {
+    width: min(100% - 2 * var(--gouttiere), var(--large));
+  }
+  .usages__titre {
+    max-width: 16ch;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .usages__liste {
+    list-style: none;
+    margin: clamp(40px, 6vw, 64px) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .usages__liste li {
+    padding: 4px 28px 0;
+    border-inline-start: 1px solid var(--trait-jour);
+  }
+  .usages__liste li:first-child {
+    padding-inline-start: 0;
+    border-inline-start: 0;
+  }
+  .usages__liste svg {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 28px;
+    fill: none;
+    stroke: var(--goutte);
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .usages__liste h3 {
+    font-size: var(--t-3);
+    letter-spacing: -0.025em;
+  }
+  .usages__liste p {
+    margin-top: 8px;
+    color: var(--texte-jour-2);
+  }
+  @media (max-width: 900px) {
+    .usages__liste {
+      grid-template-columns: 1fr 1fr;
+      row-gap: 44px;
+    }
+    .usages__liste li:nth-child(3) {
+      padding-inline-start: 0;
+      border-inline-start: 0;
+    }
+  }
+  @media (max-width: 540px) {
+    .usages__liste {
+      grid-template-columns: 1fr;
+      row-gap: 36px;
+    }
+    .usages__liste li {
+      padding-inline-start: 0;
+      border-inline-start: 0;
+    }
+  }
+</style>

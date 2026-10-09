@@ -1,0 +1,365 @@
+---
+// LE PIED DE PAGE — celui d'apple.com, adapté à Droplet.
+//
+//   • Le fil d'Ariane : la goutte, puis la page où l'on est.
+//   • Le plan du site en colonnes : Découvrir, Assistance, Informations
+//     légales, Télécharger. Sur téléphone, chaque colonne se replie, comme
+//     sur apple.com : on voit les quatre titres d'un coup d'œil.
+//   • La dernière ligne : le copyright, les liens légaux, et la langue — qui
+//     mène à LA MÊME PAGE dans l'autre langue, pas à l'accueil.
+import Logo from './Logo.astro';
+import { EDITEUR, LIEN_ANDROID } from '../config';
+import { LANGUES, chemin, type Langue } from '../i18n';
+import type { Textes } from '../i18n/fr';
+
+interface Props {
+  t: Textes;
+  langue: Langue;
+  /** La page courante (« privacy », « support »…), vide pour l'accueil. */
+  page?: string;
+  /** Son titre, pour le fil d'Ariane. */
+  titrePage?: string;
+}
+const { t, langue, page = '', titrePage } = Astro.props;
+const accueil = chemin(langue);
+const vers = (p: string, ancre = '') => `${chemin(langue, p)}${ancre}`;
+const annee = new Date().getFullYear();
+const nomLangue = LANGUES.find((l) => l.code === langue)?.nom ?? langue;
+
+const colonnes = [
+  {
+    titre: t.piedDecouvrir,
+    liens: [
+      { texte: t.galerieTitre.replace(/[.。]$/, ''), href: `${accueil}#galerie` },
+      { texte: t.navFonctionnement, href: `${accueil}#parcours` },
+      { texte: t.navConfidentialite, href: `${accueil}#confidentialite` },
+      { texte: t.navQuestions, href: `${accueil}#questions` },
+    ],
+  },
+  {
+    titre: t.piedAssistance,
+    liens: [
+      { texte: t.lienAide, href: vers('support') },
+      { texte: t.lienDemarrer, href: vers('support', '#demarrer') },
+      { texte: t.lienSansReseau, href: vers('support', '#sans-reseau') },
+      { texte: t.lienContact, href: vers('support', '#contact') },
+    ],
+  },
+  {
+    titre: t.piedLegal,
+    liens: [
+      { texte: t.piedConfidentialite, href: vers('privacy') },
+      { texte: t.lienConditions, href: vers('terms') },
+      { texte: t.lienSecurite, href: vers('security') },
+      { texte: t.lienMentions, href: vers('terms', '#mentions') },
+    ],
+  },
+  {
+    titre: t.telecharger,
+    liens: [{ texte: t.lienAndroid, href: LIEN_ANDROID }],
+  },
+];
+---
+<footer class="pied" aria-label={t.piedSignature}>
+  <div class="pied__dedans contenu--large">
+    <nav class="pied__ariane" aria-label={t.accueil}>
+      <a href={accueil} aria-label={t.accueil}><Logo taille={16} /></a>
+      {titrePage && (
+        <>
+          <svg class="pied__chevron" viewBox="0 0 8 14" aria-hidden="true"><path d="M1 1l6 6-6 6" /></svg>
+          <span aria-current="page">{titrePage}</span>
+        </>
+      )}
+    </nav>
+
+    <div class="pied__plan">
+      {colonnes.map((c) => (
+        <details class="pied__colonne" open data-colonne>
+          <summary>
+            <h3>{c.titre}</h3>
+            <svg viewBox="0 0 14 8" aria-hidden="true"><path d="M1 1l6 6 6-6" /></svg>
+          </summary>
+          <ul>
+            {c.liens.map((l) => (
+              <li><a href={l.href}>{l.texte}</a></li>
+            ))}
+          </ul>
+        </details>
+      ))}
+    </div>
+
+    <div class="pied__bas">
+      <p class="pied__copyright">Copyright © {annee} {EDITEUR}. {t.droits}</p>
+      <ul class="pied__legaux">
+        <li><a href={vers('privacy')}>{t.piedConfidentialite}</a></li>
+        <li><a href={vers('terms')}>{t.lienConditions}</a></li>
+        <li><a href={vers('terms', '#mentions')}>{t.lienMentions}</a></li>
+      </ul>
+      <details class="pied__langue" data-langue>
+        <summary aria-label={t.piedLangue}>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" /><path d="M2 10h16M10 2c2.4 2.2 3.6 4.9 3.6 8s-1.2 5.8-3.6 8c-2.4-2.2-3.6-4.9-3.6-8S7.6 4.2 10 2z" /></svg>
+          <span>{nomLangue}</span>
+        </summary>
+        <ul>
+          {LANGUES.map((l) => (
+            <li>
+              <a
+                href={chemin(l.code, page)}
+                lang={l.code}
+                hreflang={l.code}
+                aria-current={l.code === langue ? 'true' : undefined}
+              >{l.nom}</a>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .pied {
+    background: var(--gris);
+    color: #6e6e73;
+    font-size: 0.75rem;
+    line-height: 1.33;
+    letter-spacing: -0.01em;
+    padding: 18px 0 calc(22px + env(safe-area-inset-bottom));
+  }
+  .pied a {
+    color: #424245;
+    text-decoration: none;
+  }
+  .pied a:hover {
+    text-decoration: underline;
+  }
+
+  /* ── Fil d'Ariane ─────────────────────────────────────────────── */
+  .pied__ariane {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #d2d2d7;
+    color: #1d1d1f;
+  }
+  .pied__ariane a {
+    display: inline-flex;
+    opacity: 0.85;
+  }
+  .pied__chevron {
+    width: 6px;
+    height: 10px;
+    fill: none;
+    stroke: #86868b;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  :global([dir='rtl']) .pied__chevron {
+    transform: scaleX(-1);
+  }
+
+  /* ── Le plan du site ───────────────────────────────────────────── */
+  .pied__plan {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0 30px;
+    padding: 22px 0 6px;
+  }
+  .pied__colonne summary {
+    list-style: none;
+    pointer-events: none;
+  }
+  .pied__colonne summary::-webkit-details-marker {
+    display: none;
+  }
+  .pied__colonne summary svg {
+    display: none;
+  }
+  .pied__colonne h3 {
+    font-family: var(--f-texte);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #1d1d1f;
+    margin-bottom: 10px;
+  }
+  .pied__colonne ul {
+    list-style: none;
+    margin: 0 0 20px;
+    padding: 0;
+  }
+  .pied__colonne li {
+    margin-bottom: 9px;
+  }
+
+  /* ── La dernière ligne ────────────────────────────────────────── */
+  .pied__bas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 20px;
+    padding-top: 14px;
+    border-top: 1px solid #d2d2d7;
+  }
+  .pied__legaux {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    margin-inline-end: auto;
+  }
+  .pied__legaux li + li {
+    border-inline-start: 1px solid #d2d2d7;
+    margin-inline-start: 9px;
+    padding-inline-start: 9px;
+  }
+
+  /* Le choix de langue : un menu qui s'ouvre vers le haut. */
+  .pied__langue {
+    position: relative;
+  }
+  .pied__langue summary {
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    color: #424245;
+    padding: 4px 0;
+  }
+  .pied__langue summary::-webkit-details-marker {
+    display: none;
+  }
+  .pied__langue summary svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+  }
+  .pied__langue ul {
+    position: absolute;
+    inset-inline-end: 0;
+    bottom: calc(100% + 8px);
+    z-index: 10;
+    min-width: 170px;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    box-shadow:
+      0 0 0 0.5px rgba(0, 0, 0, 0.12),
+      0 14px 40px -8px rgba(0, 0, 0, 0.22);
+    animation: menu-langue 0.22s var(--ease-sortie);
+  }
+  @keyframes menu-langue {
+    from {
+      opacity: 0;
+      transform: translateY(4px) scale(0.98);
+    }
+  }
+  .pied__langue li a {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 9px;
+    font-size: 0.8125rem;
+    color: #1d1d1f;
+  }
+  .pied__langue li a:hover {
+    text-decoration: none;
+    background: rgba(0, 0, 0, 0.05);
+  }
+  .pied__langue li a[aria-current='true'] {
+    font-weight: 600;
+    color: var(--goutte);
+  }
+
+  /* ── Sur téléphone : les colonnes se replient ───────────────────── */
+  @media (max-width: 833px) {
+    .pied__plan {
+      grid-template-columns: 1fr;
+      padding: 6px 0 14px;
+    }
+    .pied__colonne {
+      border-bottom: 1px solid #d2d2d7;
+    }
+    .pied__colonne summary {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      cursor: pointer;
+    }
+    .pied__colonne summary svg {
+      display: block;
+      width: 11px;
+      height: 7px;
+      fill: none;
+      stroke: #86868b;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.3s var(--ease);
+    }
+    .pied__colonne[open] summary svg {
+      transform: rotate(180deg);
+    }
+    .pied__colonne h3 {
+      margin: 0;
+      font-weight: 400;
+      color: #424245;
+    }
+    .pied__colonne ul {
+      margin: 0 0 12px;
+      padding-inline-start: 12px;
+    }
+    .pied__colonne li a {
+      display: block;
+      padding: 4px 0;
+    }
+    .pied__bas {
+      flex-direction: column;
+      align-items: flex-start;
+      border-top: 0;
+    }
+    .pied__legaux {
+      gap: 6px 18px;
+    }
+    .pied__legaux li + li {
+      border: 0;
+      margin: 0;
+      padding: 0;
+    }
+  }
+</style>
+
+<script>
+  // Sur téléphone, les colonnes partent repliées (le HTML les livre
+  // ouvertes, pour qu'elles restent lisibles sans JavaScript).
+  const etroit = window.matchMedia('(max-width: 833px)');
+  const colonnes = [...document.querySelectorAll<HTMLDetailsElement>('[data-colonne]')];
+  const caler = () => colonnes.forEach((d) => (d.open = !etroit.matches));
+  caler();
+  etroit.addEventListener('change', caler);
+
+  // Le menu des langues se ferme d'un clic ailleurs, ou avec Échap.
+  const langue = document.querySelector<HTMLDetailsElement>('[data-langue]');
+  if (langue) {
+    document.addEventListener('click', (e) => {
+      if (langue.open && !langue.contains(e.target as Node)) langue.open = false;
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && langue.open) {
+        langue.open = false;
+        langue.querySelector('summary')?.focus();
+      }
+    });
+  }
+</script>

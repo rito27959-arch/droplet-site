@@ -1,0 +1,619 @@
+---
+// UNE PAGE DE DOCUMENT — confidentialité, conditions, sécurité, assistance.
+//
+// La mise en page des pages juridiques et d'assistance d'apple.com :
+//   • un en-tête calme, le titre en grand, la date de mise à jour ;
+//   • « Sur cette page » à gauche, qui suit la lecture (la section en cours
+//     s'allume) ; sur téléphone, il se replie en haut ;
+//   • une colonne de texte à la mesure d'un livre (68 caractères), parce
+//     que ce sont les seules pages du site qu'on lit vraiment en entier.
+//
+// L'assistance s'ouvre sur des cartes, une par sujet ; la sécurité, sur un
+// en-tête noir, comme la page Confidentialité d'Apple.
+import Base from '../layouts/Base.astro';
+import Navigation from './Navigation.astro';
+import Pied from './Pied.astro';
+import { chemin, textes, type Langue } from '../i18n';
+import { doc } from '../docs';
+import { enLigne } from '../docs/rendu';
+import { DOCS_JURIDIQUES, MISE_A_JOUR, type Bloc, type CleDoc } from '../docs/types';
+
+interface Props { langue: Langue; cle: CleDoc }
+const { langue, cle } = Astro.props;
+const t = textes(langue);
+const { page, ecritEn } = doc(langue, cle);
+const html = (s: string) => enLigne(s, langue, ecritEn);
+const juridiqueTraduitAilleurs = DOCS_JURIDIQUES.includes(cle) && ecritEn !== langue;
+const date = new Intl.DateTimeFormat(langue, { dateStyle: 'long' }).format(new Date(`${MISE_A_JOUR}T12:00:00Z`));
+const sombre = cle === 'security';
+const centre = cle === 'security' || cle === 'support';
+const cartes = page.sections.filter((s) => s.resume);
+
+// Les icônes des cartes de l'assistance : des traits fins, à la manière des
+// symboles d'Apple.
+const ICONES: Record<string, string> = {
+  telephone: '<rect x="9" y="3" width="14" height="26" rx="3.5"/><path d="M14 25.5h4"/>',
+  personnes: '<circle cx="12" cy="11" r="4.5"/><path d="M4 26c.8-4.6 4-7 8-7s7.2 2.4 8 7"/><circle cx="22.5" cy="12" r="3.5"/><path d="M21 19.2c3.4 0 6 1.9 7 6.3"/>',
+  ondes: '<circle cx="16" cy="16" r="2.2"/><path d="M11.5 20.5a6.4 6.4 0 0 1 0-9M20.5 11.5a6.4 6.4 0 0 1 0 9M7.8 24.2a11.6 11.6 0 0 1 0-16.4M24.2 7.8a11.6 11.6 0 0 1 0 16.4"/>',
+  horloge: '<circle cx="16" cy="16" r="11"/><path d="M16 10v6.5l4 2.5"/>',
+  appel: '<path d="M9.5 5.5h4l2 5-2.6 1.7a13 13 0 0 0 6.9 6.9l1.7-2.6 5 2v4a2 2 0 0 1-2 2A20 20 0 0 1 7.5 7.5a2 2 0 0 1 2-2z"/>',
+  sauvegarde: '<path d="M9 22.5h-.5a5.5 5.5 0 0 1-.6-11A8 8 0 0 1 23.5 10a6.3 6.3 0 0 1 .5 12.5H23"/><path d="M16 15v12M12 19l4-4 4 4"/>',
+  batterie: '<rect x="4" y="10" width="21" height="12" rx="3"/><path d="M28 14.5v3"/><rect x="7.5" y="13.5" width="9" height="5" rx="1" fill="currentColor" stroke="none"/>',
+  etincelle: '<path d="M16 4l2.4 7.6L26 14l-7.6 2.4L16 24l-2.4-7.6L6 14l7.6-2.4z"/><path d="M25 22l.9 2.6 2.6.9-2.6.9L25 29l-.9-2.6-2.6-.9 2.6-.9z"/>',
+  question: '<circle cx="16" cy="16" r="11"/><path d="M12.6 12.6a3.6 3.6 0 1 1 5 3.3c-1 .5-1.6 1.2-1.6 2.3v.6"/><circle cx="16" cy="22.6" r=".9" fill="currentColor"/>',
+  message: '<path d="M6 8.5A2.5 2.5 0 0 1 8.5 6h15A2.5 2.5 0 0 1 26 8.5v11a2.5 2.5 0 0 1-2.5 2.5H13l-5.5 4.5V22A2.5 2.5 0 0 1 6 19.5z"/>',
+};
+
+const genre = (b: Bloc) => (typeof b === 'string' ? 'p' : Object.keys(b)[0]);
+---
+<Base langue={langue} page={cle} titre={page.titre} description={page.description}>
+  <Navigation t={t} accueil={chemin(langue)} surAccueil={false} clairEnHaut={!sombre} />
+  <main class:list={['doc', `doc--${cle}`]}>
+    <header class:list={['doc__tete', sombre ? 'fond-noir' : cle === 'support' ? 'fond-gris' : 'fond-blanc']}>
+      <div class:list={[centre ? 'contenu--doc' : 'contenu--large']}>
+        {sombre && (
+          <svg class="doc__embleme" viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="14" y="28" width="36" height="28" rx="8" />
+            <path d="M22 28v-6a10 10 0 0 1 20 0v6" />
+            <circle cx="32" cy="42" r="3.2" />
+          </svg>
+        )}
+        <h1 class="doc__titre" lang={ecritEn}>{page.titre}</h1>
+        <p class="doc__chapo" lang={ecritEn}>{page.chapo}</p>
+        {cle !== 'support' && <p class="doc__maj">{t.majLe} {date}</p>}
+      </div>
+    </header>
+
+    {juridiqueTraduitAilleurs && (
+      <div class:list={['doc__langue', centre ? 'contenu--doc' : 'contenu--large']}>
+        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" /><path d="M2 10h16M10 2c2.4 2.2 3.6 4.9 3.6 8s-1.2 5.8-3.6 8c-2.4-2.2-3.6-4.9-3.6-8S7.6 4.2 10 2z" /></svg>
+        <p>{t.seulementFrEn} <a href={chemin('fr', cle)} hreflang="fr" lang="fr">{t.lireFr}</a></p>
+      </div>
+    )}
+
+    {cartes.length > 0 && (
+      <section class="cartes fond-gris" aria-label={page.court}>
+        <ul class="cartes__grille contenu--large">
+          {cartes.map((s) => (
+            <li>
+              <a class="carte" href={`#${s.id}`}>
+                <svg class="carte__icone" viewBox="0 0 32 32" aria-hidden="true" set:html={ICONES[s.icone ?? 'question']} />
+                <span class="carte__titre">{s.titre}</span>
+                <span class="carte__resume">{s.resume}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <div class="doc__corps contenu--large fond-blanc" lang={ecritEn}>
+      <aside class="sommaire" aria-label={t.surCettePage}>
+        <details class="sommaire__boite" open data-sommaire>
+          <summary>{t.surCettePage}</summary>
+          <ol>
+            {page.sections.map((s) => (
+              <li><a href={`#${s.id}`} data-vers={s.id}>{s.titre}</a></li>
+            ))}
+          </ol>
+        </details>
+      </aside>
+
+      <article class="texte">
+        {page.sections.map((s) => (
+          <section id={s.id} class="texte__section" data-section>
+            <h2>{s.titre}</h2>
+            {s.blocs.map((b) => {
+              const g = genre(b);
+              if (typeof b === 'string') return <p set:html={html(b)} />;
+              if ('liste' in b) return <ul>{b.liste.map((x) => <li set:html={html(x)} />)}</ul>;
+              if ('intertitre' in b) return <h3 set:html={html(b.intertitre)} />;
+              if ('encadre' in b) return <p class="encadre" set:html={html(b.encadre)} />;
+              if ('tableau' in b) {
+                const entetes = b.tableau.entetes;
+                const avecEntetes = entetes.some((e) => e);
+                return (
+                  <div class:list={['tableau', { 'tableau--cles': !avecEntetes }]}>
+                    <table>
+                      {avecEntetes && (
+                        <thead><tr>{entetes.map((e) => <th scope="col" set:html={html(e)} />)}</tr></thead>
+                      )}
+                      <tbody>
+                        {b.tableau.lignes.map((l) => (
+                          <tr>
+                            {l.map((c, i) =>
+                              i === 0
+                                ? <th scope="row" data-libelle={entetes[i]} set:html={html(c)} />
+                                : <td data-libelle={entetes[i]} set:html={html(c)} />,
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              }
+              return g;
+            })}
+          </section>
+        ))}
+        <p class="texte__haut"><a href="#top" data-haut>{t.hautPage}</a></p>
+      </article>
+    </div>
+  </main>
+  <Pied t={t} langue={langue} page={cle} titrePage={page.court} />
+</Base>
+
+<style>
+  .doc {
+    background: var(--blanc);
+    color: var(--encre);
+  }
+  .contenu--doc {
+    width: min(100% - 2 * var(--gouttiere), var(--largeur));
+    margin-inline: auto;
+  }
+
+  /* ── L'en-tête ─────────────────────────────────────────────────── */
+  .doc__tete {
+    padding: calc(52px + clamp(56px, 8vw, 104px)) 0 clamp(48px, 6vw, 80px);
+  }
+  .doc--support .doc__tete,
+  .doc--security .doc__tete {
+    text-align: center;
+  }
+  .doc--support .doc__tete {
+    padding-bottom: clamp(28px, 4vw, 44px);
+  }
+  .doc__titre {
+    font-size: var(--t-5);
+    line-height: 1.07;
+    letter-spacing: -0.022em;
+    max-width: 18ch;
+  }
+  .doc--support .doc__titre,
+  .doc--security .doc__titre {
+    margin-inline: auto;
+  }
+  .doc--security .doc__titre {
+    background: linear-gradient(180deg, #fff 30%, #a1a1a6 130%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .doc__chapo {
+    margin-top: 18px;
+    max-width: 40rem;
+    font-size: var(--t-2);
+    line-height: 1.42;
+    color: var(--encre-2);
+  }
+  .doc--support .doc__chapo,
+  .doc--security .doc__chapo {
+    margin-inline: auto;
+  }
+  .doc--security .doc__chapo {
+    color: var(--clair-2);
+  }
+  .doc__maj {
+    margin-top: 22px;
+    font-size: var(--t-0);
+    color: #86868b;
+  }
+  /* L'emblème de la sécurité : un cadenas dessiné en traits, sous une lueur
+     de la couleur du thème. */
+  .doc__embleme {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 26px;
+    fill: none;
+    stroke: var(--goutte);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 8px 30px color-mix(in srgb, var(--goutte) 55%, transparent));
+  }
+  .doc--security .doc__tete {
+    background:
+      radial-gradient(50% 60% at 50% 0%, color-mix(in srgb, var(--goutte) 16%, transparent), transparent 70%),
+      #000;
+  }
+
+  /* ── Le bandeau de langue ─────────────────────────────────────── */
+  .doc__langue {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-top: 28px;
+    padding: 16px 20px;
+    border-radius: 16px;
+    background: var(--gris);
+    font-size: var(--t-0);
+    line-height: 1.45;
+    color: var(--encre-2);
+  }
+  .doc__langue svg {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+  }
+  .doc__langue a {
+    color: var(--lien-clair);
+    white-space: nowrap;
+  }
+
+  /* ── Les cartes de l'assistance ───────────────────────────────── */
+  .cartes {
+    padding: 0 0 clamp(56px, 7vw, 88px);
+  }
+  .cartes__grille {
+    margin-block: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+    gap: 16px;
+    list-style: none;
+    padding: 0;
+  }
+  .carte {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    height: 100%;
+    padding: 26px 26px 28px;
+    border-radius: 22px;
+    background: var(--blanc);
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition:
+      transform 0.45s var(--ease-sortie),
+      box-shadow 0.45s var(--ease-sortie);
+  }
+  .carte:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 16px 40px -14px rgba(0, 0, 0, 0.18);
+  }
+  .carte__icone {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 14px;
+    fill: none;
+    stroke: var(--goutte);
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    color: var(--goutte);
+  }
+  .carte__titre {
+    font-family: var(--f-titre);
+    font-size: 1.1875rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+  .carte__resume {
+    font-size: 0.9375rem;
+    color: var(--encre-2);
+  }
+
+  /* ── Le corps : sommaire + texte ──────────────────────────────── */
+  .doc__corps {
+    display: grid;
+    grid-template-columns: minmax(0, 250px) minmax(0, 692px);
+    justify-content: space-between;
+    gap: 64px;
+    padding: clamp(48px, 6vw, 80px) 0 clamp(80px, 10vw, 140px);
+  }
+  /* Sous un en-tête blanc, le texte suit de près : pas de second vide. */
+  .doc--privacy .doc__corps,
+  .doc--terms .doc__corps {
+    padding-top: 8px;
+  }
+  .sommaire__boite {
+    position: sticky;
+    top: 84px;
+  }
+  .sommaire summary {
+    list-style: none;
+    font-size: var(--t-0);
+    font-weight: 600;
+    color: var(--encre);
+    margin-bottom: 14px;
+    pointer-events: none;
+  }
+  .sommaire summary::-webkit-details-marker {
+    display: none;
+  }
+  .sommaire ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-inline-start: 1px solid #d2d2d7;
+  }
+  .sommaire a {
+    display: block;
+    margin-inline-start: -1px;
+    padding: 6px 0 6px 16px;
+    padding-inline: 16px 0;
+    border-inline-start: 2px solid transparent;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: var(--encre-2);
+    text-decoration: none;
+    transition:
+      color 0.25s var(--ease),
+      border-color 0.25s var(--ease);
+  }
+  .sommaire a:hover {
+    color: var(--encre);
+  }
+  .sommaire a.est-actif {
+    color: var(--encre);
+    border-inline-start-color: var(--goutte);
+    font-weight: 500;
+  }
+
+  .texte {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: #1d1d1f;
+  }
+  .texte__section {
+    scroll-margin-top: 84px;
+  }
+  .texte__section + .texte__section {
+    margin-top: 56px;
+  }
+  .texte h2 {
+    font-size: var(--t-3);
+    line-height: 1.2;
+    letter-spacing: -0.018em;
+    margin-bottom: 16px;
+  }
+  .texte h3 {
+    font-size: 1.1875rem;
+    letter-spacing: -0.012em;
+    margin: 30px 0 8px;
+  }
+  .texte p + p,
+  .texte ul + p,
+  .texte p + ul,
+  .texte .tableau + p,
+  .texte p + .tableau {
+    margin-top: 14px;
+  }
+  .texte :global(a) {
+    color: var(--lien-clair);
+    text-decoration: none;
+  }
+  .texte :global(a:hover) {
+    text-decoration: underline;
+  }
+  .texte :global(strong) {
+    font-weight: 600;
+  }
+  .texte ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .texte li {
+    position: relative;
+    padding-inline-start: 22px;
+  }
+  .texte li + li {
+    margin-top: 10px;
+  }
+  .texte li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 4px;
+    top: 0.72em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--goutte);
+  }
+  .encadre {
+    margin-top: 18px;
+    padding: 18px 22px;
+    border-radius: 18px;
+    background: var(--gris);
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+  * + .encadre {
+    margin-top: 18px;
+  }
+
+  /* Les tableaux : lignes fines, comme les fiches techniques d'Apple. Sur
+     téléphone, chaque ligne devient une petite fiche. */
+  .tableau {
+    margin-top: 18px;
+    overflow-x: auto;
+  }
+  .tableau table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  .tableau th,
+  .tableau td {
+    text-align: start;
+    vertical-align: top;
+    padding: 14px 16px 14px 0;
+    border-bottom: 1px solid #d2d2d7;
+  }
+  .tableau thead th {
+    font-size: var(--t-0);
+    font-weight: 600;
+    color: var(--encre-2);
+    padding-top: 0;
+  }
+  .tableau tbody th {
+    font-weight: 600;
+    width: 30%;
+  }
+  .tableau--cles tbody th {
+    width: 38%;
+    font-weight: 400;
+    color: var(--encre-2);
+  }
+  .tableau tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+
+  .texte__haut {
+    margin-top: 64px;
+    font-size: var(--t-0);
+  }
+
+  /* ── Sur téléphone ─────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .doc__corps {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .sommaire__boite {
+      position: static;
+      padding: 4px 18px;
+      border-radius: 16px;
+      background: var(--gris);
+    }
+    .sommaire summary {
+      pointer-events: auto;
+      cursor: pointer;
+      margin: 0;
+      padding: 12px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    .sommaire summary::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      margin-top: 3px;
+      border-right: 1.5px solid #86868b;
+      border-bottom: 1.5px solid #86868b;
+      transform: rotate(45deg);
+      transition: transform 0.3s var(--ease);
+    }
+    .sommaire__boite[open] summary::after {
+      transform: rotate(-135deg);
+    }
+    .sommaire ol {
+      border: 0;
+      padding-bottom: 10px;
+    }
+    .sommaire a {
+      padding-inline-start: 0;
+      border: 0;
+    }
+  }
+  @media (max-width: 600px) {
+    /* Les cartes passent à deux colonnes, plus compactes, comme sur
+       l'assistance d'Apple : on voit les sujets d'un seul regard. */
+    .cartes__grille {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .carte {
+      padding: 18px 16px 20px;
+      border-radius: 18px;
+      gap: 4px;
+    }
+    .carte__icone {
+      width: 28px;
+      height: 28px;
+      margin-bottom: 8px;
+    }
+    .carte__titre {
+      font-size: 1rem;
+    }
+    .carte__resume {
+      font-size: 0.8125rem;
+      line-height: 1.35;
+    }
+    .tableau thead {
+      display: none;
+    }
+    .tableau tr {
+      display: block;
+      padding: 14px 0;
+      border-bottom: 1px solid #d2d2d7;
+    }
+    .tableau tbody tr:last-child {
+      border-bottom: 0;
+    }
+    .tableau th,
+    .tableau td {
+      display: block;
+      width: auto !important;
+      padding: 2px 0;
+      border: 0;
+    }
+    .tableau td[data-libelle]:not([data-libelle=''])::before {
+      content: attr(data-libelle);
+      display: block;
+      margin-top: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #86868b;
+    }
+  }
+</style>
+
+<script>
+  // Le sommaire suit la lecture : la section dont le titre a passé le haut
+  // de l'écran s'allume.
+  const liens = new Map(
+    [...document.querySelectorAll<HTMLAnchorElement>('[data-vers]')].map((a) => [a.dataset.vers!, a]),
+  );
+  const sections = [...document.querySelectorAll<HTMLElement>('[data-section]')];
+  let actif: HTMLAnchorElement | undefined;
+  let attente = false;
+  const maj = () => {
+    attente = false;
+    let courante = sections[0];
+    for (const s of sections) if (s.getBoundingClientRect().top < 140) courante = s;
+    const lien = liens.get(courante?.id ?? '');
+    if (lien !== actif) {
+      actif?.classList.remove('est-actif');
+      lien?.classList.add('est-actif');
+      actif = lien;
+    }
+  };
+  maj();
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!attente) {
+        attente = true;
+        requestAnimationFrame(maj);
+      }
+    },
+    { passive: true },
+  );
+
+  // Sur téléphone, le sommaire part replié.
+  const sommaire = document.querySelector<HTMLDetailsElement>('[data-sommaire]');
+  const etroit = window.matchMedia('(max-width: 900px)');
+  const caler = () => sommaire && (sommaire.open = !etroit.matches);
+  caler();
+  etroit.addEventListener('change', caler);
+  sommaire?.querySelectorAll('a').forEach((a) =>
+    a.addEventListener('click', () => {
+      if (etroit.matches && sommaire) sommaire.open = false;
+    }),
+  );
+
+  // « Haut de page » : sans ancre dans l'adresse.
+  document.querySelector('[data-haut]')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>

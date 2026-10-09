@@ -1,0 +1,75 @@
+---
+import '@fontsource-variable/inter-tight';
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+import { BASE, LANGUES, chemin, estRtl, textes, type Langue } from '../i18n';
+import { CLE_STOCKAGE, COULEURS } from '../couleurs';
+
+const teintes = Object.fromEntries(COULEURS.map((c) => [c.cle, c.hex]));
+
+interface Props {
+  langue: Langue;
+  /** Pour une page de document : son chemin (« privacy »), son titre et sa
+   *  description. L'accueil n'en passe aucun. */
+  page?: string;
+  titre?: string;
+  description?: string;
+}
+const { langue, page = '', titre, description } = Astro.props;
+const t = textes(langue);
+const site = Astro.site ?? new URL('https://droplet.app');
+const urlPage = new URL(chemin(langue, page), site);
+const titreComplet = !titre ? t.metaTitre : titre.includes('Droplet') ? titre : `${titre} · Droplet`;
+const descriptionPage = description ?? t.metaDescription;
+---
+<!doctype html>
+<html lang={langue} dir={estRtl(langue) ? 'rtl' : 'ltr'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{titreComplet}</title>
+    <meta name="description" content={descriptionPage} />
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" href={`${BASE}/favicon.svg`} type="image/svg+xml" />
+    <link rel="canonical" href={urlPage} />
+    {LANGUES.map((l) => (
+      <link rel="alternate" hreflang={l.code} href={new URL(chemin(l.code, page), site)} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={new URL(chemin('fr', page), site)} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={titreComplet} />
+    <meta property="og:description" content={descriptionPage} />
+    <meta property="og:url" content={urlPage} />
+    <meta property="og:image" content={new URL(`${BASE}/apercu.png`, site)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- La couleur choisie, posée AVANT le premier affichage : sans ça, la
+         page apparaîtrait en rose puis virerait à la couleur retenue. -->
+    <script is:inline define:vars={{ teintes, cle: CLE_STOCKAGE }}>
+      try {
+        const c = localStorage.getItem(cle);
+        if (c && teintes[c]) {
+          document.documentElement.style.setProperty('--goutte', teintes[c]);
+          document.documentElement.dataset.couleur = c;
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <slot />
+    <script>
+      // Les titres de section se lèvent une fois, quand ils entrent à l'écran.
+      const io = new IntersectionObserver(
+        (entrees) => {
+          for (const e of entrees) {
+            if (e.isIntersecting) {
+              e.target.classList.add('est-visible');
+              io.unobserve(e.target);
+            }
+          }
+        },
+        { rootMargin: '0px 0px -12% 0px' },
+      );
+      document.querySelectorAll('.apparait').forEach((el) => io.observe(el));
+    </script>
+  </body>
+</html>

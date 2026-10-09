@@ -1,0 +1,38 @@
+---
+// La page d'accueil, dans une langue donnée. Le rythme d'apple.com : les
+// sections alternent noir et clair, et chacune ne dit qu'une chose.
+import Base from '../layouts/Base.astro';
+import Navigation from './Navigation.astro';
+import Hero from './Hero.astro';
+import Galerie from './Galerie.astro';
+import Zoom from './Zoom.astro';
+import Manifeste from './Manifeste.astro';
+import Parcours from './Parcours.astro';
+import Fonctions from './Fonctions.astro';
+import Confidentialite from './Confidentialite.astro';
+import Usages from './Usages.astro';
+import Questions from './Questions.astro';
+import Fin from './Fin.astro';
+import Pied from './Pied.astro';
+import { chemin, textes, type Langue } from '../i18n';
+
+interface Props { langue: Langue }
+const { langue } = Astro.props;
+const t = textes(langue);
+---
+<Base langue={langue}>
+  <Navigation t={t} accueil={chemin(langue)} />
+  <main>
+    <Hero t={t} />
+    <Galerie t={t} />
+    <Zoom t={t} />
+    <Manifeste t={t} langue={langue} />
+    <Parcours t={t} />
+    <Fonctions t={t} />
+    <Confidentialite t={t} />
+    <Usages t={t} />
+    <Questions t={t} />
+  </main>
+  <Fin t={t} langue={langue} />
+  <Pied t={t} langue={langue} />
+</Base>

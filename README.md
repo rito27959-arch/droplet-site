@@ -1,50 +1,92 @@
 # Site vitrine de Droplet
 
-La page de présentation de **Droplet** — une messagerie qui fait passer les
-messages de téléphone en téléphone, de proche en proche, sans antenne, sans
-opérateur et sans serveur.
+Site statique en [Astro](https://astro.build), en 10 langues (le français à la
+racine, les autres sous `/en/`, `/de/`, `/ar/`…).
 
-## Comment ça marche
+## Lancer le site sur votre ordinateur
 
-- **`index.html`** est l'unique source. Il est écrit sans enveloppe HTML
-  (`<!doctype>`, `<head>`, `<body>`) pour pouvoir être prévisualisé tel quel
-  comme artifact pendant qu'on travaille une section.
-- **`construire.py`** l'habille de l'enveloppe (meta charset, viewport,
-  Open Graph, favicon), remonte `<title>` / `<link>` / `<style>` dans le
-  `<head>`, et copie les captures d'écran + le runtime d'animation dans
-  `public/`.
-- **`vercel.json`** dit à Vercel de lancer `python3 construire.py` et de
-  servir `public/`. Il porte aussi les en-têtes de sécurité et la
-  redirection `/droplet.apk` → dernière release GitHub.
+Il faut Node.js 20 ou plus récent.
 
-## Modifier le site
-
-```sh
-# éditer index.html, puis prévisualiser en local :
-python3 construire.py
-python3 -m http.server -d public 8000   # http://localhost:8000
+```bash
+npm install
+npm run dev        # http://localhost:4321, se recharge à chaque modification
 ```
 
-Un `git push` sur `main` suffit ensuite : **Vercel reconstruit et
-redéploie automatiquement**.
+## Construire pour la mise en ligne
 
-## Déploiement (première fois)
+```bash
+npm run build      # produit le dossier dist/
+npm run preview    # pour vérifier dist/ avant de le publier
+```
 
-1. Sur [vercel.com](https://vercel.com) → **Add New… → Project** → importer
-   ce dépôt (`rito27959-arch/droplet-site`).
-2. Vercel lit `vercel.json` : rien à configurer (Framework = Other,
-   Build = `python3 construire.py`, Output = `public`).
-3. **Deploy.** Les push suivants se déploient tout seuls.
-4. Domaine : Project → **Settings → Domains** → ajouter
-   `proche-en-proche.xyz` (ou le domaine retenu) et suivre les
-   instructions DNS.
+Le dossier `dist/` se publie tel quel sur Netlify, Vercel, Cloudflare Pages,
+GitHub Pages ou n'importe quel hébergeur de fichiers.
 
-## Contenu
+## Ce qu'il faut modifier avant de publier
 
-| Fichier / dossier        | Rôle                                             |
-|--------------------------|--------------------------------------------------|
-| `index.html`             | Source unique de la page                          |
-| `construire.py`          | Build : enveloppe + copie des assets → `public/`  |
-| `vercel.json`            | Build command, output, en-têtes, redirections     |
-| `ecrans/`                | Captures d'écran de l'app (vitrine du téléphone)  |
-| `lottie_light.min.js`    | Runtime d'animation (chargé seulement si présent) |
+- `src/config.ts` : le lien du bouton « Télécharger » (fiche Play Store ou
+  APK) et celui de la politique de confidentialité.
+- `astro.config.mjs` : l'adresse définitive du site (`site:`), utilisée pour
+  les aperçus de partage et les balises de langue.
+- `public/apercu.png` : l'image affichée quand on partage le lien (1200 × 630).
+
+## Où sont les choses
+
+- `src/i18n/` : tous les textes, une langue par fichier. `fr.ts` est la
+  référence ; les autres ont exactement les mêmes clés (TypeScript refuse de
+  compiler s'il en manque une).
+- `src/components/` : une section par fichier, dans l'ordre de la page :
+  `Hero` (le titre et les trois téléphones qui s'écartent au défilement),
+  `Galerie` (le carrousel « Les points forts »), `Zoom` (l'écran qui recule
+  et révèle les téléphones autour), `Manifeste` (le texte qui s'allume mot
+  après mot), `Parcours` (le message qui avance de relais en relais),
+  `Fonctions`, `Confidentialite`, `Usages`, `Questions`, `Fin`.
+- `src/components/Appareil.astro` et `Ecran.astro` : le téléphone et les
+  écrans de l'application, dessinés en HTML (nets à toutes les tailles,
+  traduits dans toutes les langues).
+- `src/styles/global.css` : couleurs, typographie, boutons.
+
+## Animations et accessibilité
+
+- Le maillage du haut se met en pause hors de l'écran et quand l'onglet est
+  caché ; le carrousel ne défile que lorsqu'il est visible, et s'arrête dès
+  qu'on le touche.
+- Avec « Réduire les animations » activé dans le système, tout est figé.
+- Les questions fréquentes fonctionnent sans JavaScript.
+- Les polices sont hébergées par le site : aucune requête vers Google.
+
+## Couleur du thème
+
+Les visiteurs choisissent la couleur du site (8 teintes, les mêmes que dans
+l'application) depuis la pastille de la barre du haut ou sous les téléphones
+de l'ouverture. Tout dérive de `--goutte` (`src/styles/global.css`) ; la
+liste des teintes est dans `src/couleurs.ts`. Le choix est retenu par le
+navigateur et réappliqué avant le premier affichage (`src/layouts/Base.astro`).
+
+## Pages de documents
+
+| Page | Français | Autres langues |
+|---|---|---|
+| Assistance | `/support/` | `/en/support/`, `/de/support/`… (traduite dans les 10 langues) |
+| Sécurité | `/security/` | traduite dans les 10 langues |
+| Confidentialité | `/privacy/` | français et anglais seulement ; les autres langues affichent l'anglais avec un bandeau qui l'explique |
+| Conditions d'utilisation + mentions légales | `/terms/` | idem |
+
+Le texte est dans `src/docs/<langue>.ts` (le français fait référence). Après
+toute modification : `node --experimental-strip-types outils/verif_docs.mjs <langue>`
+vérifie qu'une traduction a la même structure que le français.
+
+**À régler avant la mise en ligne** (`src/config.ts`) : `EDITEUR` (le nom
+juridiquement responsable) et `EMAIL_CONTACT` (une adresse que vous relevez).
+
+## Publication
+
+Un `git push` sur `main` suffit : le workflow `.github/workflows/deployer.yml`
+construit le site et le publie sur **GitHub Pages**, à
+https://rito27959-arch.github.io/droplet-site/.
+
+Le même dépôt reste publiable sur Vercel (`vercel.json`) : là, le site est
+servi à la racine du domaine.
+
+Pour construire en local : `npm install`, puis `npm run dev` (aperçu) ou
+`npm run build` (le site final, dans `dist/`).
