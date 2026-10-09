@@ -52,7 +52,7 @@ const teintes = Object.fromEntries(COULEURS.map((c) => [c.cle, c.hex]));
         <a class="inv__marque" href={`${BASE}/`}><Logo taille={22} /> Droplet</a>
 
         <div class="inv__avatar" aria-hidden="true" data-avatar>
-          <Logo taille={44} />
+          <Logo taille={44} actif={false} />
         </div>
 
         <h1 class="inv__titre" data-titre>{t.titreSansNom}</h1>

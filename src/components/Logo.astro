@@ -1,9 +1,25 @@
 ---
-// La goutte : un message, et l'onde qu'il fait en arrivant.
-interface Props { taille?: number }
-const { taille = 28 } = Astro.props;
+// LE LOGO DE DROPLET — la bulle et sa goutte, le même tracé que l'icône de
+// l'application.
+//
+// Comme WhatsApp avec sa bulle : en COULEUR DU THÈME quand il est actif
+// (la marque, l'ouverture, la fin), en GRIS quand il est au repos (le fil
+// d'Ariane du pied de page, une invitation sans nom). La couleur suit le
+// sélecteur de couleur du site (`--goutte`).
+interface Props { taille?: number; actif?: boolean }
+const { taille = 28, actif = true } = Astro.props;
+const couleur = actif ? 'var(--goutte)' : 'var(--logo-repos, #8e8e93)';
 ---
-<svg width={taille} height={taille} viewBox="0 0 64 64" aria-hidden="true">
-  <path d="M32 6c7.6 9.6 18 20 18 31.5a18 18 0 0 1-36 0C14 26 24.4 15.6 32 6z" style="fill: var(--goutte)" />
-  <circle cx="32" cy="38" r="6.5" fill="none" stroke="#fff" stroke-width="3" opacity=".92" />
+<svg width={taille} height={taille} viewBox="0 0 64 64" aria-hidden="true" class="logo">
+  <path
+    d="M26.16 48.79A20 20 0 1 0 15.68 40L12.5 52.5Z"
+    fill="none"
+    stroke-width="5.2"
+    stroke-linejoin="round"
+    style={`stroke: ${couleur}`}
+  />
+  <path
+    d="M33 17.5C37.2 23 41.3 27 41.3 32.4a8.3 8.3 0 0 1-16.6 0C24.7 27 28.8 23 33 17.5Z"
+    style={`fill: ${couleur}`}
+  />
 </svg>
