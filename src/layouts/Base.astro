@@ -17,7 +17,7 @@ interface Props {
 }
 const { langue, page = '', titre, description } = Astro.props;
 const t = textes(langue);
-const site = Astro.site ?? new URL('https://droplet.app');
+const site = Astro.site ?? new URL('https://dropletmesh.app');
 const urlPage = new URL(chemin(langue, page), site);
 const titreComplet = !titre ? t.metaTitre : titre.includes('Droplet') ? titre : `${titre} · Droplet`;
 const descriptionPage = description ?? t.metaDescription;

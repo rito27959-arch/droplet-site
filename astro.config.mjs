@@ -1,17 +1,13 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
-// L'ADRESSE DU SITE, selon l'endroit où il est publié.
+// L'adresse du site. Elle sert aux liens de partage (aperçus WhatsApp, X,
+// Facebook) et aux balises de langue pour Google.
 //
-//   • GitHub Pages (le workflow `.github/workflows/deployer.yml`) fournit
-//     SITE_URL et BASE_PATH : le site vit alors sous
-//     https://rito27959-arch.github.io/droplet-site/.
-//   • Ailleurs (Vercel, Netlify, un domaine à vous), rien à régler : le site
-//     est servi à la racine.
-//
-// `site` sert aux liens de partage (aperçus WhatsApp, X, Facebook) et aux
-// balises de langue pour Google ; `base` préfixe tous les liens du site.
+// Le site est publié par Vercel sur https://dropletmesh.app à chaque push
+// sur main. SITE_URL et BASE_PATH ne servent que pour le publier ailleurs,
+// par exemple sous un sous-dossier (BASE_PATH=/droplet-site).
 export default defineConfig({
-  site: process.env.SITE_URL || 'https://droplet.app',
+  site: process.env.SITE_URL || 'https://dropletmesh.app',
   base: process.env.BASE_PATH || '/',
 });

@@ -15,8 +15,9 @@ export const EDITEUR = 'Droplet';
 
 /** L'adresse de contact affichée dans la confidentialité, les conditions,
  *  la sécurité et l'assistance.
- *  ⚠️ À REMPLACER par une adresse que vous relevez vraiment. */
-export const EMAIL_CONTACT = 'contact@droplet.app';
+ *  ⚠️ Elle doit être redirigée vers une boîte que vous relevez (redirection
+ *  e-mail du domaine dropletmesh.app) avant d'être annoncée. */
+export const EMAIL_CONTACT = 'contact@dropletmesh.app';
 
 /** L'adresse publique du site, telle qu'affichée dans les mentions légales. */
-export const SITE_AFFICHE = 'rito27959-arch.github.io/droplet-site';
+export const SITE_AFFICHE = 'dropletmesh.app';

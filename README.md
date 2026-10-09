@@ -81,12 +81,10 @@ juridiquement responsable) et `EMAIL_CONTACT` (une adresse que vous relevez).
 
 ## Publication
 
-Un `git push` sur `main` suffit : le workflow `.github/workflows/deployer.yml`
-construit le site et le publie sur **GitHub Pages**, à
-https://rito27959-arch.github.io/droplet-site/.
-
-Le même dépôt reste publiable sur Vercel (`vercel.json`) : là, le site est
-servi à la racine du domaine.
+Le site est en ligne sur **https://dropletmesh.app**, publié par Vercel :
+un `git push` sur `main` suffit, Vercel reconstruit et redéploie tout seul
+(réglages dans `vercel.json`, dont la redirection `/droplet.apk` vers la
+dernière version sur GitHub).
 
 Pour construire en local : `npm install`, puis `npm run dev` (aperçu) ou
 `npm run build` (le site final, dans `dist/`).
