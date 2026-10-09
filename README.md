@@ -79,6 +79,16 @@ vérifie qu'une traduction a la même structure que le français.
 **À régler avant la mise en ligne** (`src/config.ts`) : `EDITEUR` (le nom
 juridiquement responsable) et `EMAIL_CONTACT` (une adresse que vous relevez).
 
+## La page des liens d'invitation
+
+`/i/` (`src/pages/i.astro`) reçoit les liens que l'application fabrique
+quand on partage son invitation : `https://dropletmesh.app/i/#…`. Tout ce qui
+identifie la personne qui invite est après le `#` : le navigateur ne
+l'envoie jamais au serveur, c'est le script de la page qui le lit sur le
+téléphone de l'invité, puis ouvre `droplet://droplet/invite?d=…`. Une seule
+adresse pour toutes les langues : la page prend celle du navigateur
+(textes dans `src/invitation/textes.ts`).
+
 ## Publication
 
 Le site est en ligne sur **https://dropletmesh.app**, publié par Vercel :

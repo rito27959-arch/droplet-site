@@ -244,9 +244,10 @@ canvas {
   transform: translateY(-1px);
 }
 
-[dir='rtl'] .lien-fleche::after {
-  content: '‹';
-}
+/* En arabe, rien à faire : « › » est un caractère « miroir », que le
+   navigateur retourne tout seul dans un texte de droite à gauche. Le
+   remplacer par « ‹ » le faisait retourner deux fois — la flèche pointait
+   à rebours. */
 
 /* ── Apparition au défilement ─────────────────────────────────────
    Réservée aux titres de section : un léger lever, une seule fois.

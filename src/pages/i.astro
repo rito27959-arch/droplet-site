@@ -1,0 +1,312 @@
+---
+// LA PAGE D'INVITATION — dropletmesh.app/i/#…
+//
+// L'application fabrique ce lien quand quelqu'un « partage son lien
+// d'invitation » (voir `invitation.dart`). Tout ce qui identifie celui qui
+// invite (identifiant, pseudo, clé publique) est APRÈS le « # » : un
+// navigateur n'envoie jamais cette partie au serveur. Vercel ne reçoit donc
+// qu'une demande de page vide ; c'est le script ci-dessous, sur le
+// téléphone de l'invité, qui lit l'invitation et propose de l'ouvrir dans
+// Droplet (`droplet://droplet/invite?d=…`).
+//
+// Une seule adresse pour toutes les langues : celui qui invite ne sait pas
+// quelle langue lit celui qui reçoit. Le navigateur de l'invité choisit.
+import '@fontsource-variable/inter-tight';
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+import Logo from '../components/Logo.astro';
+import { LIEN_ANDROID } from '../config';
+import { BASE } from '../i18n';
+import { CLE_STOCKAGE, COULEURS } from '../couleurs';
+import { TEXTES_INVITATION } from '../invitation/textes';
+
+const t = TEXTES_INVITATION.fr;
+const teintes = Object.fromEntries(COULEURS.map((c) => [c.cle, c.hex]));
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Droplet</title>
+    <!-- Une invitation est personnelle : elle n'a rien à faire dans Google. -->
+    <meta name="robots" content="noindex" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="theme-color" content="#000000" />
+    <meta property="og:title" content="Droplet" />
+    <meta property="og:description" content={t.texte} />
+    <meta property="og:image" content={new URL(`${BASE}/apercu.png`, Astro.site)} />
+    <link rel="icon" href={`${BASE}/favicon.svg`} type="image/svg+xml" />
+    <script is:inline define:vars={{ teintes, cle: CLE_STOCKAGE }}>
+      try {
+        const c = localStorage.getItem(cle);
+        if (c && teintes[c]) document.documentElement.style.setProperty('--goutte', teintes[c]);
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <main class="inv fond-noir" data-inv>
+      <div class="inv__ondes" aria-hidden="true"><span></span><span></span><span></span></div>
+
+      <div class="inv__carte">
+        <a class="inv__marque" href={`${BASE}/`}><Logo taille={22} /> Droplet</a>
+
+        <div class="inv__avatar" aria-hidden="true" data-avatar>
+          <Logo taille={44} />
+        </div>
+
+        <h1 class="inv__titre" data-titre>{t.titreSansNom}</h1>
+        <p class="inv__texte" data-texte>{t.texte}</p>
+
+        <!-- Sur un téléphone Android, avec une invitation lisible. -->
+        <div class="inv__actions" data-bloc="android" hidden>
+          <a class="bouton inv__ouvrir" data-ouvrir href="#">{t.ouvrir}</a>
+          <div class="inv__aide">
+            <p class="inv__aide-titre" data-t="pasEncore">{t.pasEncore}</p>
+            <ol data-etapes>
+              {t.etapes.map((e) => <li>{e}</li>)}
+            </ol>
+            <a class="lien-fleche" href={LIEN_ANDROID} data-t="telecharger">{t.telecharger}</a>
+          </div>
+        </div>
+
+        <!-- Sur un ordinateur ou un iPhone. -->
+        <div class="inv__actions" data-bloc="ailleurs" hidden>
+          <p class="inv__note" data-t="bureau">{t.bureau}</p>
+          <a class="lien-fleche" href={`${BASE}/`} data-t="decouvrir">{t.decouvrir}</a>
+        </div>
+
+        <!-- Lien abîmé ou coupé. -->
+        <div class="inv__actions" data-bloc="invalide" hidden>
+          <p class="inv__note" data-t="invalide">{t.invalide}</p>
+          <a class="lien-fleche" href={`${BASE}/`} data-t="decouvrir">{t.decouvrir}</a>
+        </div>
+
+        <p class="inv__prive">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7.5" rx="2" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>
+          <span data-t="prive">{t.prive}</span>
+        </p>
+      </div>
+    </main>
+
+    <noscript>
+      <style>[data-bloc='android'] { display: block !important; }</style>
+    </noscript>
+
+    <script>
+      import { TEXTES_INVITATION } from '../invitation/textes';
+
+      type Langue = keyof typeof TEXTES_INVITATION;
+      const langues = Object.keys(TEXTES_INVITATION) as Langue[];
+
+      // La langue de l'invité : la première de ses préférences qu'on parle.
+      const langue: Langue =
+        (navigator.languages ?? [navigator.language])
+          .map((l) => l.slice(0, 2).toLowerCase() as Langue)
+          .find((l) => langues.includes(l)) ?? 'en';
+      const t = TEXTES_INVITATION[langue];
+      document.documentElement.lang = langue;
+      document.documentElement.dir = langue === 'ar' ? 'rtl' : 'ltr';
+
+      const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+      document.querySelectorAll<HTMLElement>('[data-t]').forEach((el) => {
+        el.textContent = t[el.dataset.t as 'prive'] as string;
+      });
+      $('[data-texte]').textContent = t.texte;
+      $('[data-etapes]').replaceChildren(
+        ...t.etapes.map((e) => Object.assign(document.createElement('li'), { textContent: e })),
+      );
+      $('[data-ouvrir]').textContent = t.ouvrir;
+
+      // L'invitation, lue dans le fragment : mêmes règles que l'application
+      // (type « droplet_onion », version 1, identifiant et pseudo présents).
+      const donnees = location.hash.slice(1);
+      let pseudo: string | null = null;
+      try {
+        if (donnees && donnees.length <= 4096) {
+          const b64 = donnees.replace(/-/g, '+').replace(/_/g, '/');
+          const octets = Uint8Array.from(atob(b64 + '='.repeat((4 - (b64.length % 4)) % 4)), (c) => c.charCodeAt(0));
+          const qr = JSON.parse(new TextDecoder().decode(octets));
+          if (qr?.type === 'droplet_onion' && qr.version === 1 && qr.id && typeof qr.pseudo === 'string') {
+            pseudo = qr.pseudo.trim().slice(0, 40) || null;
+          }
+        }
+      } catch {
+        pseudo = null;
+      }
+
+      const android = /android/i.test(navigator.userAgent);
+      const bloc = !pseudo ? 'invalide' : android ? 'android' : 'ailleurs';
+      $(`[data-bloc="${bloc}"]`).hidden = false;
+
+      if (pseudo) {
+        $('[data-titre]').textContent = t.titre.replace('{nom}', pseudo);
+        // L'initiale de celui qui invite, à la place de la goutte.
+        const initiale = [...pseudo][0]?.toUpperCase() ?? '';
+        const avatar = $('[data-avatar]');
+        avatar.textContent = initiale;
+        avatar.classList.add('inv__avatar--initiale');
+        $<HTMLAnchorElement>('[data-ouvrir]').href = `droplet://droplet/invite?d=${encodeURIComponent(donnees)}`;
+        document.title = `${t.titre.replace('{nom}', pseudo)} · Droplet`;
+      } else {
+        $('[data-titre]').textContent = t.titreSansNom;
+      }
+      $('[data-inv]').classList.add('est-prete');
+    </script>
+  </body>
+</html>
+
+<style>
+  .inv {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    padding: 32px var(--gouttiere) calc(32px + env(safe-area-inset-bottom));
+    overflow: hidden;
+    isolation: isolate;
+    background:
+      radial-gradient(60% 45% at 50% 30%, color-mix(in srgb, var(--goutte) 18%, transparent), transparent 70%),
+      #000;
+  }
+  /* Le texte arrive une fois la langue choisie : pas d'éclair de français
+     pour qui lit en arabe. Sans JavaScript, tout reste visible. */
+  .inv__carte {
+    position: relative;
+    width: min(100%, 420px);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 0.6s var(--ease),
+      transform 0.8s var(--ease-sortie);
+  }
+  .inv.est-prete .inv__carte {
+    opacity: 1;
+    transform: none;
+  }
+  @media (scripting: none) {
+    .inv__carte {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .inv__ondes {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: -1;
+    transform: translateY(-14vh);
+  }
+  .inv__ondes span {
+    grid-area: 1 / 1;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    animation: onde 5s var(--ease) infinite;
+  }
+  .inv__ondes span:nth-child(1) { width: 220px; height: 220px; }
+  .inv__ondes span:nth-child(2) { width: 420px; height: 420px; animation-delay: 0.4s; }
+  .inv__ondes span:nth-child(3) { width: 680px; height: 680px; animation-delay: 0.8s; }
+  @keyframes onde {
+    50% {
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--goutte) 30%, transparent);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .inv__ondes span {
+      animation: none;
+    }
+  }
+
+  .inv__marque {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--f-titre);
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    opacity: 0.9;
+  }
+  .inv__avatar {
+    width: 96px;
+    height: 96px;
+    margin: 44px auto 26px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 20px 60px -10px color-mix(in srgb, var(--goutte) 45%, transparent);
+  }
+  .inv__avatar--initiale {
+    font-family: var(--f-titre);
+    font-size: 2.6rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(140deg, color-mix(in srgb, var(--goutte) 70%, #fff), var(--goutte) 60%, color-mix(in srgb, var(--goutte) 60%, #000));
+  }
+  .inv__titre {
+    font-size: clamp(1.9rem, 1.3rem + 2.6vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.022em;
+  }
+  .inv__texte {
+    margin-top: 14px;
+    font-size: var(--t-1);
+    color: var(--clair-2);
+  }
+  .inv__actions {
+    margin-top: 32px;
+  }
+  .inv__ouvrir {
+    width: 100%;
+    min-height: 52px;
+    font-size: 1.0625rem;
+  }
+  .inv__aide {
+    margin-top: 28px;
+    padding: 20px 22px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    text-align: start;
+  }
+  .inv__aide-titre {
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+  .inv__aide ol {
+    margin: 10px 0 14px;
+    padding-inline-start: 20px;
+    color: var(--clair-2);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .inv__note {
+    color: var(--clair-2);
+    margin-bottom: 18px;
+  }
+  .inv__prive {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 34px;
+    font-size: var(--t-0);
+    color: #86868b;
+    text-align: start;
+  }
+  .inv__prive svg {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    margin-top: 2px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+  }
+</style>
