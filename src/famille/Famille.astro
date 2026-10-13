@@ -1,0 +1,1118 @@
+---
+// LA FAMILLE DROPLET — les trois apps présentées comme Apple présente les
+// siennes sur la page d'iOS : une rangée d'icônes, une scène qui change
+// d'appareil, une phrase, un lien.
+//
+//   • Les onglets défilent tout seuls quand la section est à l'écran : la
+//     barre sous l'icône se remplit, et c'est sa FIN (animationend) qui
+//     passe à l'app suivante — un seul minuteur, celui qu'on voit.
+//   • Toucher un onglet le montre et arrête le défilement ; le bouton
+//     lecture/pause le relance. « Réduire les animations » : jamais de
+//     défilement automatique.
+//   • Les écrans sont du HTML (texte traduit, net à toutes les tailles),
+//     mesurés en largeur de scène (cqw) : ils gardent leurs proportions.
+//   • La lueur du fond prend la couleur de l'app montrée : le rose de
+//     Droplet, le bleu liquide de Droplet Drop.
+//
+// ⚠️ CE COMPOSANT EST LE MÊME SUR LES DEUX SITES (src/famille/) ; seuls les
+// liens, passés en propriétés, changent.
+import { famille, type LangueFamille } from './textes';
+
+interface Lien { href: string; texte: string; principal?: boolean }
+interface Props {
+  langue: LangueFamille;
+  /** L'app du site qui affiche la section : elle est montrée en premier. */
+  ici: 'droplet' | 'web' | 'drop';
+  liens: { droplet: Lien; web: Lien; drop: Lien };
+  /** L'icône de Droplet Drop (image), relative à la racine du site. */
+  iconeDrop: string;
+}
+const { langue, ici, liens, iconeDrop } = Astro.props;
+const t = famille[langue];
+
+const apps = [
+  { cle: 'droplet', nom: 'Droplet', accroche: t.dropletAccroche, texte: t.dropletTexte, plateformes: t.dropletPlateformes },
+  { cle: 'web', nom: 'Droplet Web', accroche: t.webAccroche, texte: t.webTexte, plateformes: t.webPlateformes },
+  { cle: 'drop', nom: 'Droplet Drop', accroche: t.dropAccroche, texte: t.dropTexte, plateformes: t.dropPlateformes },
+] as const;
+const premier = apps.findIndex((a) => a.cle === ici);
+
+// Le tracé de Droplet : la bulle et sa goutte (le même que Logo.astro).
+const BULLE = 'M26.16 48.79A20 20 0 1 0 15.68 40L12.5 52.5Z';
+const GOUTTE = 'M33 17.5C37.2 23 41.3 27 41.3 32.4a8.3 8.3 0 0 1-16.6 0C24.7 27 28.8 23 33 17.5Z';
+// Le vocal : une onde fixe (pas de hasard, la page est la même pour tous).
+const ondes = [30, 55, 80, 45, 95, 60, 35, 70, 90, 50, 25, 65, 85, 40, 60, 30, 50, 75, 45, 30];
+const vignettes = ['#ffb36b,#ff5d8f', '#53d1ff,#2b6bff', '#8de08a,#1c9e6a', '#ffd86b,#ff8a3d', '#b58cff,#5b5bf0', '#5ce1e6,#2b8cff'];
+---
+<section id="famille" class="famille" data-famille data-actif={ici} aria-labelledby="famille-titre">
+  <div class="famille__tete">
+    <h2 id="famille-titre" class="famille__titre">{t.titre}</h2>
+    <p class="famille__chapo">{t.chapo}</p>
+  </div>
+
+  <div class="famille__onglets" role="tablist" aria-label={t.titre}>
+    {apps.map((a, i) => (
+      <button
+        class:list={['onglet', { 'est-actif': i === premier }]}
+        type="button"
+        role="tab"
+        id={`famille-onglet-${a.cle}`}
+        aria-controls={`famille-scene-${a.cle}`}
+        aria-selected={i === premier ? 'true' : 'false'}
+        tabindex={i === premier ? 0 : -1}
+        data-onglet={a.cle}
+      >
+        <span class:list={['icone', `icone--${a.cle}`]} aria-hidden="true">
+          {a.cle === 'drop' ? (
+            <img src={iconeDrop} width="64" height="64" alt="" />
+          ) : (
+            <svg viewBox="0 0 64 64">
+              <path d={BULLE} class="icone__bulle" />
+              <path d={GOUTTE} class="icone__goutte" />
+              {a.cle === 'web' && <rect x="9" y="9" width="46" height="46" rx="9" class="icone__cadre" />}
+            </svg>
+          )}
+        </span>
+        <span class="onglet__nom">{a.nom}</span>
+        {a.cle === ici && <span class="onglet__ici">{t.ici}</span>}
+        <span class="onglet__barre" aria-hidden="true"><i></i></span>
+      </button>
+    ))}
+    <button class="famille__lecture" type="button" data-lecture aria-label={t.pause} data-texte-lecture={t.lecture} data-texte-pause={t.pause}>
+      <svg viewBox="0 0 24 24" class="pause" aria-hidden="true"><rect x="7" y="5.5" width="3.4" height="13" rx="1.2" /><rect x="13.6" y="5.5" width="3.4" height="13" rx="1.2" /></svg>
+      <svg viewBox="0 0 24 24" class="lecture" aria-hidden="true"><path d="M8 5.8v12.4a1 1 0 0 0 1.5.86l10-6.2a1 1 0 0 0 0-1.72l-10-6.2A1 1 0 0 0 8 5.8z" /></svg>
+    </button>
+  </div>
+
+  <div class="famille__scene" aria-live="off">
+    <!-- ───── Droplet : le téléphone, et deux voisins qui relaient ───── -->
+    <div class:list={['scene', 'scene--droplet', { 'est-actif': ici === 'droplet' }]} id="famille-scene-droplet" role="tabpanel" aria-labelledby="famille-onglet-droplet" data-scene="droplet">
+      <svg class="relais" viewBox="0 0 100 62.5" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M12 44 Q 24 22 38 34" />
+        <path d="M62 34 Q 76 22 88 44" />
+      </svg>
+      <span class="voisin voisin--g" aria-hidden="true"></span>
+      <span class="voisin voisin--d" aria-hidden="true"></span>
+      <div class="tel tel--droplet" aria-hidden="true">
+        <div class="tel__ecran ecran-droplet">
+          <div class="d-tete">
+            <span class="d-avatar">A</span>
+            <span><b>Amina</b><small>{t.portee}</small></span>
+          </div>
+          <div class="d-fil">
+            <p class="d-vocal"><i></i><span>{ondes.map((h) => <b style={`height: ${h}%`}></b>)}</span><small>0:12</small></p>
+            <p class="d-photo"><span></span></p>
+            <p class="d-bulle d-bulle--recu">{t.m1}</p>
+            <p class="d-bulle d-bulle--envoye">{t.m2}</p>
+            <p class="d-relais">{t.relais}</p>
+            <p class="d-bulle d-bulle--recu">{t.m3}</p>
+          </div>
+          <div class="d-saisie"><span>{t.saisie}</span><i></i></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───── Droplet Web : la fenêtre du navigateur ───── -->
+    <div class:list={['scene', 'scene--web', { 'est-actif': ici === 'web' }]} id="famille-scene-web" role="tabpanel" aria-labelledby="famille-onglet-web" data-scene="web">
+      <div class="fenetre" aria-hidden="true">
+        <div class="fenetre__barre">
+          <span class="feux"><i></i><i></i><i></i></span>
+          <span class="adresse">web.dropletmesh.app</span>
+        </div>
+        <div class="w-corps">
+          <ul class="w-liste">
+            <li class="est-ouverte"><span class="d-avatar">A</span><span><b>Amina</b><small>{t.m3}</small></span></li>
+            <li><span class="d-avatar d-avatar--2">F</span><span><b>{t.famille}</b><small><i style="width: 70%"></i></small></span></li>
+            <li><span class="d-avatar d-avatar--3">S</span><span><b>Sami</b><small><i style="width: 52%"></i></small></span></li>
+            <li><span class="d-avatar d-avatar--4">V</span><span><b>{t.voisins}</b><small><i style="width: 62%"></i></small></span></li>
+          </ul>
+          <div class="w-discussion">
+            <div class="d-tete d-tete--web"><span class="d-avatar">A</span><span><b>Amina</b><small>{t.portee}</small></span></div>
+            <div class="d-fil">
+              <p class="d-vocal"><i></i><span>{ondes.map((h) => <b style={`height: ${h}%`}></b>)}</span><small>0:12</small></p>
+              <p class="d-photo"><span></span></p>
+              <p class="d-bulle d-bulle--recu">{t.m1}</p>
+              <p class="d-bulle d-bulle--envoye">{t.m2}</p>
+              <p class="d-bulle d-bulle--recu">{t.m3}</p>
+            </div>
+            <div class="d-saisie"><span>{t.saisie}</span><i></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───── Droplet Drop : l'ordinateur qui envoie, le téléphone qui reçoit ───── -->
+    <div class:list={['scene', 'scene--drop', { 'est-actif': ici === 'drop' }]} id="famille-scene-drop" role="tabpanel" aria-labelledby="famille-onglet-drop" data-scene="drop">
+      <div class="fenetre fenetre--drop" aria-hidden="true">
+        <div class="fenetre__barre"><span class="feux"><i></i><i></i><i></i></span></div>
+        <div class="p-corps">
+          <div class="p-tete"><img src={iconeDrop} alt="" width="40" height="40" /><b>Droplet Drop</b></div>
+          <span class="p-envoyer">{t.envoyer}</span>
+          <span class="p-recevoir">{t.recevoir}</span>
+          <p class="p-section">{t.proximite}</p>
+          <span class="p-appareil"><i></i><b>{t.portable}</b></span>
+          <span class="p-appareil"><i class="p-i2"></i><b>Sami · Android</b></span>
+          <span class="p-appareil"><i class="p-i3"></i><b>{t.bureau}</b></span>
+        </div>
+      </div>
+      <div class="tel tel--drop" aria-hidden="true">
+        <div class="tel__ecran ecran-drop">
+          <svg class="anneau" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" class="anneau__fond" /><circle cx="60" cy="60" r="50" class="anneau__plein" /><path d="M41 61l13 13 26-28" class="anneau__coche" /></svg>
+          <p>{t.verifie}</p>
+          <div class="p-vignettes">{vignettes.map((v) => <span style={`background: linear-gradient(135deg, ${v})`}></span>)}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="famille__infos">
+    {apps.map((a) => (
+      <div class:list={['info', { 'est-actif': a.cle === ici }]} data-info={a.cle}>
+        <p class="info__texte"><strong>{a.accroche}</strong> {a.texte}</p>
+        <div class="info__action">
+          <p class="info__plateformes">{a.plateformes}</p>
+          <a class:list={[liens[a.cle].principal ? 'famille__bouton' : 'famille__lien']} href={liens[a.cle].href}>{liens[a.cle].texte}</a>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  /* La lueur, animée d'une app à l'autre. */
+  @property --lueur {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #ff2d55;
+  }
+  .famille {
+    --rose: #ff2d55;
+    --bleu: #168bff;
+    --cyan: #34d8ff;
+    --duree: 7s;
+    --lueur: var(--rose);
+    position: relative;
+    padding: clamp(96px, 12vw, 160px) 0 clamp(88px, 11vw, 140px);
+    overflow: hidden;
+    color: #f5f5f7;
+    text-align: center;
+    background:
+      radial-gradient(48% 42% at 50% 62%, color-mix(in srgb, var(--lueur) 24%, transparent), transparent 72%),
+      #05070c;
+    transition: --lueur 0.9s ease;
+  }
+  .famille[data-actif='drop'] {
+    --lueur: var(--bleu);
+  }
+  .famille__tete {
+    width: min(100% - 40px, 820px);
+    margin-inline: auto;
+  }
+  .famille__titre {
+    font-size: clamp(2.6rem, 1.2rem + 4.6vw, 5rem);
+    line-height: 1.05;
+    letter-spacing: -0.026em;
+    font-weight: 650;
+  }
+  .famille__chapo {
+    margin: 18px auto 0;
+    max-width: 34rem;
+    font-size: clamp(1.1875rem, 1rem + 0.5vw, 1.3125rem);
+    line-height: 1.4;
+    color: #a1a1a6;
+  }
+
+  /* ── Les onglets ───────────────────────────────────────────────── */
+  .famille__onglets {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: clamp(18px, 4vw, 48px);
+    margin-top: clamp(40px, 5vw, 60px);
+    padding-inline: 20px;
+  }
+  .onglet {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    width: clamp(84px, 12vw, 116px);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 0.3s;
+  }
+  .onglet:hover,
+  .onglet.est-actif {
+    opacity: 1;
+  }
+  .icone {
+    display: grid;
+    place-items: center;
+    width: clamp(52px, 6vw, 64px);
+    aspect-ratio: 1;
+    border-radius: 23.5%;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .onglet.est-actif .icone {
+    transform: scale(1.06);
+  }
+  .icone img,
+  .icone svg {
+    width: 100%;
+    height: 100%;
+  }
+  /* Droplet : la bulle blanche sur le rose. */
+  .icone--droplet {
+    background: linear-gradient(160deg, #ff5a7a, #ff2d55 55%, #e0123d);
+  }
+  .icone--droplet .icone__bulle,
+  .icone--web .icone__bulle {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 5.2;
+    stroke-linejoin: round;
+    transform: scale(0.72);
+    transform-origin: 50% 50%;
+  }
+  .icone--droplet .icone__goutte,
+  .icone--web .icone__goutte {
+    fill: #fff;
+    transform: scale(0.72);
+    transform-origin: 50% 50%;
+  }
+  /* Droplet Web : la même bulle, en rose sur la nuit, dans un écran. */
+  .icone--web {
+    background: linear-gradient(160deg, #2a2a30, #121216);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+  .icone--web .icone__bulle {
+    stroke: var(--rose);
+    transform: scale(0.56);
+  }
+  .icone--web .icone__goutte {
+    fill: var(--rose);
+    transform: scale(0.56);
+  }
+  .icone__cadre {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.35);
+    stroke-width: 2;
+  }
+  .onglet__nom {
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .onglet__ici {
+    position: absolute;
+    top: -22px;
+    font-size: 0.6875rem;
+    color: #86868b;
+    white-space: nowrap;
+  }
+  .onglet__barre {
+    width: 100%;
+    height: 3px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    opacity: 0;
+  }
+  .onglet__barre i {
+    display: block;
+    height: 100%;
+    width: 100%;
+    border-radius: inherit;
+    background: #f5f5f7;
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  :global([dir='rtl']) .onglet__barre i {
+    transform-origin: right;
+  }
+  .onglet.est-actif .onglet__barre {
+    opacity: 1;
+  }
+  /* En lecture : la barre de l'onglet actif se remplit, et sa fin passe la
+     main à l'app suivante (voir le script). */
+  .famille.est-en-lecture .onglet.est-actif .onglet__barre i {
+    animation: remplir var(--duree) linear forwards;
+  }
+  .famille.est-suspendue .onglet.est-actif .onglet__barre i {
+    animation-play-state: paused;
+  }
+  .famille:not(.est-en-lecture) .onglet.est-actif .onglet__barre i {
+    transform: scaleX(1);
+  }
+  @keyframes remplir {
+    to {
+      transform: scaleX(1);
+    }
+  }
+  .famille__lecture {
+    align-self: center;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    margin-top: -24px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #f5f5f7;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  .famille__lecture:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+  .famille__lecture svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+  .famille__lecture .lecture,
+  .famille:not(.est-en-lecture) .famille__lecture .pause {
+    display: none;
+  }
+  .famille:not(.est-en-lecture) .famille__lecture .lecture {
+    display: block;
+  }
+  .onglet:focus-visible,
+  .famille__lecture:focus-visible {
+    outline: 2px solid #2997ff;
+    outline-offset: 4px;
+    border-radius: 14px;
+  }
+
+  /* ── La scène ───────────────────────────────────────────────────── */
+  .famille__scene {
+    position: relative;
+    width: min(100% - 40px, 1080px);
+    aspect-ratio: 16 / 10;
+    margin: clamp(32px, 4vw, 52px) auto 0;
+    container-type: inline-size;
+  }
+  .scene {
+    --u: 1cqw;
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.96) translateY(2%);
+    transition:
+      opacity 0.6s ease,
+      transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0s 0.6s;
+  }
+  .scene.est-actif {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+      opacity 0.6s 0.1s ease,
+      transform 0.9s 0.1s cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0s;
+  }
+
+  /* Le téléphone, mesuré en largeur de scène. */
+  .tel {
+    position: absolute;
+    width: calc(var(--u) * 27);
+    aspect-ratio: 9 / 19.5;
+    padding: calc(var(--u) * 0.7);
+    border-radius: calc(var(--u) * 4.4);
+    background: linear-gradient(140deg, #5d5f66, #1a1b1e 40%, #2e3035 80%, #64666d);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+      0 calc(var(--u) * 4) calc(var(--u) * 7) calc(var(--u) * -2) rgba(0, 0, 0, 0.7);
+  }
+  .tel__ecran {
+    height: 100%;
+    border-radius: calc(var(--u) * 3.7);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    font-size: calc(var(--u) * 1.32);
+    line-height: 1.3;
+    text-align: start;
+  }
+  .tel--droplet {
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: calc(var(--u) * 28.8);
+  }
+
+  /* Les écrans de Droplet (le téléphone et la fenêtre web). */
+  .ecran-droplet,
+  .w-discussion {
+    background: #000;
+    color: #f5f5f7;
+  }
+  .d-tete {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    padding: 3.6em 1.1em 0.9em;
+    background: rgba(28, 28, 30, 0.9);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .d-tete--web {
+    padding-top: 0.9em;
+  }
+  .d-tete b,
+  .w-liste b {
+    display: block;
+    font-weight: 600;
+  }
+  .d-tete small {
+    display: block;
+    color: #34c759;
+    font-size: 0.78em;
+  }
+  .d-avatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.5em;
+    height: 2.5em;
+    border-radius: 50%;
+    background: linear-gradient(160deg, #ff7a95, #ff2d55);
+    color: #fff;
+    font-weight: 700;
+  }
+  .d-avatar--2 {
+    background: linear-gradient(160deg, #ffd479, #ff9f0a);
+  }
+  .d-avatar--3 {
+    background: linear-gradient(160deg, #7ab8ff, #0a84ff);
+  }
+  .d-avatar--4 {
+    background: linear-gradient(160deg, #7be495, #30d158);
+  }
+  .d-fil {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.5em;
+    padding: 1em;
+  }
+  .d-bulle {
+    max-width: 78%;
+    margin: 0;
+    padding: 0.55em 0.85em;
+    border-radius: 1.2em;
+  }
+  .d-bulle--recu {
+    align-self: flex-start;
+    background: #262628;
+    border-bottom-left-radius: 0.35em;
+  }
+  .d-bulle--envoye {
+    align-self: flex-end;
+    background: var(--rose);
+    color: #fff;
+    border-bottom-right-radius: 0.35em;
+  }
+  /* Un vocal reçu, une photo envoyée : le fil d'une vraie conversation. */
+  .d-vocal {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    margin: 0;
+    padding: 0.5em 0.85em 0.5em 0.5em;
+    border-radius: 1.2em;
+    background: #262628;
+    color: #8e8e93;
+    font-size: 0.85em;
+  }
+  .d-vocal i {
+    width: 1.9em;
+    height: 1.9em;
+    border-radius: 50%;
+    background: var(--rose);
+  }
+  .d-vocal span {
+    display: flex;
+    align-items: center;
+    gap: 0.16em;
+    height: 1.7em;
+  }
+  .d-vocal b {
+    width: 0.2em;
+    border-radius: 1em;
+    background: #c7c7cc;
+  }
+  .d-photo {
+    align-self: flex-end;
+    width: 52%;
+    margin: 0;
+    padding: 0.25em;
+    border-radius: 1.2em;
+    background: var(--rose);
+  }
+  .d-photo span {
+    display: block;
+    aspect-ratio: 4 / 3;
+    border-radius: 1em;
+    background:
+      radial-gradient(30% 40% at 70% 30%, #ffe6a8, transparent 70%),
+      linear-gradient(170deg, #ff9a62 0%, #ff5d8f 45%, #6b3fd9 100%);
+  }
+  .w-discussion .d-photo {
+    width: 22%;
+  }
+  .d-relais {
+    margin: 0;
+    align-self: flex-end;
+    font-size: 0.72em;
+    color: #8e8e93;
+  }
+  .d-saisie {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    margin: 0 0.9em 1.5em;
+    padding: 0.55em 0.55em 0.55em 1em;
+    border-radius: 2em;
+    background: #1c1c1e;
+    color: #8e8e93;
+  }
+  .d-saisie span {
+    flex: 1;
+  }
+  .d-saisie i {
+    width: 1.9em;
+    height: 1.9em;
+    border-radius: 50%;
+    background: var(--rose);
+  }
+
+  /* Les voisins qui relaient : deux silhouettes, et un pointillé qui court. */
+  .voisin {
+    position: absolute;
+    top: 46%;
+    width: calc(var(--u) * 10);
+    aspect-ratio: 9 / 19.5;
+    border-radius: calc(var(--u) * 1.8);
+    background: linear-gradient(160deg, #2a2a30, #121216);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  }
+  .voisin::after {
+    content: '';
+    position: absolute;
+    inset: 38% 30%;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--rose) 70%, transparent);
+    filter: blur(calc(var(--u) * 0.8));
+  }
+  .voisin--g {
+    left: 5%;
+  }
+  .voisin--d {
+    right: 5%;
+  }
+  .relais {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .relais path {
+    fill: none;
+    stroke: var(--rose);
+    stroke-width: 0.35;
+    stroke-dasharray: 0.6 1.4;
+    stroke-linecap: round;
+    vector-effect: none;
+    animation: courir 1.6s linear infinite;
+  }
+  @keyframes courir {
+    to {
+      stroke-dashoffset: -4;
+    }
+  }
+
+  /* La fenêtre (navigateur, application de bureau). */
+  .fenetre {
+    position: absolute;
+    left: 50%;
+    top: 4%;
+    width: calc(var(--u) * 86);
+    height: calc(var(--u) * 54);
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    border-radius: calc(var(--u) * 1.4);
+    overflow: hidden;
+    background: #000;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 calc(var(--u) * 4) calc(var(--u) * 8) calc(var(--u) * -2) rgba(0, 0, 0, 0.8);
+    font-size: calc(var(--u) * 1.15);
+    line-height: 1.3;
+    text-align: start;
+  }
+  .fenetre__barre {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    height: 2.8em;
+    padding: 0 1em;
+    background: #1c1c1e;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .feux {
+    display: flex;
+    gap: 0.45em;
+  }
+  .feux i {
+    width: 0.85em;
+    height: 0.85em;
+    border-radius: 50%;
+    background: #ff5f57;
+  }
+  .feux i:nth-child(2) {
+    background: #febc2e;
+  }
+  .feux i:nth-child(3) {
+    background: #28c840;
+  }
+  .adresse {
+    flex: 0 1 36%;
+    margin-inline: auto;
+    padding: 0.3em 0.8em;
+    border-radius: 0.6em;
+    background: #2c2c2e;
+    color: #a1a1a6;
+    font-size: 0.9em;
+    text-align: center;
+  }
+  .w-corps {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 32% 1fr;
+    min-height: 0;
+  }
+  .w-liste {
+    list-style: none;
+    margin: 0;
+    padding: 0.6em;
+    background: #0d0d0f;
+    border-inline-end: 1px solid rgba(255, 255, 255, 0.08);
+    color: #f5f5f7;
+  }
+  .w-liste li {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    padding: 0.65em;
+    border-radius: 0.8em;
+  }
+  .w-liste li > span:last-child {
+    min-width: 0;
+    flex: 1;
+  }
+  .w-liste li.est-ouverte {
+    background: #1c1c1e;
+  }
+  .w-liste small {
+    display: block;
+    color: #8e8e93;
+    font-size: 0.85em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .w-liste small i {
+    display: block;
+    height: 0.6em;
+    margin-top: 0.35em;
+    border-radius: 1em;
+    background: #2c2c2e;
+  }
+  .w-discussion {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .w-discussion .d-fil {
+    padding-inline: 2em;
+  }
+  .w-discussion .d-bulle {
+    max-width: 62%;
+  }
+  .w-discussion .d-saisie {
+    margin: 0 1.6em 1.2em;
+  }
+
+  /* Droplet Drop : l'app de bureau, et le téléphone qui reçoit. */
+  .fenetre--drop {
+    left: 6%;
+    top: 6%;
+    width: calc(var(--u) * 64);
+    height: calc(var(--u) * 50);
+    transform: none;
+    background:
+      radial-gradient(90% 60% at 0% 0%, rgba(22, 139, 255, 0.18), transparent 60%),
+      #080c16;
+  }
+  .p-corps {
+    flex: 1;
+    display: grid;
+    align-content: start;
+    gap: 0.75em;
+    width: 58%;
+    margin: 2.2em auto 0;
+    color: #f7f9fc;
+  }
+  .p-tete {
+    display: flex;
+    align-items: center;
+    gap: 0.8em;
+    font-size: 1.5em;
+    letter-spacing: -0.02em;
+  }
+  .p-tete img {
+    width: 1.9em;
+    height: 1.9em;
+    border-radius: 0.45em;
+  }
+  .p-envoyer,
+  .p-recevoir {
+    display: grid;
+    place-items: center;
+    height: 3.2em;
+    border-radius: 1em;
+    font-weight: 650;
+  }
+  .p-envoyer {
+    margin-top: 0.6em;
+    background: linear-gradient(135deg, var(--bleu), var(--cyan));
+    color: #fff;
+  }
+  .p-recevoir {
+    background: #141b28;
+    color: #4da8ff;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+  .p-section {
+    margin: 0.8em 0 0;
+    font-weight: 650;
+  }
+  .p-appareil {
+    display: flex;
+    align-items: center;
+    gap: 0.8em;
+    padding: 0.7em 0.9em;
+    border-radius: 1em;
+    background: #141b28;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+  .p-appareil i {
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    background: linear-gradient(160deg, #4da8ff, #168bff);
+  }
+  .p-appareil .p-i2 {
+    background: linear-gradient(160deg, #8c95ff, #4855e8);
+  }
+  .p-appareil .p-i3 {
+    background: linear-gradient(160deg, #5ce1e6, #12b8e0);
+  }
+  .p-appareil b {
+    font-weight: 600;
+  }
+  .tel--drop {
+    right: 6%;
+    top: 3%;
+    width: calc(var(--u) * 26);
+  }
+  .ecran-drop {
+    align-items: center;
+    justify-content: center;
+    gap: 1.2em;
+    padding: 1.4em;
+    background:
+      radial-gradient(120% 60% at 0% 0%, rgba(22, 139, 255, 0.18), transparent 60%),
+      #080c16;
+    color: #f7f9fc;
+    text-align: center;
+  }
+  .ecran-drop p {
+    margin: 0;
+    font-weight: 650;
+  }
+  .anneau {
+    width: 52%;
+    transform: rotate(-90deg);
+  }
+  .anneau circle {
+    fill: none;
+    stroke-width: 7;
+  }
+  .anneau__fond {
+    stroke: #202a39;
+  }
+  .anneau__plein {
+    stroke: var(--cyan);
+    stroke-linecap: round;
+    stroke-dasharray: 315;
+    stroke-dashoffset: 315;
+  }
+  .anneau__coche {
+    fill: none;
+    stroke: var(--cyan);
+    stroke-width: 7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    transform: rotate(90deg);
+    transform-origin: 60px 60px;
+  }
+  /* Quand la scène apparaît, l'anneau se remplit puis la coche se dessine. */
+  .scene--drop.est-actif .anneau__plein {
+    animation: anneau 1.6s 0.4s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  }
+  .scene--drop.est-actif .anneau__coche {
+    animation: coche 0.5s 2s ease-out forwards;
+  }
+  @keyframes anneau {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes coche {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  .p-vignettes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4em;
+    width: 100%;
+  }
+  .p-vignettes span {
+    aspect-ratio: 1;
+    border-radius: 0.6em;
+  }
+
+  /* ── Sous la scène : la phrase et l'action ─────────────────────── */
+  .famille__infos {
+    display: grid;
+    width: min(100% - 40px, 980px);
+    margin: clamp(28px, 4vw, 48px) auto 0;
+    text-align: start;
+  }
+  .info {
+    grid-area: 1 / 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 24px clamp(28px, 6vw, 80px);
+    align-items: start;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition:
+      opacity 0.4s ease,
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0s 0.4s;
+  }
+  .info.est-actif {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+      opacity 0.5s 0.15s ease,
+      transform 0.7s 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0s;
+  }
+  .info__texte {
+    margin: 0;
+    font-size: clamp(1.1875rem, 1rem + 0.5vw, 1.3125rem);
+    line-height: 1.42;
+    color: #a1a1a6;
+  }
+  .info__texte strong {
+    color: #f5f5f7;
+    font-weight: 600;
+  }
+  .info__action {
+    display: grid;
+    justify-items: start;
+    gap: 14px;
+  }
+  .info__plateformes {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #86868b;
+  }
+  .famille__bouton {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 22px;
+    border-radius: 980px;
+    background: var(--lueur);
+    color: #fff;
+    font-weight: 500;
+    text-decoration: none;
+    transition: filter 0.2s;
+  }
+  .famille__bouton:hover {
+    filter: brightness(1.08);
+  }
+  .famille__lien {
+    color: #2997ff;
+    text-decoration: none;
+  }
+  .famille__lien::after {
+    content: ' ›';
+  }
+  .famille__lien:hover {
+    text-decoration: underline;
+  }
+
+  /* ── Téléphone : une scène plus haute, les appareils plus grands ── */
+  @container (max-width: 640px) {
+    .scene {
+      --u: 1.55cqw;
+    }
+    .voisin,
+    .relais {
+      display: none;
+    }
+    .w-corps {
+      grid-template-columns: 1fr;
+    }
+    .w-liste {
+      display: none;
+    }
+    .fenetre {
+      width: 96cqw;
+      height: calc(var(--u) * 74);
+      top: 0;
+      font-size: calc(var(--u) * 1.55);
+    }
+    .tel__ecran {
+      font-size: calc(var(--u) * 1.5);
+    }
+    .fenetre--drop {
+      left: 0;
+      width: 70cqw;
+      height: calc(var(--u) * 70);
+      font-size: calc(var(--u) * 1.2);
+    }
+    .tel--drop {
+      right: 0;
+      top: 16%;
+      width: calc(var(--u) * 27);
+    }
+  }
+  @media (max-width: 700px) {
+    .famille__scene {
+      aspect-ratio: 6 / 7;
+    }
+    .info {
+      grid-template-columns: 1fr;
+    }
+    .onglet__ici {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scene,
+    .info {
+      transition: none;
+    }
+    .relais path {
+      animation: none;
+    }
+    .anneau__plein,
+    .anneau__coche {
+      stroke-dashoffset: 0;
+    }
+  }
+</style>
+
+<script>
+  // Les onglets : clic, clavier (flèches, Début, Fin), et lecture
+  // automatique pilotée par la barre de progression.
+  document.querySelectorAll<HTMLElement>('[data-famille]').forEach((section) => {
+    const onglets = [...section.querySelectorAll<HTMLButtonElement>('[data-onglet]')];
+    const scenes = [...section.querySelectorAll<HTMLElement>('[data-scene]')];
+    const infos = [...section.querySelectorAll<HTMLElement>('[data-info]')];
+    const bouton = section.querySelector<HTMLButtonElement>('[data-lecture]')!;
+    const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let actif = Math.max(0, onglets.findIndex((o) => o.classList.contains('est-actif')));
+
+    const montrer = (i: number, focus = false) => {
+      actif = (i + onglets.length) % onglets.length;
+      const cle = onglets[actif].dataset.onglet!;
+      section.dataset.actif = cle;
+      onglets.forEach((o, k) => {
+        const oui = k === actif;
+        o.classList.toggle('est-actif', oui);
+        o.setAttribute('aria-selected', String(oui));
+        o.tabIndex = oui ? 0 : -1;
+      });
+      scenes.forEach((s) => s.classList.toggle('est-actif', s.dataset.scene === cle));
+      infos.forEach((s) => s.classList.toggle('est-actif', s.dataset.info === cle));
+      if (focus) onglets[actif].focus();
+    };
+
+    const lecture = (oui: boolean) => {
+      section.classList.toggle('est-en-lecture', oui);
+      bouton.setAttribute('aria-label', oui ? bouton.dataset.textePause! : bouton.dataset.texteLecture!);
+    };
+
+    // La fin du remplissage de la barre : app suivante.
+    section.addEventListener('animationend', (e) => {
+      if ((e as AnimationEvent).animationName.includes('remplir') && section.classList.contains('est-en-lecture')) {
+        montrer(actif + 1);
+      }
+    });
+
+    onglets.forEach((o, i) => {
+      o.addEventListener('click', () => {
+        lecture(false);
+        montrer(i);
+      });
+      o.addEventListener('keydown', (e) => {
+        const rtl = getComputedStyle(section).direction === 'rtl';
+        const pas = { ArrowRight: rtl ? -1 : 1, ArrowLeft: rtl ? 1 : -1 } as Record<string, number>;
+        if (e.key in pas) {
+          e.preventDefault();
+          lecture(false);
+          montrer(actif + pas[e.key], true);
+        } else if (e.key === 'Home' || e.key === 'End') {
+          e.preventDefault();
+          lecture(false);
+          montrer(e.key === 'Home' ? 0 : onglets.length - 1, true);
+        }
+      });
+    });
+    bouton.addEventListener('click', () => lecture(!section.classList.contains('est-en-lecture')));
+
+    // La lecture ne tourne que si la section est à l'écran.
+    if (!reduit) lecture(true);
+    else lecture(false);
+    new IntersectionObserver(([e]) => section.classList.toggle('est-suspendue', !e.isIntersecting), {
+      threshold: 0.35,
+    }).observe(section);
+    section.classList.add('est-suspendue');
+  });
+</script>

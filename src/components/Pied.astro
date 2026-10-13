@@ -56,7 +56,12 @@ const colonnes = [
   },
   {
     titre: t.telecharger,
-    liens: [{ texte: t.lienAndroid, href: LIEN_ANDROID }],
+    liens: [
+      { texte: t.lienAndroid, href: LIEN_ANDROID },
+      // La famille : les deux autres apps, sous leur nom propre.
+      { texte: 'Droplet Web', href: 'https://web.dropletmesh.app' },
+      { texte: 'Droplet Drop', href: langue === 'fr' ? 'https://drop.dropletmesh.app/' : `https://drop.dropletmesh.app/${langue}/` },
+    ],
   },
 ];
 ---

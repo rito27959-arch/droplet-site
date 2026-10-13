@@ -12,13 +12,23 @@ import Fonctions from './Fonctions.astro';
 import Confidentialite from './Confidentialite.astro';
 import Usages from './Usages.astro';
 import Questions from './Questions.astro';
+import Famille from '../famille/Famille.astro';
+import { famille } from '../famille/textes';
+import { LIEN_ANDROID } from '../config';
 import Fin from './Fin.astro';
 import Pied from './Pied.astro';
-import { chemin, textes, type Langue } from '../i18n';
+import { BASE, chemin, textes, type Langue } from '../i18n';
 
 interface Props { langue: Langue }
 const { langue } = Astro.props;
 const t = textes(langue);
+const f = famille[langue];
+// Les liens de la famille, vus depuis dropletmesh.app.
+const liensFamille = {
+  droplet: { href: LIEN_ANDROID, texte: f.telechargerAndroid, principal: true },
+  web: { href: 'https://web.dropletmesh.app', texte: f.ouvrirWeb, principal: true },
+  drop: { href: langue === 'fr' ? 'https://drop.dropletmesh.app/' : `https://drop.dropletmesh.app/${langue}/`, texte: `${f.decouvrir} Droplet Drop` },
+};
 ---
 <Base langue={langue}>
   <Navigation t={t} accueil={chemin(langue)} />
@@ -31,6 +41,7 @@ const t = textes(langue);
     <Fonctions t={t} />
     <Confidentialite t={t} />
     <Usages t={t} />
+    <Famille langue={langue} ici="droplet" liens={liensFamille} iconeDrop={`${BASE}/famille-drop.webp`} />
     <Questions t={t} />
   </main>
   <Fin t={t} langue={langue} />
