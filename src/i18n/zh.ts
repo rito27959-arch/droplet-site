@@ -24,6 +24,12 @@ export const zh: Textes = {
   telM3: '看到你了，马上过来！',
   telRelais: '经 2 部手机转发',
   telSaisie: '消息',
+  telJour: "今天",
+  telA1: "今晚在音乐会见？",
+  telA2: "好！票在我这儿 🎟️",
+  telVoisins: "邻居",
+  telVoisinsMsg: "还有谁家有电吗？",
+  telPhoto: "📷 照片",
 
   parcoursTitre: '一条消息如何找到路',
   parcoursVous: '你',

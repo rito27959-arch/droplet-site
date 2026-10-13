@@ -24,6 +24,12 @@ export const es: Textes = {
   telM3: '¡Te veo, ya voy!',
   telRelais: 'Retransmitido por 2 teléfonos',
   telSaisie: 'Mensaje',
+  telJour: "Hoy",
+  telA1: "¿Nos vemos en el concierto esta noche?",
+  telA2: "¡Sí! Tengo las entradas 🎟️",
+  telVoisins: "Vecinos",
+  telVoisinsMsg: "¿Alguien tiene todavía luz?",
+  telPhoto: "📷 Foto",
 
   parcoursTitre: 'Cómo un mensaje encuentra su camino',
   parcoursVous: 'Tú',

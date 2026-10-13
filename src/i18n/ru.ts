@@ -24,6 +24,12 @@ export const ru: Textes = {
   telM3: 'Вижу тебя, иду!',
   telRelais: 'Передано через 2 телефона',
   telSaisie: 'Сообщение',
+  telJour: "Сегодня",
+  telA1: "Встретимся вечером на концерте?",
+  telA2: "Да! Билеты у меня 🎟️",
+  telVoisins: "Соседи",
+  telVoisinsMsg: "У кого-нибудь ещё есть свет?",
+  telPhoto: "📷 Фото",
 
   parcoursTitre: 'Как сообщение находит дорогу',
   parcoursVous: 'Вы',

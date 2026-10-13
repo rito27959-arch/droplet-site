@@ -24,6 +24,12 @@ export const ar: Textes = {
   telM3: 'أراك، أنا قادمة!',
   telRelais: 'مُرحّلة عبر هاتفين',
   telSaisie: 'رسالة',
+  telJour: "اليوم",
+  telA1: "نلتقي في الحفل الليلة؟",
+  telA2: "نعم! التذاكر معي 🎟️",
+  telVoisins: "الجيران",
+  telVoisinsMsg: "هل ما زالت الكهرباء عند أحد؟",
+  telPhoto: "📷 صورة",
 
   parcoursTitre: 'كيف تجد الرسالة طريقها',
   parcoursVous: 'أنت',

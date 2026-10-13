@@ -132,7 +132,9 @@ const trace = noeuds.map((n, i) => `${i ? 'L' : 'M'}${n.x} ${n.y}`).join(' ');
     display: grid;
     grid-template-columns: 34px 1fr;
     gap: 16px;
-    opacity: 0.28;
+    /* 0,45 et non 0,28 : l'étape en veille reste lisible (contraste AA du
+       titre), seule l'étape active « s'allume ». */
+    opacity: 0.45;
     transition: opacity 0.5s var(--ease);
   }
   .etape.est-active {

@@ -24,6 +24,12 @@ export const de: Textes = {
   telM3: 'Ich seh dich, ich komme!',
   telRelais: 'Über 2 Telefone weitergeleitet',
   telSaisie: 'Nachricht',
+  telJour: "Heute",
+  telA1: "Treffen wir uns heute Abend beim Konzert?",
+  telA2: "Ja! Ich hab die Tickets 🎟️",
+  telVoisins: "Nachbarn",
+  telVoisinsMsg: "Hat jemand noch Strom?",
+  telPhoto: "📷 Foto",
 
   parcoursTitre: 'Wie eine Nachricht ihren Weg findet',
   parcoursVous: 'Du',

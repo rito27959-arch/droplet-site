@@ -23,6 +23,12 @@ export const fr = {
   telM3: "Je te vois, j'arrive !",
   telRelais: 'Relayé par 2 téléphones',
   telSaisie: 'Message',
+  telJour: "Aujourd’hui",
+  telA1: "On se retrouve au concert ce soir\u202f?",
+  telA2: "Oui ! J’ai les billets 🎟️",
+  telVoisins: "Voisins",
+  telVoisinsMsg: "Quelqu’un a encore du courant\u202f?",
+  telPhoto: "📷 Photo",
 
   parcoursTitre: 'Comment un message trouve son chemin',
   parcoursVous: 'Vous',

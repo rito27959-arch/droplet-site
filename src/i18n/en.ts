@@ -24,6 +24,12 @@ export const en: Textes = {
   telM3: 'I can see you, on my way!',
   telRelais: 'Relayed by 2 phones',
   telSaisie: 'Message',
+  telJour: "Today",
+  telA1: "Meet at the concert tonight?",
+  telA2: "Yes! I’ve got the tickets 🎟️",
+  telVoisins: "Neighbours",
+  telVoisinsMsg: "Does anyone still have power?",
+  telPhoto: "📷 Photo",
 
   parcoursTitre: 'How a message finds its way',
   parcoursVous: 'You',

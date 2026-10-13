@@ -42,7 +42,9 @@ const coche = `<svg viewBox="0 0 18 12" class="coche"><path d="M1 6.5 4.5 10 11 
         { nom: t.telNom, apercu: t.telM3, heure: '21:04', nonlus: 2, couleur: 'linear-gradient(135deg,#ff9f0a,#ff375f)', en_ligne: true },
         { nom: t.famille, apercu: `${t.parcoursDest} : 0:12`, heure: '20:41', nonlus: 0, couleur: 'linear-gradient(135deg,#34c759,#30b0c7)', en_ligne: false },
         { nom: t.parcoursDest, apercu: t.confClair, heure: '18:02', nonlus: 0, couleur: 'linear-gradient(135deg,#5e5ce6,#007aff)', en_ligne: false, lu: true },
-        { nom: 'Lina', apercu: t.u4Texte, heure: '20:12', nonlus: 0, couleur: 'linear-gradient(135deg,#bf5af2,#ff375f)', en_ligne: false, lu: true },
+        { nom: t.telVoisins, apercu: t.telVoisinsMsg, heure: '19:30', nonlus: 5, couleur: 'linear-gradient(135deg,#ffd60a,#ff9f0a)', en_ligne: false },
+        { nom: 'Lina', apercu: t.u4Texte, heure: '17:12', nonlus: 0, couleur: 'linear-gradient(135deg,#bf5af2,#ff375f)', en_ligne: false, lu: true },
+        { nom: 'Sami', apercu: t.telPhoto, heure: '16:05', nonlus: 0, couleur: 'linear-gradient(135deg,#64d2ff,#5e5ce6)', en_ligne: true },
       ].map((r) => (
         <div class="ligne">
           <span class="avatar" style={`background:${r.couleur}`}>{r.nom.charAt(0)}{r.en_ligne && <i class="avatar__point" />}</span>
@@ -69,7 +71,15 @@ const coche = `<svg viewBox="0 0 18 12" class="coche"><path d="M1 6.5 4.5 10 11 
       </div>
       <div class="fil">
         <p class="fil__chiffre"><svg viewBox="0 0 24 24" class="fil__cadenas"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>{t.conf1Titre}</p>
-        <span class="fil__vide"></span>
+        <div class="historique">
+          <span class="jour">{t.telJour}</span>
+          <div class="bulle bulle--recue">{t.telA1}<time>18:40</time></div>
+          <div class="bulle bulle--envoyee bulle--reaction">{t.telA2}<time>18:41 <span set:html={coche} /></time><span class="reaction">❤️</span></div>
+          <div class="photo-bulle" role="img" aria-hidden="true">
+            <span class="photo-bulle__scene"></span>
+            <time>18:43 <span set:html={coche} /></time>
+          </div>
+        </div>
         {vue === 'discussion' ? (
           <>
             <div class="bulle bulle--recue a1">{t.telM1}<time>21:02</time></div>
@@ -339,12 +349,85 @@ const coche = `<svg viewBox="0 0 18 12" class="coche"><path d="M1 6.5 4.5 10 11 
     flex: 1;
     display: flex;
     flex-direction: column;
+    justify-content: flex-end;
     gap: 0.4em;
     padding: 0.7em 0.7em 0.6em;
     min-height: 0;
+    overflow: hidden;
   }
-  .fil__vide {
-    flex: 1;
+  /* L'historique de la soirée : la discussion est pleine, comme une vraie
+     capture d'écran, et non un écran vide avec deux bulles en bas. Quand le
+     téléphone est petit, les plus anciens messages sortent par le haut —
+     exactement comme un fil qu'on a fait défiler. */
+  .historique {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+  }
+  .jour {
+    align-self: center;
+    margin: 0.5em 0 0.2em;
+    padding: 0.25em 0.75em;
+    border-radius: 1em;
+    font-size: 0.72em;
+    font-weight: 600;
+    color: var(--texte-2);
+    background: var(--champ);
+  }
+  .bulle--reaction {
+    position: relative;
+    margin-bottom: 0.7em;
+  }
+  .reaction {
+    position: absolute;
+    inset-inline-start: -0.4em;
+    bottom: -0.95em;
+    padding: 0.1em 0.3em;
+    border-radius: 1em;
+    font-size: 0.8em;
+    line-height: 1.2;
+    background: var(--recue);
+    box-shadow: 0 0 0 0.14em var(--fond);
+  }
+  .photo-bulle {
+    position: relative;
+    align-self: flex-end;
+    width: 64%;
+    aspect-ratio: 4 / 3;
+    padding: 0.2em;
+    border-radius: 1.2em 1.2em 0.35em 1.2em;
+    background: var(--goutte);
+    flex: none;
+  }
+  .photo-bulle__scene {
+    position: absolute;
+    inset: 0.2em;
+    border-radius: 1.05em 1.05em 0.25em 1.05em;
+    /* Une scène de concert : faisceaux, halo, foule en contre-jour. */
+    background:
+      radial-gradient(ellipse 30% 22% at 20% 100%, #050208 98%, transparent 100%),
+      radial-gradient(ellipse 26% 20% at 46% 102%, #050208 98%, transparent 100%),
+      radial-gradient(ellipse 30% 24% at 76% 100%, #050208 98%, transparent 100%),
+      radial-gradient(circle at 12% 88%, #050208 0 9%, transparent 9.5%),
+      radial-gradient(circle at 36% 86%, #050208 0 8%, transparent 8.5%),
+      radial-gradient(circle at 62% 87%, #050208 0 8.5%, transparent 9%),
+      radial-gradient(circle at 88% 86%, #050208 0 9%, transparent 9.5%),
+      conic-gradient(from 160deg at 30% -10%, transparent 0 8deg, rgba(255, 214, 10, 0.55) 12deg, transparent 18deg),
+      conic-gradient(from 178deg at 70% -10%, transparent 0 6deg, rgba(100, 210, 255, 0.55) 10deg, transparent 16deg),
+      conic-gradient(from 168deg at 50% -10%, transparent 0 10deg, rgba(255, 55, 95, 0.6) 14deg, transparent 22deg),
+      radial-gradient(ellipse at 50% 70%, #ff375f 0%, #5e1a8a 38%, #12081f 75%);
+  }
+  .photo-bulle time {
+    position: absolute;
+    inset-inline-end: 0.75em;
+    bottom: 0.55em;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1em 0.45em;
+    border-radius: 0.8em;
+    font-size: 0.68em;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.35);
   }
   .fil__chiffre {
     align-self: center;

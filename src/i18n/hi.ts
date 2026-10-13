@@ -24,6 +24,12 @@ export const hi: Textes = {
   telM3: 'तुम दिख रहे हो, आ रही हूँ!',
   telRelais: '2 फ़ोनों से होकर आया',
   telSaisie: 'संदेश',
+  telJour: "आज",
+  telA1: "आज रात कॉन्सर्ट में मिलें?",
+  telA2: "हाँ! टिकट मेरे पास हैं 🎟️",
+  telVoisins: "पड़ोसी",
+  telVoisinsMsg: "क्या किसी के यहाँ अभी बिजली है?",
+  telPhoto: "📷 फ़ोटो",
 
   parcoursTitre: 'एक संदेश अपना रास्ता कैसे ढूँढता है',
   parcoursVous: 'आप',
