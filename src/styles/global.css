@@ -8,7 +8,11 @@
      qu'aux liens du maillage et aux liens texte.
    • Inter Tight pour les titres, Inter pour le texte : la neutralité de SF
      Pro, dont le site ne peut pas se servir.
+   • Toutes ces valeurs viennent de Droplet Design (design/droplet-design.json),
+     la source commune aux apps et aux sites : on les change là, pas ici.
    ========================================================================== */
+
+@import './droplet-design.css';
 
 /* LA COULEUR DU THÈME, ANIMÉE.
    Déclarée comme une vraie couleur (`@property`), elle peut glisser d'une
@@ -24,16 +28,16 @@
 :root {
   --noir: #000;
   --nuit: #050b1c;
-  --gris: #f5f5f7;
+  --gris: var(--dd-clair-fond-groupe);
   --blanc: #fff;
-  --encre: #1d1d1f;
-  --encre-2: #6e6e73;
-  --clair: #f5f5f7;
-  --clair-2: #a1a1a6;
+  --encre: var(--dd-clair-texte);
+  --encre-2: var(--dd-clair-texte-2);
+  --clair: var(--dd-sombre-texte);
+  --clair-2: var(--dd-sombre-texte-2);
   --carte-sombre: #141418;
   /* La goutte : LA couleur du site. Toutes ses nuances en DÉRIVENT, pour
      qu'un seul changement (le sélecteur de couleur) les emporte toutes. */
-  --goutte: #ff2d55;
+  --goutte: var(--dd-goutte);
   --goutte-fonce: color-mix(in srgb, var(--goutte) 86%, #000);
   --goutte-pale: color-mix(in srgb, var(--goutte) 72%, #fff);
   --goutte-nuit: color-mix(in srgb, var(--goutte) 22%, #000);
@@ -53,27 +57,23 @@
   --trait-jour: rgba(0, 0, 0, 0.1);
   --brume: #f5f5f7;
 
-  --f-titre: 'Inter Tight Variable', 'Inter Tight', -apple-system, BlinkMacSystemFont, 'SF Pro Display',
-    'Segoe UI', 'Noto Sans', 'Noto Sans Arabic', 'Noto Sans Devanagari', 'PingFang SC',
-    'Microsoft YaHei', sans-serif;
-  --f-texte: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI',
-    'Noto Sans', 'Noto Sans Arabic', 'Noto Sans Devanagari', 'PingFang SC', 'Microsoft YaHei',
-    sans-serif;
+  --f-titre: var(--dd-f-titres);
+  --f-texte: var(--dd-f-texte);
 
   /* L'échelle d'apple.com : 17 / 21 / 28 / 40 / 56 / 80. */
-  --t-0: 0.8125rem;
-  --t-1: 1.0625rem;
-  --t-2: clamp(1.1875rem, 1rem + 0.5vw, 1.3125rem);
-  --t-3: clamp(1.5rem, 1.1rem + 1.2vw, 1.75rem);
-  --t-4: clamp(2rem, 1.2rem + 2.6vw, 3.5rem);
-  --t-5: clamp(2.75rem, 1.3rem + 5vw, 5rem);
-  --t-6: clamp(3.2rem, 1rem + 8vw, 7.5rem);
+  --t-0: var(--dd-t0);
+  --t-1: var(--dd-t1);
+  --t-2: var(--dd-t2);
+  --t-3: var(--dd-t3);
+  --t-4: var(--dd-t4);
+  --t-5: var(--dd-t5);
+  --t-6: var(--dd-t6);
 
   --largeur: 980px;
   --large: 1260px;
   --gouttiere: clamp(20px, 5vw, 40px);
-  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
-  --ease-sortie: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease: var(--dd-courbe);
+  --ease-sortie: var(--dd-sortie);
 }
 
 *,

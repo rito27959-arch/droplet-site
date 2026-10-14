@@ -111,7 +111,7 @@ export const hi: Textes = {
 
   couleurBouton: "थीम का रंग",
   couleurTitre: "अपना रंग चुनें।",
-  couleurs: { rose: "गुलाबी", bleu: "नीला", indigo: "इंडिगो", violet: "बैंगनी", orange: "नारंगी", vert: "हरा", menthe: "मिंट", graphite: "ग्रेफ़ाइट" },
+  couleurs: { rose: "गुलाबी", bleu: "नीला", indigo: "इंडिगो", violet: "बैंगनी", rouge: "लाल", orange: "नारंगी", vert: "हरा", menthe: "मिंट", cyan: "सियान", graphite: "ग्रेफ़ाइट" },
 
   menu: "मेन्यू",
   accueil: "होम",

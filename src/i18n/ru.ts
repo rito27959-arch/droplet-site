@@ -111,7 +111,7 @@ export const ru: Textes = {
 
   couleurBouton: "Цвет темы",
   couleurTitre: "Выберите свой цвет.",
-  couleurs: { rose: "Розовый", bleu: "Синий", indigo: "Индиго", violet: "Фиолетовый", orange: "Оранжевый", vert: "Зелёный", menthe: "Мятный", graphite: "Графит" },
+  couleurs: { rose: "Розовый", bleu: "Синий", indigo: "Индиго", violet: "Фиолетовый", rouge: "Красный", orange: "Оранжевый", vert: "Зелёный", menthe: "Мятный", cyan: "Голубой", graphite: "Графит" },
 
   menu: "Меню",
   accueil: "Главная",

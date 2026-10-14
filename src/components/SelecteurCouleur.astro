@@ -152,6 +152,16 @@ const idPanneau = 'panneau-couleur';
     width: 28px;
     height: 28px;
   }
+  /* Sur un téléphone, les dix couleurs en deux rangées de cinq plutôt
+     qu'une rangée de neuf et une orpheline. */
+  @media (max-width: 560px) {
+    .sc--scene .sc__rangee {
+      display: grid;
+      grid-template-columns: repeat(5, 28px);
+      justify-content: center;
+      gap: 16px 20px;
+    }
+  }
 
   /* ── Dans la barre du haut ──────────────────────────────────────── */
   .sc__ouvrir {
@@ -231,7 +241,8 @@ const idPanneau = 'panneau-couleur';
   }
   .sc__panneau .sc__rangee {
     display: grid;
-    grid-template-columns: repeat(4, 24px);
+    /* Dix couleurs : deux rangées de cinq. */
+    grid-template-columns: repeat(5, 24px);
     gap: 16px;
   }
   :global([dir='rtl']) .sc__panneau {

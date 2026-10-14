@@ -108,7 +108,7 @@ export const zh: Textes = {
 
   couleurBouton: "主题颜色",
   couleurTitre: "选择你的颜色。",
-  couleurs: { rose: "粉色", bleu: "蓝色", indigo: "靛蓝", violet: "紫色", orange: "橙色", vert: "绿色", menthe: "薄荷", graphite: "石墨" },
+  couleurs: { rose: "粉色", bleu: "蓝色", indigo: "靛蓝", violet: "紫色", rouge: "红色", orange: "橙色", vert: "绿色", menthe: "薄荷", cyan: "青色", graphite: "石墨" },
 
   menu: "菜单",
   accueil: "首页",

@@ -111,7 +111,7 @@ export const ar: Textes = {
 
   couleurBouton: "لون السمة",
   couleurTitre: "اختر لونك.",
-  couleurs: { rose: "وردي", bleu: "أزرق", indigo: "نيلي", violet: "بنفسجي", orange: "برتقالي", vert: "أخضر", menthe: "نعناعي", graphite: "جرافيت" },
+  couleurs: { rose: "وردي", bleu: "أزرق", indigo: "نيلي", violet: "بنفسجي", rouge: "أحمر", orange: "برتقالي", vert: "أخضر", menthe: "نعناعي", cyan: "سماوي", graphite: "جرافيت" },
 
   menu: "القائمة",
   accueil: "الرئيسية",

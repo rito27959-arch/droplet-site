@@ -111,7 +111,7 @@ export const de: Textes = {
 
   couleurBouton: "Designfarbe",
   couleurTitre: "Wähle deine Farbe.",
-  couleurs: { rose: "Rosa", bleu: "Blau", indigo: "Indigo", violet: "Violett", orange: "Orange", vert: "Grün", menthe: "Mint", graphite: "Graphit" },
+  couleurs: { rose: "Rosa", bleu: "Blau", indigo: "Indigo", violet: "Violett", rouge: "Rot", orange: "Orange", vert: "Grün", menthe: "Mint", cyan: "Cyan", graphite: "Graphit" },
 
   menu: "Menü",
   accueil: "Startseite",

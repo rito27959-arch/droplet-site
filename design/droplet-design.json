@@ -1,0 +1,119 @@
+{
+  "$commentaire": "DROPLET DESIGN — la source unique du design de la famille Droplet (Droplet, Droplet Web, Droplet Drop, les deux sites). On ne modifie QUE ce fichier, puis `node design/generer.mjs` écrit le Dart et le CSS. Voir design/LISEZMOI.md.",
+  "nom": "Droplet Design",
+  "version": "1.0.0",
+
+  "marque": {
+    "$commentaire": "La couleur de chaque produit, comme chez Apple chaque app a la sienne. La goutte (rose) est celle du logo, donc de la famille.",
+    "goutte": "#FF2D55",
+    "drop": "#168BFF",
+    "drop2": "#34D8FF"
+  },
+
+  "accents": {
+    "$commentaire": "La même liste, dans le même ordre, partout où l'on choisit sa couleur. Valeurs d'iOS (claire, sombre). La goutte ouvre la liste : c'est la couleur par défaut de Droplet.",
+    "liste": [
+      { "cle": "rose", "clair": "#FF2D55", "sombre": "#FF375F" },
+      { "cle": "bleu", "clair": "#007AFF", "sombre": "#0A84FF" },
+      { "cle": "indigo", "clair": "#5856D6", "sombre": "#5E5CE6" },
+      { "cle": "violet", "clair": "#AF52DE", "sombre": "#BF5AF2" },
+      { "cle": "rouge", "clair": "#FF3B30", "sombre": "#FF453A" },
+      { "cle": "orange", "clair": "#FF9500", "sombre": "#FF9F0A" },
+      { "cle": "vert", "clair": "#34C759", "sombre": "#30D158" },
+      { "cle": "menthe", "clair": "#00C7BE", "sombre": "#63E6E2" },
+      { "cle": "cyan", "clair": "#32ADE6", "sombre": "#64D2FF" },
+      { "cle": "graphite", "clair": "#8E8E93", "sombre": "#98989D" }
+    ],
+    "defaut": "rose"
+  },
+
+  "neutres": {
+    "$commentaire": "texte3 ne porte JAMAIS une information seule (3:1 minimum) ; texte et texte2 tiennent 4,5:1 sur tous les fonds de leur couche. Deux couches. « systeme » : l'interface de tous les jours (listes, réglages, discussions), les gris d'Apple. « scene » : les moments de marque (accueil, transferts, héros des sites) — la nuit bleutée, le ciel étoilé, la lueur.",
+    "clair": {
+      "fond": "#FFFFFF",
+      "fondGroupe": "#F5F5F7",
+      "surface": "#FFFFFF",
+      "surfaceHaute": "#F2F2F7",
+      "texte": "#1D1D1F",
+      "texte2": "#6E6E73",
+      "texte3": "#86868B",
+      "trait": "#1A000000"
+    },
+    "sombre": {
+      "fond": "#000000",
+      "fondGroupe": "#000000",
+      "surface": "#1C1C1E",
+      "surfaceHaute": "#2C2C2E",
+      "texte": "#F5F5F7",
+      "texte2": "#A1A1A6",
+      "texte3": "#86868B",
+      "trait": "#1FFFFFFF"
+    },
+    "scene": {
+      "nuit": "#05070C",
+      "nuitEleve": "#0A0E17",
+      "verre": "#10151F",
+      "verreHaut": "#1A2130",
+      "texte": "#F7F9FC",
+      "texte2": "#A5B0C1",
+      "texte3": "#7D889B",
+      "trait": "#14FFFFFF"
+    }
+  },
+
+  "etats": {
+    "$commentaire": "Pour porter un sens, jamais pour décorer. Les teintes claires sont assombries pour garder 4,5:1 sur fond blanc.",
+    "clair": { "succes": "#107A43", "attention": "#9F5300", "erreur": "#D12B21" },
+    "sombre": { "succes": "#30D158", "attention": "#FF9F0A", "erreur": "#FF453A" }
+  },
+
+  "typo": {
+    "$commentaire": "Inter Tight pour les titres, Inter pour le texte — partout. Les titres sont serrés (−2,2 %) et gras ; le texte suit l'échelle d'iOS. Les chiffres qui bougent sont à chasse fixe.",
+    "titres": "Inter Tight",
+    "texte": "Inter",
+    "secours": ["SF Pro Display", "Segoe UI", "Roboto", "Noto Sans", "Noto Sans Arabic", "Noto Sans Devanagari", "PingFang SC", "Microsoft YaHei"],
+    "echelle": {
+      "hero":       { "famille": "titres", "taille": 34, "graisse": 700, "interligne": 1.06, "approche": -0.022 },
+      "grandTitre": { "famille": "titres", "taille": 34, "graisse": 700, "interligne": 1.1,  "approche": -0.022 },
+      "titre1":     { "famille": "titres", "taille": 28, "graisse": 700, "interligne": 1.14, "approche": -0.02 },
+      "titre2":     { "famille": "titres", "taille": 22, "graisse": 700, "interligne": 1.2,  "approche": -0.016 },
+      "titre3":     { "famille": "titres", "taille": 20, "graisse": 600, "interligne": 1.25, "approche": -0.012 },
+      "manchette":  { "famille": "texte",  "taille": 17, "graisse": 600, "interligne": 1.29, "approche": -0.024 },
+      "corps":      { "famille": "texte",  "taille": 17, "graisse": 400, "interligne": 1.29, "approche": -0.024 },
+      "appel":      { "famille": "texte",  "taille": 16, "graisse": 400, "interligne": 1.31, "approche": -0.02 },
+      "sousTitre":  { "famille": "texte",  "taille": 15, "graisse": 400, "interligne": 1.33, "approche": -0.016 },
+      "note":       { "famille": "texte",  "taille": 13, "graisse": 400, "interligne": 1.38, "approche": -0.006 },
+      "legende":    { "famille": "texte",  "taille": 12, "graisse": 500, "interligne": 1.33, "approche": 0 },
+      "grandChiffre": { "famille": "titres", "taille": 40, "graisse": 700, "interligne": 1.0, "approche": -0.03, "chiffresFixes": true }
+    },
+    "site": {
+      "$commentaire": "L'échelle d'apple.com pour les pages : 17 / 21 / 28 / 56 / 80 / 120. Au-delà de 48 px, les titres passent en 600 : à cette taille, le 700 empâte.",
+      "t0": "0.8125rem",
+      "t1": "1.0625rem",
+      "t2": "clamp(1.1875rem, 1rem + 0.5vw, 1.3125rem)",
+      "t3": "clamp(1.5rem, 1.1rem + 1.2vw, 1.75rem)",
+      "t4": "clamp(2rem, 1.2rem + 2.6vw, 3.5rem)",
+      "t5": "clamp(2.75rem, 1.3rem + 5vw, 5rem)",
+      "t6": "clamp(3.2rem, 1rem + 8vw, 7.5rem)"
+    }
+  },
+
+  "espace": { "$commentaire": "Grille de 4 points.", "e1": 4, "e2": 8, "e3": 12, "e4": 16, "e5": 20, "e6": 24, "e8": 32, "e10": 40, "e12": 48, "e16": 64, "marge": 16, "cible": 44 },
+
+  "rayons": {
+    "$commentaire": "Arrondis continus. 12 pour un contrôle, 20 pour une carte, 28 pour une feuille qui monte du bas, 19 pour une bulle.",
+    "petit": 8, "controle": 12, "champ": 14, "carte": 20, "carteGrande": 24, "feuille": 28, "bulle": 19, "bulleQueue": 6, "icone": 22.5, "gelule": 999
+  },
+
+  "mouvement": {
+    "$commentaire": "Le mouvement décélère, ne dépasse pas sa cible (sauf sous le doigt), et reste court.",
+    "instant": 100, "rapide": 200, "standard": 300, "lent": 450, "scene": 700,
+    "courbe": [0.25, 0.1, 0.25, 1],
+    "sortie": [0.16, 1, 0.3, 1]
+  },
+
+  "lueur": {
+    "$commentaire": "La signature de la famille : un halo de la couleur du produit derrière ce qui compte (l'appareil, l'anneau de progression, le bouton principal).",
+    "opacite": 0.35, "flou": 48, "etoiles": 0.55
+  }
+}

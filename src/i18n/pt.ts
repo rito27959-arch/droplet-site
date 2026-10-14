@@ -111,7 +111,7 @@ export const pt: Textes = {
 
   couleurBouton: "Cor do tema",
   couleurTitre: "Escolha sua cor.",
-  couleurs: { rose: "Rosa", bleu: "Azul", indigo: "Índigo", violet: "Roxo", orange: "Laranja", vert: "Verde", menthe: "Menta", graphite: "Grafite" },
+  couleurs: { rose: "Rosa", bleu: "Azul", indigo: "Índigo", violet: "Roxo", rouge: "Vermelho", orange: "Laranja", vert: "Verde", menthe: "Menta", cyan: "Ciano", graphite: "Grafite" },
 
   menu: "Menu",
   accueil: "Início",

@@ -1,22 +1,21 @@
-// LES COULEURS DU THÈME — les mêmes que dans l'application.
+// LES COULEURS DU THÈME — celles de toute la famille Droplet.
 //
-// Reprises de `ReglagesApparence.accents` (Flutter), dans leur version
-// sombre d'iOS : plus lumineuses, elles restent lisibles sur les sections
-// noires comme sur les claires. Le rose, la couleur de la goutte, ouvre la
-// liste : c'est l'identité du site, celle qu'on voit sans rien choisir.
+// Lues dans `design/droplet-design.json`, la source commune aux apps et aux
+// sites (Droplet Design) : même liste, même ordre que dans les réglages
+// d'apparence de Droplet. On prend la version sombre d'iOS, plus lumineuse,
+// lisible sur les sections noires comme sur les claires ; la goutte, elle,
+// garde la teinte exacte du logo. Elle ouvre la liste : c'est l'identité du
+// site, celle qu'on voit sans rien choisir.
+import design from '../design/droplet-design.json';
 
-export const COULEURS = [
-  { cle: 'rose', hex: '#ff2d55' },
-  { cle: 'bleu', hex: '#0a84ff' },
-  { cle: 'indigo', hex: '#5e5ce6' },
-  { cle: 'violet', hex: '#bf5af2' },
-  { cle: 'orange', hex: '#ff9f0a' },
-  { cle: 'vert', hex: '#30d158' },
-  { cle: 'menthe', hex: '#00c7be' },
-  { cle: 'graphite', hex: '#8e8e93' },
-] as const;
+type Cle = (typeof design.accents.liste)[number]['cle'];
 
-export type CleCouleur = (typeof COULEURS)[number]['cle'];
+export const COULEURS: { cle: Cle; hex: string }[] = design.accents.liste.map((a) => ({
+  cle: a.cle,
+  hex: (a.cle === design.accents.defaut ? design.marque.goutte : a.sombre).toLowerCase(),
+}));
+
+export type CleCouleur = Cle;
 
 /** La clé sous laquelle le navigateur se souvient du choix. */
 export const CLE_STOCKAGE = 'droplet:couleur';

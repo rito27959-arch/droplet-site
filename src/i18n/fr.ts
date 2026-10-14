@@ -113,7 +113,7 @@ export const fr = {
 
   couleurBouton: "Couleur du thème",
   couleurTitre: "Choisissez votre couleur.",
-  couleurs: { rose: "Rose", bleu: "Bleu", indigo: "Indigo", violet: "Violet", orange: "Orange", vert: "Vert", menthe: "Menthe", graphite: "Graphite" },
+  couleurs: { rose: "Rose", bleu: "Bleu", indigo: "Indigo", violet: "Violet", rouge: "Rouge", orange: "Orange", vert: "Vert", menthe: "Menthe", cyan: "Cyan", graphite: "Graphite" },
 
   menu: "Menu",
   accueil: "Accueil",

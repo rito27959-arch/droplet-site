@@ -111,7 +111,7 @@ export const en: Textes = {
 
   couleurBouton: "Theme colour",
   couleurTitre: "Pick your colour.",
-  couleurs: { rose: "Pink", bleu: "Blue", indigo: "Indigo", violet: "Purple", orange: "Orange", vert: "Green", menthe: "Mint", graphite: "Graphite" },
+  couleurs: { rose: "Pink", bleu: "Blue", indigo: "Indigo", violet: "Purple", rouge: "Red", orange: "Orange", vert: "Green", menthe: "Mint", cyan: "Cyan", graphite: "Graphite" },
 
   menu: "Menu",
   accueil: "Home",
