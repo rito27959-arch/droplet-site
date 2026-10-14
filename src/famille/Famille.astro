@@ -29,7 +29,7 @@ interface Props {
 }
 const { langue, ici, liens, iconeDrop, racine = '' } = Astro.props;
 const t = famille[langue];
-const film = (format: '16x9' | '9x16', ext: 'mp4' | 'webp') => `${racine}/video/droplet-famille-${format}.${ext}`;
+const film = (format: '16x9' | '9x16', ext: 'mp4' | 'webp') => `${racine}/video/droplet-film-${format}.${ext}`;
 
 const apps = [
   { cle: 'droplet', nom: 'Droplet', accroche: t.dropletAccroche, texte: t.dropletTexte, plateformes: t.dropletPlateformes },

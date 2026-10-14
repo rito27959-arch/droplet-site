@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Droplet — le film</title>
+<style>
+/* LE FILM DE LA FAMILLE DROPLET, version 2.
+   Tout est calculé par rendu(t) : pas de transition CSS, pas de minuteur.
+   Le même t donne la même image ; on exporte image par image (60 i/s).
+   Les interfaces sont animées EN DIRECT (HTML), dessinées à 390 points de
+   large comme sur un iPhone, puis mises à l'échelle de l'appareil. */
+@font-face { font-family: Inter; src: url(Inter-Variable.ttf); font-weight: 100 900; }
+@font-face { font-family: Emoji; src: url(NotoColorEmoji.ttf); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: var(--W); height: var(--H); overflow: hidden; background: #000; }
+body { font-family: Inter, Emoji, system-ui, sans-serif; -webkit-font-smoothing: antialiased; font-feature-settings: 'cv11', 'ss01'; }
+#scene { position: absolute; inset: 0; overflow: hidden; }
+.calque { position: absolute; inset: 0; }
+.el { position: absolute; will-change: transform, opacity; }
+.cache { visibility: hidden; }
+.titre { font-weight: 700; letter-spacing: -0.045em; line-height: 1.02; }
+.sur { font-weight: 600; letter-spacing: -0.01em; }
+.corps { font-weight: 400; letter-spacing: -0.012em; line-height: 1.4; }
+.rose { background: linear-gradient(95deg, #ff2d55 10%, #ff5e3a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bleu { background: linear-gradient(95deg, #2fa8ff 10%, #35e0c8 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ligne { display: block; overflow: hidden; padding-bottom: .08em; }
+.ligne > span { display: inline-block; }
+
+/* ── L'iPhone ─────────────────────────────────────────────────────── */
+.iphone { position: relative; width: var(--pw); aspect-ratio: 390 / 845; border-radius: calc(var(--pw) * .165);
+  padding: calc(var(--pw) * .028); background: linear-gradient(145deg, #5a5a60, #1d1d20 30%, #0d0d0f 60%, #3a3a3f);
+  box-shadow: 0 calc(var(--pw) * .12) calc(var(--pw) * .25) rgba(0,0,0,.28), 0 calc(var(--pw) * .03) calc(var(--pw) * .06) rgba(0,0,0,.2); }
+.iphone::before { content: ''; position: absolute; inset: calc(var(--pw) * .008); border-radius: calc(var(--pw) * .157); background: #050506; }
+.iphone__ecran { position: absolute; inset: calc(var(--pw) * .028); border-radius: calc(var(--pw) * .138); overflow: hidden; background: #fff; }
+.iphone__ecran > .ui { text-rendering: geometricPrecision; position: absolute; left: 0; top: 0; width: 390px; height: 845px; transform-origin: 0 0; }
+.ile { position: absolute; top: calc(var(--pw) * .055); left: 50%; width: calc(var(--pw) * .3); height: calc(var(--pw) * .085); transform: translateX(-50%); background: #000; border-radius: 99px; z-index: 5; }
+.iphone .reflet { position: absolute; inset: calc(var(--pw) * .028); border-radius: calc(var(--pw) * .138); background: linear-gradient(115deg, rgba(255,255,255,.14), rgba(255,255,255,0) 38%); pointer-events: none; z-index: 6; }
+
+/* ── Le Mac ───────────────────────────────────────────────────────── */
+.mac { position: relative; width: var(--lw); }
+.mac__ecran { position: relative; border-radius: calc(var(--lw) * .028) calc(var(--lw) * .028) 0 0; background: #0b0b0c; padding: calc(var(--lw) * .018) calc(var(--lw) * .018) calc(var(--lw) * .024);
+  box-shadow: inset 0 0 0 1.5px #3a3a3e; }
+.mac__vue { position: relative; aspect-ratio: 1.6; overflow: hidden; border-radius: 4px; background: #000; }
+.mac__vue img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+.mac__encoche { position: absolute; top: calc(var(--lw) * .018); left: 50%; width: calc(var(--lw) * .1); height: calc(var(--lw) * .016); transform: translateX(-50%); background: #0b0b0c; border-radius: 0 0 8px 8px; z-index: 2; }
+.mac__base { position: relative; height: calc(var(--lw) * .028); margin: 0 calc(var(--lw) * -.07); border-radius: 0 0 calc(var(--lw) * .03) calc(var(--lw) * .03) / 0 0 calc(var(--lw) * .02) calc(var(--lw) * .02);
+  background: linear-gradient(#d9dade, #a9aab0 60%, #6f7076); }
+.mac__base::before { content: ''; position: absolute; left: 50%; top: 0; width: 14%; height: 38%; transform: translateX(-50%); background: linear-gradient(#a3a4aa, #c4c5ca); border-radius: 0 0 10px 10px; }
+.mac.nuit .mac__base { background: linear-gradient(#55565c, #34353a 60%, #1e1f22); }
+.mac.nuit .mac__base::before { background: linear-gradient(#2a2b2f, #45464b); }
+.ombre-sol { position: absolute; left: 6%; right: 6%; height: 40px; bottom: -34px; background: radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.35), transparent); filter: blur(6px); }
+
+/* ── Interface : la discussion (390 × 845) ─────────────────────────── */
+.ui-chat { background: #fff; color: #000; font-size: 17px; }
+.ui-chat .barre-etat, .ui-drop .barre-etat { position: absolute; top: 0; left: 0; right: 0; height: 54px; display: flex; justify-content: space-between; align-items: center; padding: 6px 34px 0 42px; font-weight: 600; font-size: 16px; }
+.barre-etat .icones { display: flex; gap: 6px; align-items: center; }
+.barre-etat .icones i { display: block; width: 18px; height: 11px; border-radius: 3px; border: 1.5px solid currentColor; opacity: .9; }
+.barre-etat .icones b { display: block; width: 16px; height: 11px; background: linear-gradient(90deg, currentColor 0 18%, transparent 18% 27%, currentColor 27% 45%, transparent 45% 54%, currentColor 54% 72%, transparent 72% 81%, currentColor 81%); clip-path: polygon(0 100%, 100% 0, 100% 100%); }
+.ui-chat .tete { position: absolute; top: 54px; left: 0; right: 0; height: 64px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-bottom: .5px solid rgba(60,60,67,.2); background: rgba(249,249,251,.94); }
+.chevron { width: 12px; height: 20px; border-left: 3px solid #ff2d55; border-bottom: 3px solid #ff2d55; transform: rotate(45deg) scale(.7); margin: 0 6px 0 8px; border-radius: 2px; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 600; font-size: 16px; flex: none; }
+.tete b { display: block; font-size: 16px; font-weight: 600; }
+.tete small { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #6e6e73; }
+.tete small i { width: 7px; height: 7px; border-radius: 50%; background: #34c759; display: block; }
+.fil { position: absolute; left: 0; right: 0; top: 118px; bottom: 84px; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 12px 10px; overflow: hidden; }
+.enveloppe { overflow: hidden; flex: none; }
+.bulle { max-width: 76%; padding: 9px 14px; border-radius: 20px; font-size: 16.5px; line-height: 1.3; margin-top: 6px; width: fit-content; transform-origin: bottom right; position: relative; }
+.bulle.moi { margin-left: auto; color: #fff; background: linear-gradient(#ff3b63, #e8174f); border-bottom-right-radius: 6px; }
+.bulle.lui { background: #e9e9eb; color: #000; border-bottom-left-radius: 6px; transform-origin: bottom left; }
+.bulle.photo { padding: 4px; background: #e9e9eb; }
+.bulle.photo .image { width: 210px; height: 150px; border-radius: 16px; }
+.etiquette { font-size: 11.5px; color: #8e8e93; margin: 5px 6px 0; display: flex; align-items: center; gap: 5px; }
+.etiquette.droite { justify-content: flex-end; }
+.saisie { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; padding: 8px 12px 30px; display: flex; gap: 10px; align-items: center; background: rgba(249,249,251,.94); border-top: .5px solid rgba(60,60,67,.15); }
+.plus { width: 34px; height: 34px; border-radius: 50%; background: #e9e9eb; display: grid; place-items: center; font-size: 24px; color: #6e6e73; font-weight: 300; flex: none; }
+.champ { flex: 1; height: 38px; border-radius: 19px; border: 1px solid #d1d1d6; display: flex; align-items: center; padding: 0 5px 0 14px; color: #000; font-size: 16px; background: #fff; }
+.champ .texte { flex: 1; white-space: nowrap; overflow: hidden; }
+.champ .texte.vide { color: #a1a1a6; }
+.curseur { display: inline-block; width: 2px; height: 19px; background: #ff2d55; vertical-align: -3px; margin-left: 1px; }
+.envoi { width: 28px; height: 28px; border-radius: 50%; background: #ff2d55; display: grid; place-items: center; flex: none; }
+.envoi::before { content: ''; width: 9px; height: 9px; border-left: 2.5px solid #fff; border-top: 2.5px solid #fff; transform: translateY(2px) rotate(45deg); }
+
+/* ── Interface : Droplet Drop reçoit (390 × 845, sombre) ─────────────── */
+.ui-drop { background: radial-gradient(120% 60% at 50% 0%, #0d2140, #05070c 60%); color: #f5f5f7; }
+.ui-drop .entete { position: absolute; top: 70px; left: 24px; right: 24px; display: flex; align-items: center; gap: 12px; }
+.ui-drop .entete img { width: 44px; height: 44px; border-radius: 11px; }
+.ui-drop .entete b { font-size: 21px; font-weight: 700; display: block; letter-spacing: -.02em; }
+.ui-drop .entete small { font-size: 13px; color: #8e9bb0; }
+.anneau { position: absolute; left: 50%; top: 170px; width: 220px; height: 220px; transform: translateX(-50%); }
+.anneau svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.anneau .fond { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 14; }
+.anneau .plein { fill: none; stroke: url(#degradeDrop); stroke-width: 14; stroke-linecap: round; }
+.anneau .pourcent { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.anneau .pourcent b { font-size: 50px; font-weight: 700; letter-spacing: -.04em; display: block; font-variant-numeric: tabular-nums; }
+.anneau .pourcent small { font-size: 14px; color: #8e9bb0; display: block; margin-top: -4px; font-variant-numeric: tabular-nums; }
+.anneau .coche { position: absolute; inset: 0; display: grid; place-items: center; }
+.coche svg { width: 96px; height: 96px; transform: none; }
+.coche path { fill: none; stroke: #35e0c8; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+.ui-drop .statut { position: absolute; top: 410px; left: 0; right: 0; text-align: center; font-size: 19px; font-weight: 600; letter-spacing: -.01em; }
+.ui-drop .statut small { display: block; font-size: 13.5px; color: #8e9bb0; font-weight: 400; margin-top: 4px; }
+.fichiers { position: absolute; top: 500px; left: 18px; right: 18px; display: grid; gap: 8px; }
+.fichier { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; background: rgba(255,255,255,.06); }
+.fichier .vignette { width: 40px; height: 40px; border-radius: 9px; flex: none; }
+.fichier b { font-size: 14.5px; font-weight: 600; display: block; }
+.fichier small { font-size: 12.5px; color: #8e9bb0; }
+.fichier .etat { margin-left: auto; width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(255,255,255,.18); display: grid; place-items: center; }
+.fichier .etat.fait { border-color: #35e0c8; background: #35e0c8; }
+.fichier .etat.fait::before { content: ''; width: 9px; height: 5px; border-left: 2.5px solid #05070c; border-bottom: 2.5px solid #05070c; transform: translateY(-1px) rotate(-45deg); }
+
+/* ── Group Drop ──────────────────────────────────────────────────── */
+.grille { display: grid; grid-template-columns: repeat(var(--col), var(--cel)); gap: calc(var(--cel) * .32); }
+.poste { width: var(--cel); height: var(--cel); position: relative; }
+.poste svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.poste .f { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 5; }
+.poste .p { fill: none; stroke: #2fa8ff; stroke-width: 5; stroke-linecap: round; }
+.poste .rond { position: absolute; inset: 14%; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.05); }
+.poste .rond i { width: 44%; height: 30%; border: 2.5px solid rgba(255,255,255,.5); border-radius: 3px; display: block; }
+.poste.fini .rond { background: #35e0c8; }
+.poste.fini .rond i { border: none; width: 34%; height: 18%; border-left: 3.5px solid #05070c; border-bottom: 3.5px solid #05070c; transform: translateY(-15%) rotate(-45deg); border-radius: 0; }
+
+.icone-app { border-radius: 22.5%; overflow: hidden; }
+.photo-a { background: radial-gradient(circle at 70% 30%, #ffe9a8 0 12%, transparent 13%), linear-gradient(180deg, #ff9a5a, #ff4f7a 55%, #6a3cff); }
+.photo-b { background: radial-gradient(circle at 30% 70%, #b8ffe8 0 14%, transparent 15%), linear-gradient(160deg, #35d6c4, #2b6bff); }
+.photo-c { background: linear-gradient(200deg, #ffd86b, #ff8a3d 50%, #c2185b); }
+.photo-d { background: linear-gradient(140deg, #8de08a, #1c9e6a 60%, #0e5a4a); }
+.particule { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle, #fff 0 25%, #ff2d55 40%, rgba(255,45,85,0) 72%); }
+.particule.bleue { background: radial-gradient(circle, #fff 0 25%, #2fa8ff 40%, rgba(47,168,255,0) 72%); }
+svg.arcs { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="degradeDrop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2fa8ff"/><stop offset="1" stop-color="#35e0c8"/></linearGradient>
+  <linearGradient id="degradeRose" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff2d55" stop-opacity="0"/><stop offset=".5" stop-color="#ff2d55"/><stop offset="1" stop-color="#ff2d55" stop-opacity="0"/></linearGradient>
+</defs></svg>
+<div id="scene"></div>
+<script>
+// ════════════════════════════════════════════════════════════════════════
+const V = new URLSearchParams(location.search).get('f') === 'v';
+const W = V ? 1080 : 1920, H = V ? 1920 : 1080;
+document.documentElement.style.setProperty('--W', W + 'px');
+document.documentElement.style.setProperty('--H', H + 'px');
+const DUREE = 60;
+window.DUREE = DUREE;
+const scene = document.getElementById('scene');
+
+// ── Outils ──────────────────────────────────────────────────────────────
+const b01 = (x) => Math.max(0, Math.min(1, x));
+const sortie = (x) => 1 - Math.pow(1 - b01(x), 4);
+const sortie3 = (x) => 1 - Math.pow(1 - b01(x), 3);
+const douce = (x) => { x = b01(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const entree = (x) => Math.pow(b01(x), 3);
+/** Un ressort amorti (dépasse un peu, puis se pose). */
+const ressort = (x) => { x = b01(x); return 1 - Math.exp(-7 * x) * Math.cos(11 * x); };
+const prog = (t, a, d) => b01((t - a) / d);
+const mix = (a, b, k) => a + (b - a) * k;
+function vie(t, a, b, e = .8, s = .6) {
+  if (t < a || t > b) return 0;
+  return Math.min(sortie((t - a) / e), 1 - douce((t - (b - s)) / s));
+}
+function el(parent, html, cls = 'el', style = '') {
+  const d = document.createElement('div');
+  d.className = cls;
+  d.innerHTML = html;
+  if (style) d.style.cssText = style;
+  parent.appendChild(d);
+  return d;
+}
+function calque() { return el(scene, '', 'calque'); }
+/** Pose un élément : opacité, translation, échelle, rotations 3D, flou. */
+function pose(d, o, { x = 0, y = 0, k = 1, rx = 0, ry = 0, rz = 0, flou = 0, p = 1800 } = {}) {
+  d.style.opacity = o.toFixed(4);
+  d.style.visibility = o < .003 ? 'hidden' : 'visible';
+  d.style.transform = `perspective(${p}px) translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) rotateX(${rx.toFixed(3)}deg) rotateY(${ry.toFixed(3)}deg) rotateZ(${rz.toFixed(3)}deg) scale(${k.toFixed(4)})`;
+  d.style.filter = flou > .05 ? `blur(${flou.toFixed(2)}px)` : 'none';
+}
+/** Un titre dont les mots montent derrière un masque, un par un. */
+function titre(parent, lignes, style, cls = 'titre') {
+  const d = el(parent, lignes.map((l) => `<span class="ligne">${l.split(/ (?![^<]*>)/).map((m) => `<span>${m}</span>`).join(' ')}</span>`).join(''), 'el ' + cls, style);
+  d.mots = [...d.querySelectorAll('.ligne > span')];
+  return d;
+}
+function poserMots(d, t, a, pas = .06, duree = .8) {
+  d.mots.forEach((m, i) => {
+    const v = sortie((t - a - i * pas) / duree);
+    m.style.transform = `translateY(${((1 - v) * 105).toFixed(1)}%)`;
+  });
+}
+/** Point sur une courbe de Bézier quadratique. */
+function bezier(p0, p1, p2, k) {
+  const u = 1 - k;
+  return [u * u * p0[0] + 2 * u * k * p1[0] + k * k * p2[0], u * u * p0[1] + 2 * u * k * p1[1] + k * k * p2[1]];
+}
+const iphone = (pw, ui, cls = '') => `<div class="iphone ${cls}" style="--pw:${pw}px"><div class="iphone__ecran"><div class="ui ${ui.cls}" style="transform:scale(${((pw - pw * .056) / 390).toFixed(5)})">${ui.html}</div></div><i class="ile"></i><i class="reflet"></i></div>`;
+const mac = (lw, images, nuit = false) => `<div class="mac ${nuit ? 'nuit' : ''}" style="--lw:${lw}px"><div class="mac__ecran"><div class="mac__vue">${images.map((s, i) => `<img src="img/${s}" style="opacity:${i ? 0 : 1}">`).join('')}</div><i class="mac__encoche"></i></div><div class="mac__base"></div><i class="ombre-sol"></i></div>`;
+const etat = (sombre = false) => `<div class="barre-etat" style="color:${sombre ? '#fff' : '#000'}"><span>9:41</span><span class="icones"><b></b><i></i></span></div>`;
+
+// ── Les écrans de discussion ─────────────────────────────────────────────
+// [qui, texte, apparition, type] — l'enveloppe s'ouvre, la bulle rebondit.
+function ecranChat({ nom, initiale, couleur, sous, bulles, saisie }) {
+  const html = `${etat()}
+    <div class="tete"><i class="chevron"></i><span class="avatar" style="background:${couleur}">${initiale}</span><span><b>${nom}</b><small><i></i>${sous}</small></span></div>
+    <div class="fil">${bulles.map((b) => `<div class="enveloppe"><div class="bulle ${b.moi ? 'moi' : 'lui'} ${b.photo ? 'photo' : ''}">${b.photo ? `<div class="image ${b.photo}"></div>` : b.texte}</div>${b.etiquette ? `<div class="etiquette ${b.moi ? 'droite' : ''}">${b.etiquette}</div>` : ''}</div>`).join('')}</div>
+    <div class="saisie"><span class="plus">+</span><span class="champ"><span class="texte vide">Message</span><span class="envoi" style="opacity:0"></span></span></div>`;
+  return { cls: 'ui-chat', html, bulles, saisie };
+}
+function poserChat(racine, ui, t) {
+  const env = [...racine.querySelectorAll('.enveloppe')];
+  ui.bulles.forEach((b, i) => {
+    const e = env[i];
+    if (!e.dataset.h) e.dataset.h = e.scrollHeight;
+    const ouvre = sortie3((t - b.a) / .45);
+    e.style.height = (ouvre * +e.dataset.h).toFixed(1) + 'px';
+    const bu = e.querySelector('.bulle');
+    const r = ressort((t - b.a) / .7);
+    bu.style.transform = `scale(${t < b.a ? .5 : (.5 + .5 * r).toFixed(4)})`;
+    bu.style.opacity = b01((t - b.a) / .15).toFixed(3);
+    const et = e.querySelector('.etiquette');
+    if (et) et.style.opacity = b01((t - b.a - .5) / .4).toFixed(3);
+  });
+  if (ui.saisie) {
+    const s = ui.saisie;
+    const champ = racine.querySelector('.champ .texte');
+    const n = Math.floor(b01((t - s.a) / (s.b - s.a)) * s.texte.length);
+    const visible = t >= s.a && t < s.envoi;
+    const txt = visible ? s.texte.slice(0, n) : '';
+    champ.classList.toggle('vide', !txt);
+    champ.innerHTML = txt ? txt + (Math.floor(t * 2.4) % 2 === 0 || t < s.b ? '<span class="curseur"></span>' : '') : 'Message';
+    racine.querySelector('.envoi').style.opacity = txt ? '1' : '0';
+  }
+}
+
+// ── L'écran de réception de Droplet Drop ─────────────────────────────────
+const vign = ['photo-a', 'photo-b', 'photo-c', 'photo-d'];
+const fichiersDrop = [['Vacances_2031.heic', '3,4 Mo'], ['Concert.mov', '812 Mo'], ['Projet final.key', '96 Mo'], ['Musique', '214 Mo · 38 fichiers']];
+const ecranDrop = () => ({
+  cls: 'ui-drop',
+  html: `${etat(true)}
+    <div class="entete"><img src="img/icone-drop.png"><span><b>Réception</b><small>De MacBook de Léa · AB12-CD34</small></span></div>
+    <div class="anneau"><svg viewBox="0 0 220 220"><circle class="fond" cx="110" cy="110" r="96"/><circle class="plein" cx="110" cy="110" r="96" stroke-dasharray="603.2" stroke-dashoffset="603.2"/></svg>
+      <div class="pourcent"><span><b>0 %</b><small>38,5 Mo/s</small></span></div>
+      <div class="coche" style="opacity:0"><svg viewBox="0 0 100 100"><path d="M24 52 L43 70 L77 32" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg></div></div>
+    <div class="statut">4 fichiers · 1,1 Go<small>Chiffré · vérifié bloc par bloc</small></div>
+    <div class="fichiers">${fichiersDrop.map(([n, s], i) => `<div class="fichier"><span class="vignette ${vign[i]}"></span><span><b>${n}</b><small>${s}</small></span><span class="etat"></span></div>`).join('')}</div>`,
+});
+function poserDrop(racine, t, a, b) {
+  const k = douce(prog(t, a, b - a));
+  racine.querySelector('.plein').setAttribute('stroke-dashoffset', (603.2 * (1 - k)).toFixed(2));
+  const pct = racine.querySelector('.pourcent');
+  pct.querySelector('b').textContent = `${Math.round(k * 100)} %`;
+  const fini = prog(t, b, .5);
+  pct.style.opacity = (1 - fini).toFixed(3);
+  const c = racine.querySelector('.coche');
+  c.style.opacity = fini.toFixed(3);
+  c.style.transform = `scale(${(.6 + .4 * ressort(prog(t, b, .8))).toFixed(3)})`;
+  racine.querySelector('.coche path').setAttribute('stroke-dashoffset', (1 - sortie(prog(t, b + .1, .5))).toFixed(3));
+  racine.querySelector('.statut').firstChild.textContent = fini > .5 ? 'Tout est arrivé, vérifié.' : '4 fichiers · 1,1 Go';
+  racine.querySelectorAll('.fichier .etat').forEach((e, i) => e.classList.toggle('fait', k >= (i + 1) / 4 - .001));
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// LES SCÈNES
+// ════════════════════════════════════════════════════════════════════════
+const fond = calque();
+fond.style.background = '#000';
+
+// ── 1. L'ouverture : une goutte tombe dans le noir ───────────────────────
+const c1 = calque();
+const goutte = el(c1, `<svg width="44" height="60" viewBox="0 0 44 60"><path d="M22 2C30 14 40 24 40 38a18 18 0 0 1-36 0C4 24 14 14 22 2Z" fill="#ff2d55"/></svg>`, 'el', `left:${W / 2 - 22}px;top:${H / 2 - 30}px`);
+const ondes = [0, 1, 2, 3].map(() => el(c1, '', 'el', `left:${W / 2 - 300}px;top:${H / 2 - 300}px;width:600px;height:600px;border-radius:50%;border:2px solid #ff2d55`));
+const tf = V ? 118 : 132;
+const h1a = titre(c1, ['Pas de réseau.'], `left:0;right:0;text-align:center;top:${H / 2 - tf * 1.2}px;font-size:${tf}px;color:#f5f5f7`);
+const h1b = titre(c1, ['Pas de <span class="rose">problème.</span>'], `left:0;right:0;text-align:center;top:${H / 2 + tf * .05}px;font-size:${tf}px;color:#f5f5f7`);
+// le mot en dégradé est un seul « mot »
+h1b.mots = [...h1b.querySelectorAll('.ligne > span')];
+const voile = el(scene, '', 'el', `left:${W / 2}px;top:${H / 2}px;width:10px;height:10px;border-radius:50%;background:#f5f5f7;margin:-5px 0 0 -5px`);
+
+// ── 2. Droplet : trois téléphones, un message qui saute de l'un à l'autre ──
+const c2 = calque();
+const pw = V ? 320 : 360;
+const ecA = ecranChat({
+  nom: 'Amina', initiale: 'A', couleur: 'linear-gradient(135deg,#ffb36b,#ff5d8f)', sous: 'À portée, par Bluetooth',
+  bulles: [
+    { moi: false, texte: 'Le concert commence à 21 h 🎸', a: 0 },
+    { moi: true, texte: 'On se retrouve devant ?', a: 0 },
+    { moi: false, texte: 'Tu es où ? Plus aucun réseau ici 😅', a: 7.0 },
+    { moi: true, texte: 'Devant la grande scène.', a: 9.9, etiquette: 'Envoyé' },
+    { moi: false, texte: "Je te vois, j'arrive !", a: 15.0 },
+  ],
+  saisie: { texte: 'Devant la grande scène.', a: 8.5, b: 9.6, envoi: 9.9 },
+});
+const ecR = ecranChat({
+  nom: 'Voisins', initiale: 'V', couleur: 'linear-gradient(135deg,#53d1ff,#2b6bff)', sous: 'Relais actif',
+  bulles: [
+    { moi: false, texte: 'Qui a encore du réseau ?', a: 0 },
+    { moi: true, texte: 'Personne 😂', a: 0 },
+    { moi: false, texte: 'Heureusement, Droplet passe quand même.', a: 0 },
+    { moi: false, texte: 'On est tous au concert 🎶', a: 6.0 },
+  ],
+});
+const ecB = ecranChat({
+  nom: 'Léa', initiale: 'L', couleur: 'linear-gradient(135deg,#b58cff,#5b5bf0)', sous: 'À portée, par Bluetooth',
+  bulles: [
+    { moi: true, texte: 'Le concert commence à 21 h 🎸', a: 0 },
+    { moi: false, texte: 'On se retrouve devant ?', a: 0 },
+    { moi: true, texte: 'Tu es où ? Plus aucun réseau ici 😅', a: 7.0 },
+    { moi: false, texte: 'Devant la grande scène.', a: 12.9, etiquette: 'Relayé par un téléphone voisin' },
+    { moi: true, texte: "Je te vois, j'arrive !", a: 14.2 },
+  ],
+  saisie: { texte: "Je te vois, j'arrive !", a: 13.5, b: 14.0, envoi: 14.2 },
+});
+const espace = V ? 0 : 520;
+const ph = pw * 845 / 390;
+const hautTel = V ? H / 2 - ph / 2 + 120 : H / 2 - ph / 2;
+const telA = el(c2, iphone(pw, ecA), 'el', `left:${W / 2 - pw / 2 - (V ? 330 : espace)}px;top:${hautTel}px`);
+const telR = el(c2, iphone(pw * .86, ecR), 'el', `left:${W / 2 - pw * .43}px;top:${hautTel + ph * .07}px`);
+const telB = el(c2, iphone(pw, ecB), 'el', `left:${W / 2 - pw / 2 + (V ? 330 : espace)}px;top:${hautTel}px`);
+const c2b = calque();
+const arcs = el(c2b, `<svg class="arcs" viewBox="0 0 ${W} ${H}"><path class="a1" fill="none" stroke="#ff2d55" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round"/><path class="a2" fill="none" stroke="#ff2d55" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round"/></svg>`, 'el', 'left:0;top:0;width:100%;height:100%');
+const part = el(c2b, '', 'el particule', 'left:0;top:0;width:34px;height:34px;margin:-17px 0 0 -17px');
+const sillage = [0, 1, 2, 3, 4, 5].map(() => el(c2b, '', 'el particule', 'left:0;top:0;width:22px;height:22px;margin:-11px 0 0 -11px'));
+const t2 = titre(c2b, ['La messagerie qui', 'marche sans réseau.'], `left:0;right:0;text-align:center;top:${V ? 200 : 64}px;font-size:${V ? 92 : 84}px;color:#1d1d1f`);
+const t2s = el(c2b, `<div class="sur" style="font-size:${V ? 34 : 26}px;color:#ff2d55">Droplet</div>`, 'el', `left:0;right:0;text-align:center;top:${V ? 140 : 18}px`);
+const t2c = el(c2b, `<p class="corps" style="font-size:${V ? 34 : 25}px;color:#6e6e73;max-width:${V ? 880 : 1500}px;margin:0 auto">Vos messages sautent de téléphone en téléphone, par Bluetooth et Wi‑Fi, jusqu'à la bonne personne. Chiffrés de bout en bout.</p>`, 'el', `left:0;right:0;text-align:center;top:${V ? 1700 : 1010}px`);
+
+// ── 3. Droplet Web : le Mac, et une photo qui passe d'un écran à l'autre ──
+const c3 = calque();
+const lw = V ? 940 : 1020;
+const leMac = el(c3, mac(lw, ['w_bureau_clair.png', 'w_bureau_sombre.png']), 'el', V ? `left:${(W - lw) / 2}px;top:760px` : `left:${(W - lw) / 2 - 130}px;top:330px`);
+const ecW = ecranChat({
+  nom: 'Amina', initiale: 'A', couleur: 'linear-gradient(135deg,#ffb36b,#ff5d8f)', sous: 'À portée, par Bluetooth',
+  bulles: [
+    { moi: false, texte: 'Tu es où ? Plus aucun réseau ici 😅', a: 0 },
+    { moi: true, texte: 'Devant la grande scène.', a: 0 },
+    { moi: true, photo: 'photo-a', a: 24.9, etiquette: 'Envoyé depuis Droplet Web' },
+  ],
+});
+const telW = el(c3, iphone(V ? 300 : 270, ecW), 'el', V ? `left:${W - 350}px;top:1130px` : `left:${(W - lw) / 2 - 130 + lw - 40}px;top:430px`);
+const photoVol = el(c3, '<div class="photo-a" style="width:100%;height:100%;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.3)"></div>', 'el', 'left:0;top:0;width:220px;height:157px;margin:-78px 0 0 -110px');
+const t3s = el(c3, `<div class="sur" style="font-size:${V ? 34 : 24}px;color:#ff2d55">Droplet Web</div>`, 'el', `left:0;right:0;text-align:center;top:${V ? 140 : 34}px`);
+const t3 = titre(c3, V ? ['Vos discussions,', 'sur grand écran.'] : ['Vos discussions, sur grand écran.'], `left:0;right:0;text-align:center;top:${V ? 200 : 72}px;font-size:${V ? 92 : 76}px;color:#1d1d1f`);
+const t3n = titre(c3, V ? ['Vos discussions,', 'sur grand écran.'] : ['Vos discussions, sur grand écran.'], `left:0;right:0;text-align:center;top:${V ? 200 : 72}px;font-size:${V ? 92 : 76}px;color:#f5f5f7`);
+const t3c = el(c3, `<p class="corps" style="font-size:${V ? 34 : 25}px;color:#86868b">Photos, vidéos et vocaux, dans les deux sens. <span style="color:#ff2d55">web.dropletmesh.app</span></p>`, 'el', `left:0;right:0;text-align:center;top:${V ? 420 : 172}px;padding:0 60px`);
+
+// ── 4. Droplet Drop ─────────────────────────────────────────────────────
+const c4 = calque();
+const lueur = el(c4, '', 'el', `left:${W / 2 - 700}px;top:${H / 2 - 700}px;width:1400px;height:1400px;border-radius:50%;background:radial-gradient(circle, rgba(47,168,255,.28), rgba(47,168,255,0) 62%)`);
+const grandeIcone = el(c4, `<img class="icone-app" src="img/icone-drop.png" width="${V ? 260 : 220}" height="${V ? 260 : 220}" style="display:block;box-shadow:0 40px 120px rgba(47,168,255,.45)">`, 'el', `left:${W / 2 - (V ? 130 : 110)}px;top:${H / 2 - (V ? 230 : 190)}px`);
+const nomDrop = titre(c4, ['Droplet Drop'], `left:0;right:0;text-align:center;top:${H / 2 + (V ? 70 : 70)}px;font-size:${V ? 104 : 96}px;color:#f5f5f7`);
+const t4 = titre(c4, ['Vos fichiers, à tous les', 'appareils autour de vous.'], `left:0;right:0;text-align:center;top:${V ? 200 : 60}px;font-size:${V ? 84 : 76}px;color:#f5f5f7`);
+const macDrop = el(c4, mac(V ? 760 : 980, ['1-accueil-bureau-sombre.png'], true), 'el', V ? `left:60px;top:780px` : `left:200px;top:330px`);
+const pwD = V ? 330 : 300;
+const ecD = ecranDrop();
+const telD = el(c4, iphone(pwD, ecD), 'el', V ? `left:${W - pwD - 60}px;top:1180px` : `left:1360px;top:290px`);
+const volants = vign.map((v) => el(c4, `<div class="${v}" style="width:100%;height:100%;border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.45)"></div>`, 'el', 'left:0;top:0;width:96px;height:96px;margin:-48px 0 0 -48px'));
+const t4c = el(c4, `<p class="corps" style="font-size:${V ? 34 : 25}px;color:#8e9bb0">Directement sur votre Wi‑Fi. Android, Windows, Mac et Linux.</p>`, 'el', `left:0;right:0;text-align:center;top:${V ? 420 : 1000}px;padding:0 60px`);
+// Group Drop
+const COL = V ? 5 : 10, cel = V ? 120 : 92;
+const grille = el(c4, `<div class="grille" style="--col:${COL};--cel:${cel}px">${Array.from({ length: 30 }, () => `<div class="poste"><svg viewBox="0 0 100 100"><circle class="f" cx="50" cy="50" r="46"/><circle class="p" cx="50" cy="50" r="46" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg><span class="rond"><i></i></span></div>`).join('')}</div>`, 'el', '');
+const largG = COL * cel + (COL - 1) * cel * .32, hautG = (30 / COL) * cel + (30 / COL - 1) * cel * .32;
+grille.style.left = (W - largG) / 2 + 'px';
+grille.style.top = (V ? 640 : 470) + 'px';
+const postes = [...grille.querySelectorAll('.poste')];
+const t5s = el(c4, `<div class="sur" style="font-size:${V ? 34 : 26}px"><span class="bleu">Group Drop</span></div>`, 'el', `left:0;right:0;text-align:center;top:${V ? 150 : 50}px`);
+const t5 = titre(c4, ['Toute une salle,', 'en un seul envoi.'], `left:0;right:0;text-align:center;top:${V ? 210 : 96}px;font-size:${V ? 92 : 80}px;color:#f5f5f7`);
+const compteur = el(c4, `<div class="titre" style="font-size:${V ? 64 : 52}px;color:#f5f5f7;font-variant-numeric:tabular-nums"><b>0</b><span style="color:#5d6b80"> / 30</span></div><div class="corps" style="font-size:${V ? 28 : 21}px;color:#8e9bb0">appareils ont tout reçu</div>`, 'el', `left:0;right:0;text-align:center;top:${V ? 1640 : 870}px`);
+
+// ── 5. Les mots, sur le temps ───────────────────────────────────────────
+const c5 = calque();
+const mots = [['Chiffré.', 'rose'], ['Vérifié.', 'bleu'], ['Sans compte.', ''], ['Sans Internet.', 'rose']].map(([m, c]) =>
+  el(c5, `<div class="titre ${c}" style="font-size:${V ? 150 : 190}px;color:#f5f5f7;white-space:nowrap">${m}</div>`, 'el', `left:0;right:0;text-align:center;top:${H / 2 - (V ? 90 : 110)}px`));
+
+// ── 6. La famille, et la fin ────────────────────────────────────────────
+const c6 = calque();
+const BULLE = 'M26.16 48.79A20 20 0 1 0 15.68 40L12.5 52.5Z', GOUT = 'M33 17.5C37.2 23 41.3 27 41.3 32.4a8.3 8.3 0 0 1-16.6 0C24.7 27 28.8 23 33 17.5Z';
+const ti = V ? 220 : 200;
+const icDroplet = `<svg viewBox="0 0 64 64" width="${ti}" height="${ti}" class="icone-app" style="display:block;background:linear-gradient(160deg,#ff5a7a,#ff2d55 55%,#e0123d);box-shadow:0 40px 100px rgba(255,45,85,.4)"><g transform="translate(32 32) scale(.72) translate(-32 -32)"><path d="${BULLE}" fill="none" stroke="#fff" stroke-width="5.2" stroke-linejoin="round"/><path d="${GOUT}" fill="#fff"/></g></svg>`;
+const icWeb = `<svg viewBox="0 0 64 64" width="${ti}" height="${ti}" class="icone-app" style="display:block;background:linear-gradient(160deg,#2a2a30,#121216);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 40px 100px rgba(0,0,0,.6)"><rect x="9" y="9" width="46" height="46" rx="9" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2"/><g transform="translate(32 32) scale(.56) translate(-32 -32)"><path d="${BULLE}" fill="none" stroke="#ff2d55" stroke-width="5.2" stroke-linejoin="round"/><path d="${GOUT}" fill="#ff2d55"/></g></svg>`;
+const icDrop = `<img src="img/icone-drop.png" width="${ti}" height="${ti}" class="icone-app" style="display:block;box-shadow:0 40px 100px rgba(47,168,255,.4)">`;
+const ecart = V ? 300 : 400;
+const trio = [[icDroplet, 'Droplet'], [icWeb, 'Droplet Web'], [icDrop, 'Droplet Drop']].map(([ic, n], i) =>
+  el(c6, `${ic}<div class="sur" style="font-size:${V ? 34 : 30}px;color:#f5f5f7;text-align:center;margin-top:28px;width:${ti + 200}px;margin-left:-100px">${n}</div>`, 'el', `left:${W / 2 - ti / 2 + (i - 1) * ecart}px;top:${H / 2 - ti / 2 - (V ? 40 : 20)}px`));
+const t6 = titre(c6, ['Trois apps.', 'Une même idée.'], `left:0;right:0;text-align:center;top:${V ? 330 : 90}px;font-size:${V ? 104 : 88}px;color:#f5f5f7`);
+const finLogo = el(c6, `<img src="logo-droplet.svg" width="${V ? 230 : 190}" height="${V ? 230 : 190}" style="display:block;border-radius:22.5%;box-shadow:0 40px 120px rgba(255,45,85,.45)">`, 'el', `left:${W / 2 - (V ? 115 : 95)}px;top:${H / 2 - (V ? 260 : 210)}px`);
+const finNom = titre(c6, ['Droplet'], `left:0;right:0;text-align:center;top:${H / 2 + (V ? 30 : 20)}px;font-size:${V ? 120 : 104}px;color:#f5f5f7`);
+const finSite = el(c6, `<div class="corps" style="font-size:${V ? 40 : 34}px;color:#f5f5f7">dropletmesh.app</div><div class="corps" style="font-size:${V ? 28 : 22}px;color:#86868b;margin-top:10px">web.dropletmesh.app&nbsp;&nbsp;·&nbsp;&nbsp;drop.dropletmesh.app</div>`, 'el', `left:0;right:0;text-align:center;top:${H / 2 + (V ? 200 : 170)}px`);
+const noir = el(scene, '', 'calque', 'background:#000');
+
+// ════════════════════════════════════════════════════════════════════════
+// LE MONTAGE (60 s ; le temps fort de la musique tombe toutes les 0,6 s)
+// ════════════════════════════════════════════════════════════════════════
+const fondCouleur = (t) => {
+  // noir → clair (Droplet, Web) → noir (bascule sombre de Web, Drop, fin)
+  const clair = douce(prog(t, 6.6, .9)) * (1 - douce(prog(t, 27.6, 1.2)));
+  const c = Math.round(mix(0, 245, clair));
+  return `rgb(${c},${c},${Math.round(mix(0, 247, clair))})`;
+};
+
+window.rendu = function (t) {
+  fond.style.background = fondCouleur(t);
+
+  // ── 1 ──
+  const chute = prog(t, .3, .9);
+  pose(goutte, t < 1.2 ? 1 : 1 - prog(t, 1.2, .12), { y: mix(-H / 2 - 60, 0, entree(chute)), k: t < 1.2 ? mix(.8, 1, chute) : 1 });
+  ondes.forEach((o, i) => {
+    const a = 1.2 + i * .3;
+    const k = prog(t, a, 2.6);
+    pose(o, t < a ? 0 : (1 - k) * .7, { k: .02 + sortie(k) * (1.2 + i * .25) });
+    o.style.borderWidth = (2.5 / Math.max(.05, .02 + sortie(k) * (1.2 + i * .25))).toFixed(2) + 'px';
+  });
+  const o1 = vie(t, 2.2, 7.0, .01, .5);
+  pose(h1a, o1, { y: -prog(t, 4.0, .6) * 0, k: 1 + prog(t, 2.2, 5) * .03 });
+  pose(h1b, o1, { k: 1 + prog(t, 2.2, 5) * .03 });
+  poserMots(h1a, t, 2.4);
+  poserMots(h1b, t, 4.2);
+  // Le voile : un cercle clair qui grandit depuis le centre (passage au jour).
+  const ouv = douce(prog(t, 6.3, .9));
+  pose(voile, t > 6.3 && t < 7.4 ? 1 - prog(t, 7.0, .4) : 0, { k: ouv * Math.hypot(W, H) / 10 * 1.05 });
+
+  // ── 2 ──
+  const e2 = 6.8, f2 = 19.4;
+  const o2 = vie(t, e2, f2, .01, .7);
+  c2.style.visibility = c2b.style.visibility = o2 > 0 ? 'visible' : 'hidden';
+  // La caméra : elle s'approche du téléphone qui écrit, puis recule pour
+  // montrer le saut d'un téléphone à l'autre.
+  const zoom = douce(prog(t, 8.0, 1.0)) * (1 - douce(prog(t, 9.95, 1.0)));
+  const cx = mix(W / 2, W / 2 - (V ? 330 : espace), zoom), cy = mix(H / 2, hautTel + ph * .7, zoom), kc = 1 + zoom * (V ? .9 : 1.15);
+  c2.style.transformOrigin = '0 0';
+  c2.style.transform = `translate(${W / 2}px, ${H / 2}px) scale(${kc.toFixed(4)}) translate(${(-cx).toFixed(2)}px, ${(-cy).toFixed(2)}px)`;
+  const sortie2 = douce(prog(t, 18.6, .8));
+  [[telA, 0, -1], [telR, .12, 0], [telB, .24, 1]].forEach(([d, r, cote]) => {
+    const v = sortie(prog(t, e2 + .2 + r, 1.4));
+    const derive = (t - e2) * 1.2;
+    // Le titre arrive : les téléphones descendent et rapetissent.
+    const place = douce(prog(t, 15.3, 1.2));
+    pose(d, o2 * b01(v * 1.6), {
+      y: (1 - v) * 380 - derive + sortie2 * 40 + place * (V ? 120 : 120),
+      x: sortie2 * -260 * (V ? 1 : 1) - sortie2 * 60 * (1 - cote),
+      rx: (1 - v) * 28 + 6,
+      ry: V ? cote * -6 : cote * -14,
+      k: (cote === 0 ? .96 : 1) * (1 - sortie2 * .06) * (1 - place * (V ? .12 : .22)),
+      flou: sortie2 * 10,
+    });
+  });
+  telR.style.zIndex = 1; telA.style.zIndex = telB.style.zIndex = 2;
+  poserChat(telA, ecA, t);
+  poserChat(telR, ecR, t);
+  poserChat(telB, ecB, t);
+  // Le saut : A → voisin → B, puis la réponse B → voisin → A.
+  const centre = (d) => { const r = d.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height * .42]; };
+  const [pa, pr, pb] = [centre(telA), centre(telR), centre(telB)];
+  const haut = V ? 160 : 230;
+  const ctrl = (p, q) => [(p[0] + q[0]) / 2, Math.min(p[1], q[1]) - haut];
+  const sauts = [[10.1, pa, pr], [11.3, pr, pb], [14.4, pb, pr], [15.0, pr, pa]];
+  let pp = null, kk = 0, actif = false;
+  for (const [a, p, q] of sauts) {
+    const d = a < 14 ? 1.05 : .55;
+    if (t >= a && t <= a + d) { pp = [p, q]; kk = douce((t - a) / d); actif = true; }
+  }
+  const p1 = arcs.querySelector('.a1'), p2 = arcs.querySelector('.a2');
+  const traceArc = (path, p, q, o) => { const c = ctrl(p, q); path.setAttribute('d', `M${p[0]} ${p[1]} Q${c[0]} ${c[1]} ${q[0]} ${q[1]}`); path.style.opacity = o; };
+  traceArc(p1, pa, pr, (vie(t, 9.9, 12.6, .3, .6) + vie(t, 14.3, 16.0, .2, .5)) * .7 * (1 - sortie2));
+  traceArc(p2, pr, pb, (vie(t, 11.1, 13.4, .3, .6) + vie(t, 14.3, 15.6, .2, .5)) * .7 * (1 - sortie2));
+  arcs.style.strokeDashoffset = 0;
+  [p1, p2].forEach((p) => p.setAttribute('stroke-dashoffset', (-t * 40).toFixed(1)));
+  if (actif) {
+    const [p, q] = pp;
+    const [x, y] = bezier(p, ctrl(p, q), q, kk);
+    pose(part, 1, { x, y, k: 1 + Math.sin(kk * Math.PI) * .5 });
+    sillage.forEach((s, i) => {
+      const k2 = Math.max(0, kk - (i + 1) * .035);
+      const [sx, sy] = bezier(p, ctrl(p, q), q, k2);
+      pose(s, (1 - (i + 1) / 7) * .8, { x: sx, y: sy, k: 1 - i * .1 });
+    });
+  } else {
+    pose(part, 0); sillage.forEach((s) => pose(s, 0));
+  }
+  // Les textes de la scène
+  pose(t2s, vie(t, 15.6, f2 - .2, .8, .6), { y: (1 - sortie(prog(t, 15.6, .8))) * 20 });
+  pose(t2, vie(t, 15.7, f2 - .2, .01, .6));
+  poserMots(t2, t, 15.75, .07, .9);
+  pose(t2c, vie(t, 16.6, f2 - .2, .9, .6), { y: (1 - sortie(prog(t, 16.6, .9))) * 20 });
+
+  // ── 3 ──
+  const e3 = 18.9, f3 = 30.0;
+  const o3 = vie(t, e3, f3, .01, .8);
+  c3.style.visibility = o3 > 0 ? 'visible' : 'hidden';
+  const arr = sortie(prog(t, e3, 2.0));
+  const nuit = douce(prog(t, 27.6, 1.2));
+  const depart = douce(prog(t, 29.0, 1.0));
+  pose(leMac, o3, { x: (1 - arr) * (V ? 0 : 900), y: (1 - arr) * (V ? 900 : 120) - (t - e3) * 2 + (V ? 0 : 0), ry: (1 - arr) * -38, rx: (1 - arr) * 10 + 4, k: (.9 + .1 * arr) * (1 + depart * .5), flou: depart * 14, p: 2400 });
+  leMac.querySelectorAll('.mac__vue img')[1].style.opacity = nuit.toFixed(3);
+  leMac.querySelector('.mac').classList.toggle('nuit', nuit > .5);
+  const arrT = sortie(prog(t, 21.4, 1.4));
+  pose(telW, o3 * b01(arrT * 1.5) * (1 - depart), { y: (1 - arrT) * 300 - (t - e3) * 3, ry: -10 + (1 - arrT) * -20, rx: 6, flou: depart * 10 });
+  poserChat(telW, ecW, t);
+  // La photo s'envole de l'écran du Mac vers le téléphone.
+  const vol = prog(t, 23.6, 1.3);
+  if (t >= 23.4 && t <= 25.1) {
+    const rm = leMac.querySelector('.mac__vue').getBoundingClientRect();
+    const rt = telW.getBoundingClientRect();
+    const p = [rm.left + rm.width * .7, rm.top + rm.height * .55], q = [rt.left + rt.width * .62, rt.top + rt.height * .6];
+    const [x, y] = bezier(p, [(p[0] + q[0]) / 2, Math.min(p[1], q[1]) - 220], q, douce(vol));
+    pose(photoVol, Math.min(sortie(prog(t, 23.4, .3)), 1 - prog(t, 24.85, .25)), { x, y, k: mix(1, .55, douce(vol)) * (1 + Math.sin(vol * Math.PI) * .15), rz: Math.sin(vol * Math.PI) * -8 });
+  } else pose(photoVol, 0);
+  pose(t3s, vie(t, 19.6, f3 - .3, .8, .6) * (1 - depart));
+  pose(t3, vie(t, 19.7, f3, .01, .6) * (1 - nuit));
+  pose(t3n, vie(t, 19.7, f3, .01, .6) * nuit * (1 - depart));
+  poserMots(t3, t, 19.75, .07, .9); poserMots(t3n, t, 19.75, .07, .9);
+  pose(t3c, vie(t, 22.4, f3 - .3, .9, .6) * (1 - depart), { y: (1 - sortie(prog(t, 22.4, .9))) * 20 });
+
+  // ── 4 ──
+  const e4 = 29.8, f4 = 44.6;
+  const o4 = vie(t, e4, f4, .01, .5);
+  c4.style.visibility = o4 > 0 ? 'visible' : 'hidden';
+  const ic = sortie(prog(t, e4, 1.2));
+  const reduit = douce(prog(t, 31.6, 1.0));
+  pose(lueur, o4 * (.6 + .4 * Math.sin(t * 1.3)) * (1 - reduit * .4), { k: .8 + ic * .3 });
+  pose(grandeIcone, vie(t, e4, 32.6, .9, .7), { k: (.6 + .4 * ressort(prog(t, e4, 1.3))) * (1 - reduit * .3), y: reduit * -120 });
+  pose(nomDrop, vie(t, e4 + .5, 32.6, .01, .6), { y: reduit * -80, k: 1 - reduit * .1 });
+  poserMots(nomDrop, t, e4 + .6, .1, .9);
+  const e41 = 32.4, g = 38.4;
+  pose(t4, vie(t, e41, g, .01, .5));
+  poserMots(t4, t, e41 + .05, .06, .9);
+  const arrD = sortie(prog(t, e41 + .2, 1.6));
+  const finD = douce(prog(t, g - .4, .9));
+  pose(macDrop, vie(t, e41 + .2, g + .6, 1.0, .9), { x: (1 - arrD) * -300 - finD * 200, y: (1 - arrD) * 80, ry: 16 * (1 - arrD) + 8, rx: 4, k: 1 - finD * .1, flou: finD * 12, p: 2400 });
+  pose(telD, vie(t, e41 + .5, g + .6, 1.0, .9), { x: (1 - arrD) * 300 + finD * 200, y: (1 - arrD) * 120, ry: -14 * (1 - arrD) - 8, rx: 4, k: 1 - finD * .1, flou: finD * 12 });
+  poserDrop(telD, t, 33.8, 37.0);
+  const rm = macDrop.querySelector('.mac__vue').getBoundingClientRect(), rt = telD.getBoundingClientRect();
+  volants.forEach((v, i) => {
+    const a = 33.8 + i * .55, k = prog(t, a, 1.1);
+    if (t < a || t > a + 1.1) return pose(v, 0);
+    const p = [rm.left + rm.width * (.45 + i * .08), rm.top + rm.height * .4], q = [rt.left + rt.width / 2, rt.top + rt.height * .3];
+    const [x, y] = bezier(p, [(p[0] + q[0]) / 2, Math.min(p[1], q[1]) - 200], q, douce(k));
+    pose(v, Math.min(sortie(k * 5), 1 - prog(k, .82, .18)), { x, y, k: mix(1, .4, douce(k)), rz: (i - 1.5) * 8 * Math.sin(k * Math.PI) });
+  });
+  pose(t4c, vie(t, 34.4, g, .9, .5), { y: (1 - sortie(prog(t, 34.4, .9))) * 20 });
+  // Group Drop
+  pose(t5s, vie(t, g + .3, f4, .8, .5));
+  pose(t5, vie(t, g + .35, f4, .01, .5));
+  poserMots(t5, t, g + .4, .07, .9);
+  pose(grille, vie(t, g + .4, f4, 1, .5), { y: (1 - sortie(prog(t, g + .4, 1.2))) * 80, k: .96 + .04 * sortie(prog(t, g + .4, 1.2)) });
+  let finis = 0;
+  postes.forEach((p, i) => {
+    const r = Math.floor(i / COL), c = i % COL;
+    const a = g + 1.2 + (r + c) * (V ? .2 : .13) + ((i * 37) % 7) * .05;
+    const k = prog(t, a, 1.4);
+    p.querySelector('.p').setAttribute('stroke-dashoffset', (1 - douce(k)).toFixed(3));
+    const fini = k >= 1;
+    p.classList.toggle('fini', fini);
+    if (fini) finis++;
+    p.style.transform = `scale(${fini ? (1 + .15 * Math.sin(Math.PI * b01((t - a - 1.4) / .3))).toFixed(3) : 1})`;
+  });
+  compteur.querySelector('b').textContent = finis;
+  pose(compteur, vie(t, g + 1.0, f4, .8, .5));
+
+  // ── 5 ──
+  mots.forEach((m, i) => {
+    const a = 44.4 + i * 1.2;
+    const k = prog(t, a, 1.2);
+    const o = t < a || t > a + 1.2 ? 0 : Math.min(sortie(k * 6), 1 - prog(k, .85, .15));
+    pose(m, o, { k: 1.18 - .18 * sortie(k * 1.5) + k * .04, flou: (1 - sortie(k * 4)) * 14 });
+  });
+
+  // ── 6 ──
+  const e6 = 49.2;
+  const fusion = douce(prog(t, 53.4, 1.0));
+  pose(t6, vie(t, e6 + .2, 53.6, .01, .5));
+  poserMots(t6, t, e6 + .25, .08, .9);
+  trio.forEach((d, i) => {
+    const v = ressort(prog(t, e6 + .5 + i * .25, 1.2));
+    pose(d, vie(t, e6 + .5 + i * .25, 54.4, .3, .6), { y: (1 - v) * 120 - (t - e6) * 3, k: (.6 + .4 * v) * (1 - fusion * .5), x: -(i - 1) * ecart * fusion });
+  });
+  pose(finLogo, vie(t, 53.9, 61, .01, .1), { k: .6 + .4 * ressort(prog(t, 53.9, 1.2)) });
+  pose(finNom, vie(t, 54.5, 61, .01, .1));
+  poserMots(finNom, t, 54.5, .1, .9);
+  pose(finSite, vie(t, 55.3, 61, .9, .1), { y: (1 - sortie(prog(t, 55.3, .9))) * 16 });
+  pose(noir, prog(t, 58.8, 1.2));
+};
+
+window.pret = Promise.all([
+  document.fonts.load('700 40px Inter'), document.fonts.load('400 40px Inter'), document.fonts.load('600 40px Inter'), document.fonts.load('40px Emoji'),
+  ...[...document.images].map((i) => i.decode().catch(() => {})),
+]).then(() => rendu(0));
+rendu(+(new URLSearchParams(location.search).get('t') || 0));
+</script>
+</body>
+</html>
