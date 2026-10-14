@@ -24,12 +24,14 @@ interface Props {
   liens: { droplet: Lien; web: Lien; drop: Lien };
   /** L'icône de Droplet Drop (image), relative à la racine du site. */
   iconeDrop: string;
-  /** La racine du site (BASE), pour les fichiers du film. */
+  /** Où sont les fichiers du film (la racine de dropletmesh.app). */
   racine?: string;
 }
 const { langue, ici, liens, iconeDrop, racine = '' } = Astro.props;
 const t = famille[langue];
-const film = (format: '16x9' | '9x16', ext: 'mp4' | 'webp') => `${racine}/video/droplet-film-${format}.${ext}`;
+// Le film existe dans les dix langues des sites ; il est hébergé une seule
+// fois, sur dropletmesh.app (le site de Droplet Drop y pointe).
+const film = (format: '16x9' | '9x16', ext: 'mp4' | 'webp') => `${racine}/video/droplet-film-${langue}-${format}.${ext}`;
 
 const apps = [
   { cle: 'droplet', nom: 'Droplet', accroche: t.dropletAccroche, texte: t.dropletTexte, plateformes: t.dropletPlateformes },
@@ -76,7 +78,6 @@ const GOUTTE = 'M33 17.5C37.2 23 41.3 27 41.3 32.4a8.3 8.3 0 0 1-16.6 0C24.7 27 
         </button>
       </div>
     </div>
-    {t.videoLangue && <figcaption class="film__langue">{t.videoLangue}</figcaption>}
   </figure>
 
   <ul class="famille__apps">
@@ -184,11 +185,6 @@ const GOUTTE = 'M33 17.5C37.2 23 41.3 27 41.3 32.4a8.3 8.3 0 0 1-16.6 0C24.7 27 
   .film.est-en-pause .lecture { display: block; }
   .film.avec-son .muet { display: none; }
   .film.avec-son .sonore { display: block; }
-  .film__langue {
-    margin-top: 12px;
-    font-size: 0.875rem;
-    color: #86868b;
-  }
   /* Sur téléphone : le film vertical, à la largeur de l'écran. */
   @media (max-width: 640px) {
     .film { width: min(100% - 32px, 440px); }

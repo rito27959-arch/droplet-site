@@ -11,9 +11,11 @@
    large comme sur un iPhone, puis mises à l'échelle de l'appareil. */
 @font-face { font-family: Inter; src: url(Inter-Variable.ttf); font-weight: 100 900; }
 @font-face { font-family: Emoji; src: url(NotoColorEmoji.ttf); }
+@font-face { font-family: Arabe; src: url(arabe.woff2); font-weight: 100 900; }
+@font-face { font-family: Devanagari; src: url(devanagari.woff2); font-weight: 100 900; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: var(--W); height: var(--H); overflow: hidden; background: #000; }
-body { font-family: Inter, Emoji, system-ui, sans-serif; -webkit-font-smoothing: antialiased; font-feature-settings: 'cv11', 'ss01'; }
+body { font-family: Inter, Arabe, Devanagari, 'Noto Sans CJK SC', Emoji, system-ui, sans-serif; -webkit-font-smoothing: antialiased; font-feature-settings: 'cv11', 'ss01'; }
 #scene { position: absolute; inset: 0; overflow: hidden; }
 .calque { position: absolute; inset: 0; }
 .el { position: absolute; will-change: transform, opacity; }
@@ -23,7 +25,16 @@ body { font-family: Inter, Emoji, system-ui, sans-serif; -webkit-font-smoothing:
 .corps { font-weight: 400; letter-spacing: -0.012em; line-height: 1.4; }
 .rose { background: linear-gradient(95deg, #ff2d55 10%, #ff5e3a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .bleu { background: linear-gradient(95deg, #2fa8ff 10%, #35e0c8 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.ligne { display: block; overflow: hidden; padding-bottom: .08em; }
+.ligne { display: block; overflow: hidden; padding-bottom: .08em; white-space: nowrap; }
+/* Les écritures qui ne se serrent pas : arabe, devanagari, chinois. */
+body.large .titre, body.large .sur, body.large .corps { letter-spacing: 0; }
+body.large .titre { line-height: 1.28; }
+body.large .ligne { padding: .06em 0 .14em; }
+/* De droite à gauche : mes bulles passent à gauche. */
+body.rtl .bulle.moi { margin-left: 0; margin-right: auto; border-bottom-right-radius: 20px; border-bottom-left-radius: 6px; transform-origin: bottom left; }
+body.rtl .bulle.lui { margin-right: 0; border-bottom-left-radius: 20px; border-bottom-right-radius: 6px; transform-origin: bottom right; }
+body.rtl .etiquette.droite { justify-content: flex-start; }
+body.rtl .ui { direction: rtl; }
 .ligne > span { display: inline-block; }
 
 /* ── L'iPhone ─────────────────────────────────────────────────────── */
@@ -134,9 +145,15 @@ svg.arcs { position: absolute; inset: 0; width: 100%; height: 100%; overflow: vi
   <linearGradient id="degradeRose" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff2d55" stop-opacity="0"/><stop offset=".5" stop-color="#ff2d55"/><stop offset="1" stop-color="#ff2d55" stop-opacity="0"/></linearGradient>
 </defs></svg>
 <div id="scene"></div>
+<script src="textes.js"></script>
 <script>
 // ════════════════════════════════════════════════════════════════════════
 const V = new URLSearchParams(location.search).get('f') === 'v';
+const LANGUE = new URLSearchParams(location.search).get('l') || 'fr';
+const T = window.TEXTES[LANGUE];
+document.documentElement.lang = LANGUE;
+if (T.rtl) { document.body.classList.add('rtl'); document.documentElement.dir = 'rtl'; }
+if (T.rtl || T.cjk || LANGUE === 'hi') document.body.classList.add('large');
 const W = V ? 1080 : 1920, H = V ? 1920 : 1080;
 document.documentElement.style.setProperty('--W', W + 'px');
 document.documentElement.style.setProperty('--H', H + 'px');
@@ -176,7 +193,8 @@ function pose(d, o, { x = 0, y = 0, k = 1, rx = 0, ry = 0, rz = 0, flou = 0, p =
 }
 /** Un titre dont les mots montent derrière un masque, un par un. */
 function titre(parent, lignes, style, cls = 'titre') {
-  const d = el(parent, lignes.map((l) => `<span class="ligne">${l.split(/ (?![^<]*>)/).map((m) => `<span>${m}</span>`).join(' ')}</span>`).join(''), 'el ' + cls, style);
+  const morceaux = (l) => T.cjk ? (l.match(/<[^>]+>[^<]*<\/[^>]+>|./gu) || []) : l.split(/ (?![^<]*>)/);
+  const d = el(parent, lignes.map((l) => `<span class="ligne">${morceaux(l).map((m) => `<span>${m}</span>`).join(T.cjk ? '' : ' ')}</span>`).join(''), 'el ' + cls, style);
   d.mots = [...d.querySelectorAll('.ligne > span')];
   return d;
 }
@@ -201,7 +219,7 @@ function ecranChat({ nom, initiale, couleur, sous, bulles, saisie }) {
   const html = `${etat()}
     <div class="tete"><i class="chevron"></i><span class="avatar" style="background:${couleur}">${initiale}</span><span><b>${nom}</b><small><i></i>${sous}</small></span></div>
     <div class="fil">${bulles.map((b) => `<div class="enveloppe"><div class="bulle ${b.moi ? 'moi' : 'lui'} ${b.photo ? 'photo' : ''}">${b.photo ? `<div class="image ${b.photo}"></div>` : b.texte}</div>${b.etiquette ? `<div class="etiquette ${b.moi ? 'droite' : ''}">${b.etiquette}</div>` : ''}</div>`).join('')}</div>
-    <div class="saisie"><span class="plus">+</span><span class="champ"><span class="texte vide">Message</span><span class="envoi" style="opacity:0"></span></span></div>`;
+    <div class="saisie"><span class="plus">+</span><span class="champ"><span class="texte vide">${T.saisie}</span><span class="envoi" style="opacity:0"></span></span></div>`;
   return { cls: 'ui-chat', html, bulles, saisie };
 }
 function poserChat(racine, ui, t) {
@@ -225,22 +243,22 @@ function poserChat(racine, ui, t) {
     const visible = t >= s.a && t < s.envoi;
     const txt = visible ? s.texte.slice(0, n) : '';
     champ.classList.toggle('vide', !txt);
-    champ.innerHTML = txt ? txt + (Math.floor(t * 2.4) % 2 === 0 || t < s.b ? '<span class="curseur"></span>' : '') : 'Message';
+    champ.innerHTML = txt ? txt + (Math.floor(t * 2.4) % 2 === 0 || t < s.b ? '<span class="curseur"></span>' : '') : T.saisie;
     racine.querySelector('.envoi').style.opacity = txt ? '1' : '0';
   }
 }
 
 // ── L'écran de réception de Droplet Drop ─────────────────────────────────
 const vign = ['photo-a', 'photo-b', 'photo-c', 'photo-d'];
-const fichiersDrop = [['Vacances_2031.heic', '3,4 Mo'], ['Concert.mov', '812 Mo'], ['Projet final.key', '96 Mo'], ['Musique', '214 Mo · 38 fichiers']];
+const fichiersDrop = T.fichiers;
 const ecranDrop = () => ({
   cls: 'ui-drop',
   html: `${etat(true)}
-    <div class="entete"><img src="img/icone-drop.png"><span><b>Réception</b><small>De MacBook de Léa · AB12-CD34</small></span></div>
+    <div class="entete"><img src="img/icone-drop.png"><span><b>${T.reception}</b><small>${T.de}</small></span></div>
     <div class="anneau"><svg viewBox="0 0 220 220"><circle class="fond" cx="110" cy="110" r="96"/><circle class="plein" cx="110" cy="110" r="96" stroke-dasharray="603.2" stroke-dashoffset="603.2"/></svg>
-      <div class="pourcent"><span><b>0 %</b><small>38,5 Mo/s</small></span></div>
+      <div class="pourcent"><span><b>0 %</b><small>${T.debit}</small></span></div>
       <div class="coche" style="opacity:0"><svg viewBox="0 0 100 100"><path d="M24 52 L43 70 L77 32" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg></div></div>
-    <div class="statut">4 fichiers · 1,1 Go<small>Chiffré · vérifié bloc par bloc</small></div>
+    <div class="statut">${T.resume}<small>${T.bloc}</small></div>
     <div class="fichiers">${fichiersDrop.map(([n, s], i) => `<div class="fichier"><span class="vignette ${vign[i]}"></span><span><b>${n}</b><small>${s}</small></span><span class="etat"></span></div>`).join('')}</div>`,
 });
 function poserDrop(racine, t, a, b) {
@@ -254,7 +272,7 @@ function poserDrop(racine, t, a, b) {
   c.style.opacity = fini.toFixed(3);
   c.style.transform = `scale(${(.6 + .4 * ressort(prog(t, b, .8))).toFixed(3)})`;
   racine.querySelector('.coche path').setAttribute('stroke-dashoffset', (1 - sortie(prog(t, b + .1, .5))).toFixed(3));
-  racine.querySelector('.statut').firstChild.textContent = fini > .5 ? 'Tout est arrivé, vérifié.' : '4 fichiers · 1,1 Go';
+  racine.querySelector('.statut').firstChild.textContent = fini > .5 ? T.arrive : T.resume;
   racine.querySelectorAll('.fichier .etat').forEach((e, i) => e.classList.toggle('fait', k >= (i + 1) / 4 - .001));
 }
 
@@ -269,8 +287,8 @@ const c1 = calque();
 const goutte = el(c1, `<svg width="44" height="60" viewBox="0 0 44 60"><path d="M22 2C30 14 40 24 40 38a18 18 0 0 1-36 0C4 24 14 14 22 2Z" fill="#ff2d55"/></svg>`, 'el', `left:${W / 2 - 22}px;top:${H / 2 - 30}px`);
 const ondes = [0, 1, 2, 3].map(() => el(c1, '', 'el', `left:${W / 2 - 300}px;top:${H / 2 - 300}px;width:600px;height:600px;border-radius:50%;border:2px solid #ff2d55`));
 const tf = V ? 118 : 132;
-const h1a = titre(c1, ['Pas de réseau.'], `left:0;right:0;text-align:center;top:${H / 2 - tf * 1.2}px;font-size:${tf}px;color:#f5f5f7`);
-const h1b = titre(c1, ['Pas de <span class="rose">problème.</span>'], `left:0;right:0;text-align:center;top:${H / 2 + tf * .05}px;font-size:${tf}px;color:#f5f5f7`);
+const h1a = titre(c1, [T.hookA], `left:0;right:0;text-align:center;top:${H / 2 - tf * 1.2}px;font-size:${tf}px;color:#f5f5f7`);
+const h1b = titre(c1, [T.hookB], `left:0;right:0;text-align:center;top:${H / 2 + tf * .05}px;font-size:${tf}px;color:#f5f5f7`);
 // le mot en dégradé est un seul « mot »
 h1b.mots = [...h1b.querySelectorAll('.ligne > span')];
 const voile = el(scene, '', 'el', `left:${W / 2}px;top:${H / 2}px;width:10px;height:10px;border-radius:50%;background:#f5f5f7;margin:-5px 0 0 -5px`);
@@ -279,35 +297,35 @@ const voile = el(scene, '', 'el', `left:${W / 2}px;top:${H / 2}px;width:10px;hei
 const c2 = calque();
 const pw = V ? 320 : 360;
 const ecA = ecranChat({
-  nom: 'Amina', initiale: 'A', couleur: 'linear-gradient(135deg,#ffb36b,#ff5d8f)', sous: 'À portée, par Bluetooth',
+  nom: T.noms[0], initiale: T.noms[0][0], couleur: 'linear-gradient(135deg,#ffb36b,#ff5d8f)', sous: T.portee,
   bulles: [
-    { moi: false, texte: 'Le concert commence à 21 h 🎸', a: 0 },
-    { moi: true, texte: 'On se retrouve devant ?', a: 0 },
-    { moi: false, texte: 'Tu es où ? Plus aucun réseau ici 😅', a: 7.0 },
-    { moi: true, texte: 'Devant la grande scène.', a: 9.9, etiquette: 'Envoyé' },
-    { moi: false, texte: "Je te vois, j'arrive !", a: 15.0 },
+    { moi: false, texte: T.c1, a: 0 },
+    { moi: true, texte: T.c2, a: 0 },
+    { moi: false, texte: T.m1, a: 7.0 },
+    { moi: true, texte: T.m2, a: 9.9, etiquette: T.envoye },
+    { moi: false, texte: T.m3, a: 15.0 },
   ],
-  saisie: { texte: 'Devant la grande scène.', a: 8.5, b: 9.6, envoi: 9.9 },
+  saisie: { texte: T.m2, a: 8.5, b: 9.6, envoi: 9.9 },
 });
 const ecR = ecranChat({
-  nom: 'Voisins', initiale: 'V', couleur: 'linear-gradient(135deg,#53d1ff,#2b6bff)', sous: 'Relais actif',
+  nom: T.voisins, initiale: T.voisins[0], couleur: 'linear-gradient(135deg,#53d1ff,#2b6bff)', sous: T.relaisActif,
   bulles: [
-    { moi: false, texte: 'Qui a encore du réseau ?', a: 0 },
-    { moi: true, texte: 'Personne 😂', a: 0 },
-    { moi: false, texte: 'Heureusement, Droplet passe quand même.', a: 0 },
-    { moi: false, texte: 'On est tous au concert 🎶', a: 6.0 },
+    { moi: false, texte: T.g1, a: 0 },
+    { moi: true, texte: T.g2, a: 0 },
+    { moi: false, texte: T.g3, a: 0 },
+    { moi: false, texte: T.g4, a: 6.0 },
   ],
 });
 const ecB = ecranChat({
-  nom: 'Léa', initiale: 'L', couleur: 'linear-gradient(135deg,#b58cff,#5b5bf0)', sous: 'À portée, par Bluetooth',
+  nom: T.noms[1], initiale: T.noms[1][0], couleur: 'linear-gradient(135deg,#b58cff,#5b5bf0)', sous: T.portee,
   bulles: [
-    { moi: true, texte: 'Le concert commence à 21 h 🎸', a: 0 },
-    { moi: false, texte: 'On se retrouve devant ?', a: 0 },
-    { moi: true, texte: 'Tu es où ? Plus aucun réseau ici 😅', a: 7.0 },
-    { moi: false, texte: 'Devant la grande scène.', a: 12.9, etiquette: 'Relayé par un téléphone voisin' },
-    { moi: true, texte: "Je te vois, j'arrive !", a: 14.2 },
+    { moi: true, texte: T.c1, a: 0 },
+    { moi: false, texte: T.c2, a: 0 },
+    { moi: true, texte: T.m1, a: 7.0 },
+    { moi: false, texte: T.m2, a: 12.9, etiquette: T.relaye },
+    { moi: true, texte: T.m3, a: 14.2 },
   ],
-  saisie: { texte: "Je te vois, j'arrive !", a: 13.5, b: 14.0, envoi: 14.2 },
+  saisie: { texte: T.m3, a: 13.5, b: 14.0, envoi: 14.2 },
 });
 const espace = V ? 0 : 520;
 const ph = pw * 845 / 390;
@@ -319,41 +337,41 @@ const c2b = calque();
 const arcs = el(c2b, `<svg class="arcs" viewBox="0 0 ${W} ${H}"><path class="a1" fill="none" stroke="#ff2d55" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round"/><path class="a2" fill="none" stroke="#ff2d55" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round"/></svg>`, 'el', 'left:0;top:0;width:100%;height:100%');
 const part = el(c2b, '', 'el particule', 'left:0;top:0;width:34px;height:34px;margin:-17px 0 0 -17px');
 const sillage = [0, 1, 2, 3, 4, 5].map(() => el(c2b, '', 'el particule', 'left:0;top:0;width:22px;height:22px;margin:-11px 0 0 -11px'));
-const t2 = titre(c2b, ['La messagerie qui', 'marche sans réseau.'], `left:0;right:0;text-align:center;top:${V ? 200 : 64}px;font-size:${V ? 92 : 84}px;color:#1d1d1f`);
+const t2 = titre(c2b, T.t2, `left:0;right:0;text-align:center;top:${V ? 200 : 64}px;font-size:${V ? 92 : 84}px;color:#1d1d1f`);
 const t2s = el(c2b, `<div class="sur" style="font-size:${V ? 34 : 26}px;color:#ff2d55">Droplet</div>`, 'el', `left:0;right:0;text-align:center;top:${V ? 140 : 18}px`);
-const t2c = el(c2b, `<p class="corps" style="font-size:${V ? 34 : 25}px;color:#6e6e73;max-width:${V ? 880 : 1500}px;margin:0 auto">Vos messages sautent de téléphone en téléphone, par Bluetooth et Wi‑Fi, jusqu'à la bonne personne. Chiffrés de bout en bout.</p>`, 'el', `left:0;right:0;text-align:center;top:${V ? 1700 : 1010}px`);
+const t2c = el(c2b, `<p class="corps" style="font-size:${V ? 34 : 25}px;color:#6e6e73;max-width:${V ? 880 : 1500}px;margin:0 auto">${T.t2c}</p>`, 'el', `left:0;right:0;text-align:center;top:${V ? 1700 : 1010}px`);
 
 // ── 3. Droplet Web : le Mac, et une photo qui passe d'un écran à l'autre ──
 const c3 = calque();
 const lw = V ? 940 : 1020;
-const leMac = el(c3, mac(lw, ['w_bureau_clair.png', 'w_bureau_sombre.png']), 'el', V ? `left:${(W - lw) / 2}px;top:760px` : `left:${(W - lw) / 2 - 130}px;top:330px`);
+const leMac = el(c3, mac(lw, LANGUE === 'fr' ? ['w_bureau_clair.png', 'w_bureau_sombre.png'] : ['w_bureau_clair-en.png', 'w_bureau_sombre-en.png']), 'el', V ? `left:${(W - lw) / 2}px;top:760px` : `left:${(W - lw) / 2 - 130}px;top:330px`);
 const ecW = ecranChat({
-  nom: 'Amina', initiale: 'A', couleur: 'linear-gradient(135deg,#ffb36b,#ff5d8f)', sous: 'À portée, par Bluetooth',
+  nom: T.noms[0], initiale: T.noms[0][0], couleur: 'linear-gradient(135deg,#ffb36b,#ff5d8f)', sous: T.portee,
   bulles: [
-    { moi: false, texte: 'Tu es où ? Plus aucun réseau ici 😅', a: 0 },
-    { moi: true, texte: 'Devant la grande scène.', a: 0 },
-    { moi: true, photo: 'photo-a', a: 24.9, etiquette: 'Envoyé depuis Droplet Web' },
+    { moi: false, texte: T.m1, a: 0 },
+    { moi: true, texte: T.m2, a: 0 },
+    { moi: true, photo: 'photo-a', a: 24.9, etiquette: T.envoyeWeb },
   ],
 });
 const telW = el(c3, iphone(V ? 300 : 270, ecW), 'el', V ? `left:${W - 350}px;top:1130px` : `left:${(W - lw) / 2 - 130 + lw - 40}px;top:430px`);
 const photoVol = el(c3, '<div class="photo-a" style="width:100%;height:100%;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.3)"></div>', 'el', 'left:0;top:0;width:220px;height:157px;margin:-78px 0 0 -110px');
 const t3s = el(c3, `<div class="sur" style="font-size:${V ? 34 : 24}px;color:#ff2d55">Droplet Web</div>`, 'el', `left:0;right:0;text-align:center;top:${V ? 140 : 34}px`);
-const t3 = titre(c3, V ? ['Vos discussions,', 'sur grand écran.'] : ['Vos discussions, sur grand écran.'], `left:0;right:0;text-align:center;top:${V ? 200 : 72}px;font-size:${V ? 92 : 76}px;color:#1d1d1f`);
-const t3n = titre(c3, V ? ['Vos discussions,', 'sur grand écran.'] : ['Vos discussions, sur grand écran.'], `left:0;right:0;text-align:center;top:${V ? 200 : 72}px;font-size:${V ? 92 : 76}px;color:#f5f5f7`);
-const t3c = el(c3, `<p class="corps" style="font-size:${V ? 34 : 25}px;color:#86868b">Photos, vidéos et vocaux, dans les deux sens. <span style="color:#ff2d55">web.dropletmesh.app</span></p>`, 'el', `left:0;right:0;text-align:center;top:${V ? 420 : 172}px;padding:0 60px`);
+const t3 = titre(c3, V ? T.t3v : T.t3, `left:0;right:0;text-align:center;top:${V ? 200 : 72}px;font-size:${V ? 92 : 76}px;color:#1d1d1f`);
+const t3n = titre(c3, V ? T.t3v : T.t3, `left:0;right:0;text-align:center;top:${V ? 200 : 72}px;font-size:${V ? 92 : 76}px;color:#f5f5f7`);
+const t3c = el(c3, `<p class="corps" style="font-size:${V ? 34 : 25}px;color:#86868b">${T.t3c} <span style="color:#ff2d55">web.dropletmesh.app</span></p>`, 'el', `left:0;right:0;text-align:center;top:${V ? 420 : 172}px;padding:0 60px`);
 
 // ── 4. Droplet Drop ─────────────────────────────────────────────────────
 const c4 = calque();
 const lueur = el(c4, '', 'el', `left:${W / 2 - 700}px;top:${H / 2 - 700}px;width:1400px;height:1400px;border-radius:50%;background:radial-gradient(circle, rgba(47,168,255,.28), rgba(47,168,255,0) 62%)`);
 const grandeIcone = el(c4, `<img class="icone-app" src="img/icone-drop.png" width="${V ? 260 : 220}" height="${V ? 260 : 220}" style="display:block;box-shadow:0 40px 120px rgba(47,168,255,.45)">`, 'el', `left:${W / 2 - (V ? 130 : 110)}px;top:${H / 2 - (V ? 230 : 190)}px`);
 const nomDrop = titre(c4, ['Droplet Drop'], `left:0;right:0;text-align:center;top:${H / 2 + (V ? 70 : 70)}px;font-size:${V ? 104 : 96}px;color:#f5f5f7`);
-const t4 = titre(c4, ['Vos fichiers, à tous les', 'appareils autour de vous.'], `left:0;right:0;text-align:center;top:${V ? 200 : 60}px;font-size:${V ? 84 : 76}px;color:#f5f5f7`);
+const t4 = titre(c4, T.t4, `left:0;right:0;text-align:center;top:${V ? 200 : 60}px;font-size:${V ? 84 : 76}px;color:#f5f5f7`);
 const macDrop = el(c4, mac(V ? 760 : 980, ['1-accueil-bureau-sombre.png'], true), 'el', V ? `left:60px;top:780px` : `left:200px;top:330px`);
 const pwD = V ? 330 : 300;
 const ecD = ecranDrop();
 const telD = el(c4, iphone(pwD, ecD), 'el', V ? `left:${W - pwD - 60}px;top:1180px` : `left:1360px;top:290px`);
 const volants = vign.map((v) => el(c4, `<div class="${v}" style="width:100%;height:100%;border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.45)"></div>`, 'el', 'left:0;top:0;width:96px;height:96px;margin:-48px 0 0 -48px'));
-const t4c = el(c4, `<p class="corps" style="font-size:${V ? 34 : 25}px;color:#8e9bb0">Directement sur votre Wi‑Fi. Android, Windows, Mac et Linux.</p>`, 'el', `left:0;right:0;text-align:center;top:${V ? 420 : 1000}px;padding:0 60px`);
+const t4c = el(c4, `<p class="corps" style="font-size:${V ? 34 : 25}px;color:#8e9bb0">${T.t4c}</p>`, 'el', `left:0;right:0;text-align:center;top:${V ? 420 : 1000}px;padding:0 60px`);
 // Group Drop
 const COL = V ? 5 : 10, cel = V ? 120 : 92;
 const grille = el(c4, `<div class="grille" style="--col:${COL};--cel:${cel}px">${Array.from({ length: 30 }, () => `<div class="poste"><svg viewBox="0 0 100 100"><circle class="f" cx="50" cy="50" r="46"/><circle class="p" cx="50" cy="50" r="46" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg><span class="rond"><i></i></span></div>`).join('')}</div>`, 'el', '');
@@ -362,12 +380,12 @@ grille.style.left = (W - largG) / 2 + 'px';
 grille.style.top = (V ? 640 : 470) + 'px';
 const postes = [...grille.querySelectorAll('.poste')];
 const t5s = el(c4, `<div class="sur" style="font-size:${V ? 34 : 26}px"><span class="bleu">Group Drop</span></div>`, 'el', `left:0;right:0;text-align:center;top:${V ? 150 : 50}px`);
-const t5 = titre(c4, ['Toute une salle,', 'en un seul envoi.'], `left:0;right:0;text-align:center;top:${V ? 210 : 96}px;font-size:${V ? 92 : 80}px;color:#f5f5f7`);
-const compteur = el(c4, `<div class="titre" style="font-size:${V ? 64 : 52}px;color:#f5f5f7;font-variant-numeric:tabular-nums"><b>0</b><span style="color:#5d6b80"> / 30</span></div><div class="corps" style="font-size:${V ? 28 : 21}px;color:#8e9bb0">appareils ont tout reçu</div>`, 'el', `left:0;right:0;text-align:center;top:${V ? 1640 : 870}px`);
+const t5 = titre(c4, T.t5, `left:0;right:0;text-align:center;top:${V ? 210 : 96}px;font-size:${V ? 92 : 80}px;color:#f5f5f7`);
+const compteur = el(c4, `<div class="titre" dir="ltr" style="font-size:${V ? 64 : 52}px;color:#f5f5f7;font-variant-numeric:tabular-nums"><b>0</b><span style="color:#5d6b80"> / 30</span></div><div class="corps" style="font-size:${V ? 28 : 21}px;color:#8e9bb0">${T.compteur}</div>`, 'el', `left:0;right:0;text-align:center;top:${V ? 1640 : 870}px`);
 
 // ── 5. Les mots, sur le temps ───────────────────────────────────────────
 const c5 = calque();
-const mots = [['Chiffré.', 'rose'], ['Vérifié.', 'bleu'], ['Sans compte.', ''], ['Sans Internet.', 'rose']].map(([m, c]) =>
+const mots = T.mots.map((m, i) => [m, ['rose', 'bleu', '', 'rose'][i]]).map(([m, c]) =>
   el(c5, `<div class="titre ${c}" style="font-size:${V ? 150 : 190}px;color:#f5f5f7;white-space:nowrap">${m}</div>`, 'el', `left:0;right:0;text-align:center;top:${H / 2 - (V ? 90 : 110)}px`));
 
 // ── 6. La famille, et la fin ────────────────────────────────────────────
@@ -380,7 +398,7 @@ const icDrop = `<img src="img/icone-drop.png" width="${ti}" height="${ti}" class
 const ecart = V ? 300 : 400;
 const trio = [[icDroplet, 'Droplet'], [icWeb, 'Droplet Web'], [icDrop, 'Droplet Drop']].map(([ic, n], i) =>
   el(c6, `${ic}<div class="sur" style="font-size:${V ? 34 : 30}px;color:#f5f5f7;text-align:center;margin-top:28px;width:${ti + 200}px;margin-left:-100px">${n}</div>`, 'el', `left:${W / 2 - ti / 2 + (i - 1) * ecart}px;top:${H / 2 - ti / 2 - (V ? 40 : 20)}px`));
-const t6 = titre(c6, ['Trois apps.', 'Une même idée.'], `left:0;right:0;text-align:center;top:${V ? 330 : 90}px;font-size:${V ? 104 : 88}px;color:#f5f5f7`);
+const t6 = titre(c6, T.t6, `left:0;right:0;text-align:center;top:${V ? 330 : 90}px;font-size:${V ? 104 : 88}px;color:#f5f5f7`);
 const finLogo = el(c6, `<img src="logo-droplet.svg" width="${V ? 230 : 190}" height="${V ? 230 : 190}" style="display:block;border-radius:22.5%;box-shadow:0 40px 120px rgba(255,45,85,.45)">`, 'el', `left:${W / 2 - (V ? 115 : 95)}px;top:${H / 2 - (V ? 260 : 210)}px`);
 const finNom = titre(c6, ['Droplet'], `left:0;right:0;text-align:center;top:${H / 2 + (V ? 30 : 20)}px;font-size:${V ? 120 : 104}px;color:#f5f5f7`);
 const finSite = el(c6, `<div class="corps" style="font-size:${V ? 40 : 34}px;color:#f5f5f7">dropletmesh.app</div><div class="corps" style="font-size:${V ? 28 : 22}px;color:#86868b;margin-top:10px">web.dropletmesh.app&nbsp;&nbsp;·&nbsp;&nbsp;drop.dropletmesh.app</div>`, 'el', `left:0;right:0;text-align:center;top:${H / 2 + (V ? 200 : 170)}px`);
@@ -582,7 +600,37 @@ window.rendu = function (t) {
 window.pret = Promise.all([
   document.fonts.load('700 40px Inter'), document.fonts.load('400 40px Inter'), document.fonts.load('600 40px Inter'), document.fonts.load('40px Emoji'),
   ...[...document.images].map((i) => i.decode().catch(() => {})),
-]).then(() => rendu(0));
+]).then(() => {
+  // Un titre trop large pour l'image (allemand, russe…) : on réduit sa taille
+  // jusqu'à ce que sa plus longue ligne tienne dans 90 % de la largeur.
+  const largeurLigne = (l) => { const r = document.createRange(); r.selectNodeContents(l); return r.getBoundingClientRect().width; };
+  document.querySelectorAll('.el.titre').forEach((d) => {
+    const base = parseFloat(getComputedStyle(d).fontSize);
+    let k = 1;
+    for (let i = 0; i < 40; i++) {
+      const lignes = [...d.querySelectorAll('.ligne')];
+      const largeur = Math.max(0, ...lignes.map(largeurLigne));
+      if (largeur <= W * .9) break;
+      k *= .95;
+      d.style.fontSize = (base * k).toFixed(1) + 'px';
+    }
+  });
+  // Les mots du montage (« Chiffré. ») : même règle.
+  mots.forEach((m) => {
+    const t = m.querySelector('.titre');
+    const base = parseFloat(getComputedStyle(t).fontSize);
+    let k = 1;
+    for (let i = 0; i < 40 && largeurLigne(t) > W * .9; i++) { k *= .95; t.style.fontSize = (base * k).toFixed(1) + 'px'; }
+  });
+  // Les sous-titres se placent sous leur titre (sa hauteur dépend de la langue).
+  const sous = (titreEl, texteEl) => {
+    const r = titreEl.getBoundingClientRect();
+    texteEl.style.top = (titreEl.offsetTop + titreEl.offsetHeight + (V ? 26 : 14)) + 'px';
+  };
+  if (V) { sous(t3, t3c); sous(t4, t4c); }
+  else sous(t3, t3c);
+  rendu(0);
+});
 rendu(+(new URLSearchParams(location.search).get('t') || 0));
 </script>
 </body>

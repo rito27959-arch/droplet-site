@@ -19,8 +19,6 @@ export interface TextesFamille {
   son: string;
   sansSon: string;
   video: string;
-  /** « Vidéo en français » — vide en français. */
-  videoLangue: string;
   ici: string;
   dropletAccroche: string;
   dropletTexte: string;
@@ -61,7 +59,6 @@ export const famille: Record<LangueFamille, TextesFamille> = {
     son: 'Activer le son',
     sansSon: 'Couper le son',
     video: 'Vidéo de présentation de Droplet, Droplet Web et Droplet Drop',
-    videoLangue: '',
     ici: 'Vous êtes ici',
     dropletAccroche: 'La messagerie qui marche sans réseau.',
     dropletTexte: "Vos messages sautent de téléphone en téléphone, par Bluetooth et Wi‑Fi, jusqu'à la bonne personne. Chiffrés de bout en bout.",
@@ -99,7 +96,6 @@ export const famille: Record<LangueFamille, TextesFamille> = {
     son: 'Turn sound on',
     sansSon: 'Mute',
     video: 'Introduction video for Droplet, Droplet Web and Droplet Drop',
-    videoLangue: 'Video in French',
     ici: 'You are here',
     dropletAccroche: 'The messenger that works without a network.',
     dropletTexte: 'Your messages hop from phone to phone, over Bluetooth and Wi‑Fi, until they reach the right person. End-to-end encrypted.',
@@ -137,7 +133,6 @@ export const famille: Record<LangueFamille, TextesFamille> = {
     son: 'Activar el sonido',
     sansSon: 'Silenciar',
     video: 'Vídeo de presentación de Droplet, Droplet Web y Droplet Drop',
-    videoLangue: 'Vídeo en francés',
     ici: 'Estás aquí',
     dropletAccroche: 'La mensajería que funciona sin red.',
     dropletTexte: 'Tus mensajes saltan de teléfono en teléfono, por Bluetooth y wifi, hasta la persona correcta. Cifrados de extremo a extremo.',
@@ -175,7 +170,6 @@ export const famille: Record<LangueFamille, TextesFamille> = {
     son: 'Ativar o som',
     sansSon: 'Silenciar',
     video: 'Vídeo de apresentação do Droplet, Droplet Web e Droplet Drop',
-    videoLangue: 'Vídeo em francês',
     ici: 'Está aqui',
     dropletAccroche: 'As mensagens que funcionam sem rede.',
     dropletTexte: 'As suas mensagens saltam de telemóvel em telemóvel, por Bluetooth e Wi‑Fi, até à pessoa certa. Cifradas de ponta a ponta.',
@@ -213,7 +207,6 @@ export const famille: Record<LangueFamille, TextesFamille> = {
     son: 'Ton einschalten',
     sansSon: 'Stumm schalten',
     video: 'Vorstellungsvideo von Droplet, Droplet Web und Droplet Drop',
-    videoLangue: 'Video auf Französisch',
     ici: 'Du bist hier',
     dropletAccroche: 'Der Messenger, der ohne Netz funktioniert.',
     dropletTexte: 'Deine Nachrichten springen per Bluetooth und WLAN von Handy zu Handy, bis zur richtigen Person. Ende-zu-Ende-verschlüsselt.',
@@ -251,7 +244,6 @@ export const famille: Record<LangueFamille, TextesFamille> = {
     son: 'Attiva l’audio',
     sansSon: 'Disattiva l’audio',
     video: 'Video di presentazione di Droplet, Droplet Web e Droplet Drop',
-    videoLangue: 'Video in francese',
     ici: 'Sei qui',
     dropletAccroche: 'La messaggistica che funziona senza rete.',
     dropletTexte: 'I tuoi messaggi saltano da telefono a telefono, via Bluetooth e Wi‑Fi, fino alla persona giusta. Cifrati end-to-end.',
@@ -289,7 +281,6 @@ export const famille: Record<LangueFamille, TextesFamille> = {
     son: 'Включить звук',
     sansSon: 'Выключить звук',
     video: 'Видео о Droplet, Droplet Web и Droplet Drop',
-    videoLangue: 'Видео на французском',
     ici: 'Вы здесь',
     dropletAccroche: 'Мессенджер, который работает без сети.',
     dropletTexte: 'Сообщения перескакивают с телефона на телефон по Bluetooth и Wi‑Fi, пока не дойдут до адресата. Сквозное шифрование.',
@@ -327,7 +318,6 @@ export const famille: Record<LangueFamille, TextesFamille> = {
     son: 'تشغيل الصوت',
     sansSon: 'كتم الصوت',
     video: 'فيديو تعريفي بـ Droplet وDroplet Web وDroplet Drop',
-    videoLangue: 'الفيديو باللغة الفرنسية',
     ici: 'أنت هنا',
     dropletAccroche: 'المراسلة التي تعمل دون شبكة.',
     dropletTexte: 'تنتقل رسائلك من هاتف إلى هاتف، عبر البلوتوث وWi‑Fi، حتى تصل إلى الشخص المقصود. مشفّرة من طرف إلى طرف.',
@@ -365,7 +355,6 @@ export const famille: Record<LangueFamille, TextesFamille> = {
     son: 'आवाज़ चालू करें',
     sansSon: 'आवाज़ बंद करें',
     video: 'Droplet, Droplet Web और Droplet Drop का परिचय वीडियो',
-    videoLangue: 'वीडियो फ़्रेंच में है',
     ici: 'आप यहाँ हैं',
     dropletAccroche: 'बिना नेटवर्क चलने वाला मैसेंजर।',
     dropletTexte: 'आपके संदेश ब्लूटूथ और वाई-फ़ाई से एक फ़ोन से दूसरे फ़ोन पर कूदते हुए सही व्यक्ति तक पहुँचते हैं। एंड-टू-एंड एन्क्रिप्टेड।',
@@ -403,7 +392,6 @@ export const famille: Record<LangueFamille, TextesFamille> = {
     son: '打开声音',
     sansSon: '静音',
     video: 'Droplet、Droplet Web 与 Droplet Drop 介绍视频',
-    videoLangue: '视频为法语',
     ici: '当前所在',
     dropletAccroche: '无需网络的即时通讯。',
     dropletTexte: '你的消息通过蓝牙和 Wi‑Fi 在手机之间接力，直到送达对方。端到端加密。',
