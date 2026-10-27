@@ -4,17 +4,17 @@
   "version": "1.0.0",
 
   "marque": {
-    "$commentaire": "La couleur de chaque produit, comme chez Apple chaque app a la sienne. La goutte (rose) est celle du logo, donc de la famille.",
-    "goutte": "#FF2D55",
+    "$commentaire": "La couleur de chaque produit, comme chez Apple chaque app a la sienne. La goutte (bleue) est celle du logo — la bulle et sa goutte — donc de la famille.",
+    "goutte": "#007AFF",
     "drop": "#168BFF",
     "drop2": "#34D8FF"
   },
 
   "accents": {
-    "$commentaire": "La même liste, dans le même ordre, partout où l'on choisit sa couleur. Valeurs d'iOS (claire, sombre). La goutte ouvre la liste : c'est la couleur par défaut de Droplet.",
+    "$commentaire": "La même liste, dans le même ordre, partout où l'on choisit sa couleur. Valeurs d'iOS (claire, sombre). Le bleu ouvre la liste : c'est la couleur du logo, donc celle de Droplet par défaut.",
     "liste": [
-      { "cle": "rose", "clair": "#FF2D55", "sombre": "#FF375F" },
       { "cle": "bleu", "clair": "#007AFF", "sombre": "#0A84FF" },
+      { "cle": "rose", "clair": "#FF2D55", "sombre": "#FF375F" },
       { "cle": "indigo", "clair": "#5856D6", "sombre": "#5E5CE6" },
       { "cle": "violet", "clair": "#AF52DE", "sombre": "#BF5AF2" },
       { "cle": "rouge", "clair": "#FF3B30", "sombre": "#FF453A" },
@@ -24,7 +24,7 @@
       { "cle": "cyan", "clair": "#32ADE6", "sombre": "#64D2FF" },
       { "cle": "graphite", "clair": "#8E8E93", "sombre": "#98989D" }
     ],
-    "defaut": "rose"
+    "defaut": "bleu"
   },
 
   "neutres": {

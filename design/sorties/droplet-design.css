@@ -5,13 +5,13 @@
  */
 
 :root {
-  --dd-goutte: #ff2d55;
+  --dd-goutte: #007aff;
   --dd-drop: #168bff;
   --dd-drop-2: #34d8ff;
-  --dd-accent-rose: #ff375f;
-  --dd-accent-rose-clair: #ff2d55;
   --dd-accent-bleu: #0a84ff;
   --dd-accent-bleu-clair: #007aff;
+  --dd-accent-rose: #ff375f;
+  --dd-accent-rose-clair: #ff2d55;
   --dd-accent-indigo: #5e5ce6;
   --dd-accent-indigo-clair: #5856d6;
   --dd-accent-violet: #bf5af2;

@@ -20,7 +20,7 @@ node design/generer.mjs --verifier            # échoue si une sortie n'est plus
 
 ## Les règles
 
-1. **Une couleur par produit, une liste d'accents pour tous.** La goutte (rose `#FF2D55`) est la couleur du logo, donc celle de Droplet. Le bleu liquide (`#168BFF` → `#34D8FF`) est celle de Droplet Drop. Quand on laisse choisir sa couleur, c'est la même liste, dans le même ordre, partout, et la goutte l'ouvre.
+1. **Une couleur par produit, une liste d'accents pour tous.** La goutte (bleue `#007AFF`) est la couleur du logo — la bulle et sa goutte —, donc celle de Droplet. Le bleu liquide (`#168BFF` → `#34D8FF`) est celle de Droplet Drop. Quand on laisse choisir sa couleur, c'est la même liste, dans le même ordre, partout, et le bleu l'ouvre.
 2. **Deux couches de neutres.**
    - **Système** : les gris d'Apple, pour l'interface de tous les jours (listes, réglages, discussions).
    - **Scène** : la nuit bleutée, le ciel étoilé et la lueur, pour les moments de marque (accueil, transferts, héros des sites).
