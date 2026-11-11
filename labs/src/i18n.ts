@@ -144,7 +144,7 @@ const en = {
     ],
     ambitionsTitle: 'Long-term ambitions',
     ambitions:
-      'To turn the shared foundations of these projects, the encrypted identity, the mesh engine and the file transfer engine, into building blocks that other developers can use. The roadmap describes the steps, in order.',
+      'A complete connection infrastructure, built from Cameroon. First Droplet ID: one identifier, no personal information, a key that never leaves your device, to sign in to every Droplet app. Then a way to reach the internet at lower cost and securely, with nothing more than that identifier, and without depending on servers abroad. Finally, the same foundations opened to other developers.',
     visionLink: 'Read the vision',
   },
 
@@ -482,7 +482,7 @@ const fr: typeof en = {
     ],
     ambitionsTitle: 'Ambitions à long terme',
     ambitions:
-      'Faire des fondations communes de ces projets, l’identité chiffrée, le moteur mesh et le moteur de transfert de fichiers, des briques que d’autres développeurs pourront utiliser. La feuille de route décrit les étapes, dans l’ordre.',
+      'Une infrastructure de connexion complète, construite depuis le Cameroun. D’abord Droplet ID : un identifiant, aucune information personnelle, une clé qui ne quitte jamais votre appareil, pour se connecter à toutes les apps Droplet. Ensuite, un moyen d’accéder à Internet à moindre coût et en sécurité, avec ce seul identifiant, sans dépendre de serveurs extérieurs. Enfin, les mêmes fondations ouvertes aux autres développeurs.',
     visionLink: 'Lire la vision',
   },
 
