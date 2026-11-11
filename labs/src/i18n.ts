@@ -144,7 +144,7 @@ const en = {
     ],
     ambitionsTitle: 'Long-term ambitions',
     ambitions:
-      'A complete connection infrastructure, built from Cameroon. First Droplet ID: one identifier, no personal information, a key that never leaves your device, to sign in to every Droplet app. Then a way to reach the internet at lower cost and securely, with nothing more than that identifier, and without depending on servers abroad. Finally, the same foundations opened to other developers.',
+      'A complete connection infrastructure, built from Cameroon. First Droplet ID: one identifier, no personal information, a key that never leaves your device, to sign in to every Droplet app. Then a way to reach the internet at lower cost and securely, with nothing more than that identifier, and without depending on servers abroad. Goal: 100,000 people by 2028, in Cameroon first, then across French-speaking Africa.',
     visionLink: 'Read the vision',
   },
 
@@ -226,12 +226,24 @@ const en = {
     projectsTitle: 'Current projects',
     ambitionsTitle: 'Long-term ambitions',
     ambitions:
-      'To build, from Cameroon, a complete connection infrastructure: one private identity that opens every Droplet app, without a phone number or an email. In time, a way for people to reach the internet at lower cost and securely, with nothing more than an identifier.',
+      'To build, from Cameroon, a complete connection infrastructure: one private identity that opens every Droplet app, without a phone number or an email. Goal: 100,000 people connected without giving their name by 2028, first in Cameroon, then across French-speaking Africa. Then internet access at lower cost, shared through the mesh, then through neighbourhood access points, and in the long run a company with its own connectivity, satellite included.',
   },
 
   vision: {
     title: 'Vision: one private identity for every Droplet app',
     description: 'Droplet Labs is building Droplet ID: one identifier, no personal information, a key that never leaves your device, to sign in to every app in the Droplet family. Values, how it works and the roadmap.',
+    targetValue: '100,000',
+    targetText: 'people connected without giving their name, by 2028.',
+    targetWhere: 'In Cameroon first, then across French-speaking Africa.',
+    targetNote: 'An objective, not a result.',
+    accessTitle: 'Internet at lower cost',
+    accessLead: 'Getting online is expensive. The plan is to bring the cost down in three stages, each one opened with a Droplet ID, without handing over your name, and within the rules of each country.',
+    access: [
+      { when: 'First', title: 'Shared through the mesh', text: 'One connected phone shares its access with the Droplet devices around it. The cost is split, every user stays anonymous behind their own Droplet ID.' },
+      { when: 'Next', title: 'Neighbourhood access points', text: 'Wi-Fi points run by local relays, paid in small amounts, opened with a Droplet ID.' },
+      { when: 'In the long run', title: 'Our own connectivity', text: 'A company with its own infrastructure, satellite links included, so that access does not depend on a single operator’s prices.' },
+    ],
+    accessNote: 'None of these stages exists yet. They come after Droplet ID, in this order.',
     motto: 'Connected, never exposed.',
     lead: 'People should be able to talk, share and learn without handing over who they are. Droplet Labs is building the infrastructure for that: one identity, carried by your device, that opens every Droplet app and reveals nothing about you.',
     idTitle: 'Droplet ID',
@@ -315,6 +327,7 @@ const en = {
           { text: 'Bring in the first engineers and a designer', state: 'todo' },
           { text: 'An independent security review of Droplet ID', state: 'todo' },
           { text: 'Droplet ID in every app of the family', state: 'todo' },
+          { text: 'Internet shared through the mesh: one connected phone serves the Droplet devices around it', state: 'todo' },
         ],
         doneWhen: 'Every Droplet app signs in with Droplet ID, and its security has been reviewed by someone outside the team.',
       },
@@ -324,8 +337,8 @@ const en = {
         steps: [
           { text: 'Public documentation and a developer kit for Droplet ID', state: 'todo' },
           { text: 'Third-party apps signing in with Droplet ID', state: 'todo' },
-          { text: 'Partners outside Cameroon', state: 'todo' },
-          { text: 'Internet access at lower cost, shared securely through the mesh with a Droplet ID', state: 'todo' },
+          { text: 'Partners across French-speaking Africa', state: 'todo' },
+          { text: 'Neighbourhood access points, opened with a Droplet ID', state: 'todo' },
         ],
         doneWhen: 'Apps built by others use Droplet ID, in several countries.',
       },
@@ -482,7 +495,7 @@ const fr: typeof en = {
     ],
     ambitionsTitle: 'Ambitions à long terme',
     ambitions:
-      'Une infrastructure de connexion complète, construite depuis le Cameroun. D’abord Droplet ID : un identifiant, aucune information personnelle, une clé qui ne quitte jamais votre appareil, pour se connecter à toutes les apps Droplet. Ensuite, un moyen d’accéder à Internet à moindre coût et en sécurité, avec ce seul identifiant, sans dépendre de serveurs extérieurs. Enfin, les mêmes fondations ouvertes aux autres développeurs.',
+      'Une infrastructure de connexion complète, construite depuis le Cameroun. D’abord Droplet ID : un identifiant, aucune information personnelle, une clé qui ne quitte jamais votre appareil, pour se connecter à toutes les apps Droplet. Ensuite, un moyen d’accéder à Internet à moindre coût et en sécurité, avec ce seul identifiant, sans dépendre de serveurs extérieurs. Objectif : 100 000 personnes d’ici 2028, au Cameroun d’abord, puis en Afrique francophone.',
     visionLink: 'Lire la vision',
   },
 
@@ -564,12 +577,24 @@ const fr: typeof en = {
     projectsTitle: 'Projets en cours',
     ambitionsTitle: 'Ambitions à long terme',
     ambitions:
-      'Construire, depuis le Cameroun, une infrastructure de connexion complète : une identité privée qui ouvre toutes les apps Droplet, sans numéro de téléphone ni e-mail. À terme, un moyen d’accéder à Internet à moindre coût et en sécurité, avec un simple identifiant.',
+      'Construire, depuis le Cameroun, une infrastructure de connexion complète : une identité privée qui ouvre toutes les apps Droplet, sans numéro de téléphone ni e-mail. Objectif : 100 000 personnes connectées sans donner leur nom d’ici 2028, d’abord au Cameroun, puis en Afrique francophone. Ensuite, un accès à Internet à moindre coût, partagé par le mesh, puis par des points d’accès de quartier, et à long terme une société avec sa propre connectivité, satellite compris.',
   },
 
   vision: {
     title: 'Vision : une identité privée pour toutes les apps Droplet',
     description: 'Droplet Labs construit Droplet ID : un identifiant, aucune information personnelle, une clé qui ne quitte jamais votre appareil, pour se connecter à toutes les apps de la famille Droplet. Valeurs, fonctionnement et feuille de route.',
+    targetValue: '100 000',
+    targetText: 'personnes connectées sans donner leur nom, d’ici 2028.',
+    targetWhere: 'Au Cameroun d’abord, puis en Afrique francophone.',
+    targetNote: 'Un objectif, pas un résultat.',
+    accessTitle: 'Internet à moindre coût',
+    accessLead: 'Se connecter coûte cher. Le plan est de faire baisser ce coût en trois étapes, chacune ouverte avec un Droplet ID, sans livrer votre nom, et dans le respect des règles de chaque pays.',
+    access: [
+      { when: 'D’abord', title: 'Partagé par le mesh', text: 'Un téléphone connecté partage son accès avec les appareils Droplet autour de lui. Le coût se divise, et chacun reste anonyme derrière son propre Droplet ID.' },
+      { when: 'Ensuite', title: 'Des points d’accès de quartier', text: 'Des bornes Wi-Fi tenues par des relais locaux, payées par petites sommes, ouvertes avec un Droplet ID.' },
+      { when: 'À long terme', title: 'Notre propre connectivité', text: 'Une société avec sa propre infrastructure, liaisons satellite comprises, pour que l’accès ne dépende plus des prix d’un seul opérateur.' },
+    ],
+    accessNote: 'Aucune de ces étapes n’existe encore. Elles viennent après Droplet ID, dans cet ordre.',
     motto: 'Connecté, jamais exposé.',
     lead: 'On devrait pouvoir parler, partager et apprendre sans livrer qui l’on est. Droplet Labs construit l’infrastructure pour cela : une seule identité, portée par votre appareil, qui ouvre toutes les apps Droplet et ne révèle rien de vous.',
     idTitle: 'Droplet ID',
@@ -653,6 +678,7 @@ const fr: typeof en = {
           { text: 'Accueillir les premiers ingénieurs et un designer', state: 'todo' },
           { text: 'Un audit de sécurité indépendant de Droplet ID', state: 'todo' },
           { text: 'Droplet ID dans toutes les apps de la famille', state: 'todo' },
+          { text: 'Internet partagé par le mesh : un téléphone connecté dessert les appareils Droplet autour de lui', state: 'todo' },
         ],
         doneWhen: 'Toutes les apps Droplet se connectent avec Droplet ID, et sa sécurité a été vérifiée par quelqu’un d’extérieur.',
       },
@@ -662,8 +688,8 @@ const fr: typeof en = {
         steps: [
           { text: 'Une documentation publique et un kit de développement pour Droplet ID', state: 'todo' },
           { text: 'Des apps tierces qui se connectent avec Droplet ID', state: 'todo' },
-          { text: 'Des partenaires hors du Cameroun', state: 'todo' },
-          { text: 'Un accès à Internet à moindre coût, partagé en sécurité par le réseau mesh avec un Droplet ID', state: 'todo' },
+          { text: 'Des partenaires en Afrique francophone', state: 'todo' },
+          { text: 'Des points d’accès de quartier, ouverts avec un Droplet ID', state: 'todo' },
         ],
         doneWhen: 'Des apps construites par d’autres utilisent Droplet ID, dans plusieurs pays.',
       },
