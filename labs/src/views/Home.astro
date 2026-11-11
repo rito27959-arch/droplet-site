@@ -1,6 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
 import MeshCanvas from '../components/MeshCanvas.astro';
+import LiquidDrop from '../components/LiquidDrop.astro';
+import Story from '../components/Story.astro';
 import Rise from '../components/Rise.astro';
 import ProductMedia from '../components/ProductMedia.astro';
 import Portrait from '../components/Portrait.astro';
@@ -22,12 +24,16 @@ const country = lang === 'fr' ? 'Cameroun' : site.country;
     <MeshCanvas />
     <div class="pointer-events-none absolute inset-x-0 bottom-0 -z-0 h-[40%] bg-gradient-to-t from-abyss to-transparent"></div>
 
-    <div class="wrap relative pb-14 pt-36 md:pb-20">
+    <!-- The drop: centre stage on phones, to the right of the headline on large screens. -->
+    <div class="pointer-events-none absolute left-1/2 top-[4.75rem] size-[min(62vw,22rem)] -translate-x-1/2 md:left-auto md:right-[2%] md:top-[12%] md:size-[min(46vw,40rem)] md:translate-x-0" data-reveal style="--d:250ms">
+      <LiquidDrop class="h-full w-full" />
+    </div>
+    <div class="wrap relative pb-14 pt-[calc(5rem+min(62vw,22rem))] md:pb-20 md:pt-36">
       <p class="mb-8 inline-flex items-center gap-2.5 rounded-full bg-foam/[0.06] py-1.5 pl-2 pr-4 text-[0.88rem] text-haze ring-1 ring-foam/10 backdrop-blur" data-reveal>
         <span class="relative flex size-2.5"><span class="absolute inset-0 animate-ping rounded-full bg-ice/60 motion-reduce:animate-none"></span><span class="relative size-2.5 rounded-full bg-ice"></span></span>
         {site.city}, {country}
       </p>
-      <Rise as="h1" text={h.headline} class="max-w-[12ch] text-hero font-[500]" />
+      <Rise as="h1" text={h.headline} class="relative max-w-[12ch] text-hero font-[500] [text-shadow:0_2px_40px_rgba(3,17,26,0.6)]" />
       <div class="mt-10 grid gap-10 md:mt-14 md:grid-cols-12 md:items-end">
         <p class="md:col-span-6 max-w-[46ch] text-lead text-haze" data-reveal style="--d:500ms">{h.lead}</p>
         <div class="md:col-span-6 flex flex-wrap gap-3 md:justify-end" data-reveal style="--d:650ms">
@@ -45,6 +51,9 @@ const country = lang === 'fr' ? 'Cameroun' : site.country;
       {h.manifesto.split(' ').map((w) => <><span class="w">{w}</span>{' '}</>)}
     </p>
   </section>
+
+  <!-- ── The story, pinned to the screen as you scroll ─────────────── -->
+  <Story lang={lang} />
 
   <!-- ── The projects, one chapter each ────────────────────────────── -->
   <section aria-labelledby="projects-title" class="relative">

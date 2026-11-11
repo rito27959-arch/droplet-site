@@ -65,6 +65,14 @@ const en = {
     scroll: 'Scroll',
     chapter: 'Project',
     discover: 'Discover',
+    storyTitle: 'One idea, from a phone to a whole room',
+    story: [
+      { title: 'No signal. The message still arrives.', text: 'Droplet Messenger passes an encrypted message from phone to phone over Bluetooth and local Wi-Fi until it reaches the right person.', media: 'messenger', accent: '#ff3b5c' },
+      { title: 'The same chats, on a bigger screen.', text: 'Droplet Web links to the phone’s account: photos, videos and voice notes, in both directions.', media: 'messenger-web', accent: '#ff3b5c' },
+      { title: 'Any file, to any device nearby.', text: 'Droplet Drop sends folders straight over the local network, from Android to Windows, Mac or Linux.', media: 'drop', accent: '#2e8bff' },
+      { title: 'A whole room, in a single send.', text: 'Group Drop sends the same files to thirty devices at once, each copy checked block by block.', media: 'drop-group', accent: '#2e8bff' },
+    ],
+    storyNote: 'Footage from the Droplet product film.',
     statsTitle: 'Measured, not claimed',
     stats: [
       { value: 5, suffix: '', label: 'projects built and published since July 2026' },
@@ -310,6 +318,14 @@ const fr: typeof en = {
     scroll: 'Défiler',
     chapter: 'Projet',
     discover: 'Découvrir',
+    storyTitle: 'Une idée, d’un téléphone à toute une salle',
+    story: [
+      { title: 'Pas de réseau. Le message arrive quand même.', text: 'Droplet Messenger fait passer un message chiffré de téléphone en téléphone, par Bluetooth et Wi-Fi local, jusqu’à la bonne personne.', media: 'messenger', accent: '#ff3b5c' },
+      { title: 'Les mêmes discussions, sur grand écran.', text: 'Droplet Web se relie au compte du téléphone : photos, vidéos et messages vocaux, dans les deux sens.', media: 'messenger-web', accent: '#ff3b5c' },
+      { title: 'N’importe quel fichier, à tout appareil proche.', text: 'Droplet Drop envoie des dossiers directement par le réseau local, d’Android à Windows, Mac ou Linux.', media: 'drop', accent: '#2e8bff' },
+      { title: 'Toute une salle, en un seul envoi.', text: 'Group Drop envoie les mêmes fichiers à trente appareils à la fois, chaque copie vérifiée bloc par bloc.', media: 'drop-group', accent: '#2e8bff' },
+    ],
+    storyNote: 'Images tirées du film de présentation de Droplet.',
     statsTitle: 'Mesuré, pas promis',
     stats: [
       { value: 5, suffix: '', label: 'projets construits et publiés depuis juillet 2026' },

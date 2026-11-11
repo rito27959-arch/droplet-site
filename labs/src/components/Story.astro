@@ -1,0 +1,108 @@
+---
+// Scroll-driven story (large screens): the footage stays pinned while the
+// steps scroll past; each step brings its own clip forward. On phones it
+// becomes a plain sequence, clip under each step.
+import Rise from './Rise.astro';
+import { t, type Lang } from '../i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const h = t[lang].home;
+const steps = h.story;
+---
+<section class="relative border-t border-foam/[0.08]" data-story>
+  <div class="wrap pt-24 md:pt-32">
+    <Rise text={h.storyTitle} class="text-mega max-w-[16ch]" />
+  </div>
+
+  <div class="wrap relative mt-12 lg:mt-0 lg:grid lg:grid-cols-12 lg:gap-10">
+    <!-- The steps -->
+    <ol class="lg:col-span-5">
+      {steps.map((s, i) => (
+        <li class="story-step py-10 lg:flex lg:min-h-[85vh] lg:items-center lg:py-0" data-step={i}>
+          <div class="transition-opacity duration-500 lg:opacity-30 [.active_&]:opacity-100">
+            <p class="flex items-center gap-3 text-[0.92rem] tabular-nums text-haze">
+              <span class="size-2 rounded-full" style={`background:${s.accent};box-shadow:0 0 14px ${s.accent}`}></span>
+              {String(i + 1).padStart(2, '0')} / {String(steps.length).padStart(2, '0')}
+            </p>
+            <h3 class="mt-4 max-w-[18ch] text-[clamp(1.9rem,1.3rem+2vw,3.2rem)] leading-[1.02] tracking-[-0.035em]">{s.title}</h3>
+            <p class="mt-5 max-w-[40ch] text-lead text-haze">{s.text}</p>
+          </div>
+          <div class="mt-8 overflow-hidden rounded-[22px] ring-1 ring-foam/10 lg:hidden">
+            <video data-auto muted loop playsinline preload="none" poster={`/media/${s.media}.jpg`} class="w-full" aria-hidden="true">
+              <source src={`/media/${s.media}.mp4`} type="video/mp4" />
+            </video>
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <!-- The pinned screen -->
+    <div class="hidden lg:col-span-7 lg:block">
+      <div class="sticky top-0 flex h-screen items-center">
+        <div class="relative w-full">
+          {steps.map((s, i) => (
+            <div class="story-glow glow -z-10 inset-[10%] opacity-0 transition-opacity duration-700" style={`background:${s.accent}`} data-glow={i}></div>
+          ))}
+          <div class="relative aspect-video w-full overflow-hidden rounded-[30px] bg-black ring-1 ring-foam/12 shadow-[0_60px_140px_-40px_rgba(0,0,0,0.9)]">
+            {steps.map((s, i) => (
+              <video data-clip={i} muted loop playsinline preload="none" poster={`/media/${s.media}.jpg`}
+                     class:list={['absolute inset-0 h-full w-full object-contain transition-[opacity,transform] duration-700 ease-out', i === 0 ? 'opacity-100' : 'opacity-0 scale-[1.04]']}
+                     style={`background:${s.media.startsWith('messenger') ? '#f2f3f5' : '#000'}`}
+                     aria-hidden="true">
+                <source src={`/media/${s.media}.mp4`} type="video/mp4" />
+              </video>
+            ))}
+          </div>
+          <div class="mt-5 flex gap-2" aria-hidden="true">
+            {steps.map((_, i) => <span class="h-[3px] flex-1 overflow-hidden rounded-full bg-foam/12"><span class="block h-full w-0 rounded-full bg-ice transition-[width] duration-500" data-bar={i}></span></span>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="wrap pb-20 pt-6 text-[0.85rem] text-haze/70 md:pb-28">{h.storyNote}</p>
+</section>
+
+<script>
+  function story() {
+    const root = document.querySelector<HTMLElement>('[data-story]');
+    if (!root || root.dataset.on) return;
+    root.dataset.on = '1';
+    const big = matchMedia('(min-width: 64rem)');
+    const steps = [...root.querySelectorAll<HTMLElement>('.story-step')];
+    const clips = [...root.querySelectorAll<HTMLVideoElement>('video[data-clip]')];
+    const glows = [...root.querySelectorAll<HTMLElement>('[data-glow]')];
+    const bars = [...root.querySelectorAll<HTMLElement>('[data-bar]')];
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let current = -1, inView = false;
+
+    const show = (i: number) => {
+      if (i === current) return;
+      current = i;
+      steps.forEach((s, k) => s.classList.toggle('active', k === i));
+      clips.forEach((v, k) => {
+        const on = k === i;
+        v.classList.toggle('opacity-0', !on); v.classList.toggle('scale-[1.04]', !on); v.classList.toggle('opacity-100', on);
+        if (on && inView && !calm) { v.preload = 'auto'; v.play().catch(() => {}); } else v.pause();
+      });
+      glows.forEach((g, k) => { g.style.opacity = k === i ? '0.35' : '0'; });
+      bars.forEach((b, k) => { b.style.width = k <= i ? '100%' : '0'; });
+    };
+    const update = () => {
+      if (!big.matches) return;
+      const mid = innerHeight * 0.55;
+      let best = 0;
+      steps.forEach((s, k) => { if (s.getBoundingClientRect().top < mid) best = k; });
+      show(best);
+    };
+    new IntersectionObserver(([e]) => {
+      inView = e.isIntersecting;
+      const v = clips[current];
+      if (v) { if (inView && !calm && big.matches) v.play().catch(() => {}); else v.pause(); }
+    }, { threshold: 0.1 }).observe(root);
+    addEventListener('scroll', () => requestAnimationFrame(update), { passive: true });
+    update();
+  }
+  document.addEventListener('astro:page-load', story);
+</script>

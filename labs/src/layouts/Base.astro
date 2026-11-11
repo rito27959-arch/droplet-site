@@ -68,6 +68,7 @@ const website = {
   </head>
   <body class="min-h-dvh flex flex-col overflow-x-clip">
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] btn btn-light">{d.skip}</a>
+    <div id="progress" aria-hidden="true"></div>
     <Header lang={lang} />
     <main id="main" class="flex-1">
       <slot />
@@ -138,6 +139,16 @@ const website = {
           });
         }
       }
+      // Header: hide when scrolling down past the hero, show when scrolling up.
+      // Progress: the hairline grows with the page.
+      let lastY = scrollY;
+      addEventListener('scroll', () => {
+        const y = scrollY, header = document.querySelector('header');
+        if (header) header.dataset.hidden = String(y > 400 && y > lastY && !calm);
+        lastY = y;
+        const max = document.documentElement.scrollHeight - innerHeight;
+        document.getElementById('progress')?.style.setProperty('--p', String(max > 0 ? y / max : 0));
+      }, { passive: true });
       document.addEventListener('astro:page-load', init);
     </script>
   </body>

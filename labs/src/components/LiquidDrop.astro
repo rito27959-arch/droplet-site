@@ -1,0 +1,127 @@
+---
+// The signature of the site: a single drop of water, rendered live on the
+// GPU — refracting the deep light behind it, its surface slowly moving,
+// turning towards the pointer. One fragment shader, no library.
+// Without WebGL, or with reduced motion: a still drawn in CSS.
+interface Props { class?: string }
+const { class: cls = '' } = Astro.props;
+---
+<div class={`relative ${cls}`} data-drop-host>
+  <!-- Light caught under the drop, as on a wet surface. -->
+  <div class="absolute bottom-[4%] left-1/2 h-[9%] w-[46%] -translate-x-1/2 rounded-[50%] bg-ice/30 blur-2xl"></div>
+  <div class="drop-fallback absolute inset-[14%] rounded-[50%_50%_50%_50%/58%_58%_42%_42%] bg-[radial-gradient(60%_60%_at_35%_30%,#e9fbff_0%,#8eeaf5_18%,#1c7f93_55%,#06283a_100%)] opacity-90 shadow-[0_40px_120px_-20px_rgba(34,180,203,0.6)]"></div>
+  <canvas data-drop class="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-1000" aria-hidden="true"></canvas>
+</div>
+
+<script>
+  const FRAG = `
+precision highp float;
+uniform vec2 res; uniform float time; uniform vec2 look;
+// A drop of water: a round cone (round bottom, fine tip), its surface
+// stirred by three slow waves.
+float sdRoundCone(vec3 p, float r1, float r2, float h) {
+  float b = (r1 - r2) / h, a = sqrt(1.0 - b * b);
+  vec2 q = vec2(length(p.xz), p.y);
+  float k = dot(q, vec2(-b, a));
+  if (k < 0.0) return length(q) - r1;
+  if (k > a * h) return length(q - vec2(0.0, h)) - r2;
+  return dot(q, vec2(a, b)) - r1;
+}
+float sdDrop(vec3 p) {
+  p.y += 0.42;
+  float wob = 0.028 * sin(3.1 * p.x + time * 0.9) * sin(2.7 * p.y - time * 0.7) * sin(3.3 * p.z + time * 0.6);
+  return sdRoundCone(p, 0.86, 0.025, 1.55) + wob;
+}
+vec3 normalAt(vec3 p) {
+  vec2 e = vec2(0.0015, 0.0);
+  return normalize(vec3(sdDrop(p + e.xyy) - sdDrop(p - e.xyy), sdDrop(p + e.yxy) - sdDrop(p - e.yxy), sdDrop(p + e.yyx) - sdDrop(p - e.yyx)));
+}
+// The water around: deep blue below, light pouring down from above.
+vec3 env(vec3 d) {
+  float up = d.y * 0.5 + 0.5;
+  vec3 c = mix(vec3(0.02, 0.10, 0.15), vec3(0.20, 0.62, 0.72), smoothstep(0.05, 0.95, up));
+  c += vec3(0.75, 0.97, 1.0) * pow(max(d.y, 0.0), 4.0) * 1.2;
+  vec3 L = normalize(vec3(-0.5 + look.x * 0.6, 0.85, 0.5 - look.y * 0.4));
+  c += vec3(1.0) * pow(max(dot(d, L), 0.0), 60.0) * 4.0;
+  c += vec3(0.6, 0.9, 1.0) * pow(max(dot(d, normalize(vec3(0.7, 0.2, 0.6))), 0.0), 18.0) * 0.8;
+  return c;
+}
+mat2 rot(float a) { float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
+void main() {
+  vec2 uv = (gl_FragCoord.xy * 2.0 - res) / min(res.x, res.y);
+  vec3 ro = vec3(0.0, 0.15, 3.9), rd = normalize(vec3(uv * 0.95, -1.9));
+  float ay = look.x * 0.55 + sin(time * 0.3) * 0.25, ax = -look.y * 0.22 + 0.06;
+  ro.xz *= rot(ay); rd.xz *= rot(ay); ro.yz *= rot(ax); rd.yz *= rot(ax);
+  float t = 0.0, d = 1.0; bool hit = false;
+  for (int i = 0; i < 70; i++) {
+    vec3 p = ro + rd * t; d = sdDrop(p);
+    if (d < 0.0008) { hit = true; break; }
+    t += d; if (t > 8.0) break;
+  }
+  if (!hit) { gl_FragColor = vec4(0.0); return; }
+  vec3 p = ro + rd * t, n = normalAt(p);
+  float fres = pow(1.0 - max(dot(n, -rd), 0.0), 2.5);
+  vec3 refl = env(reflect(rd, n));
+  vec3 refr = env(refract(rd, n, 0.62)) * vec3(0.55, 0.9, 1.0);
+  vec3 col = mix(refr, refl, 0.08 + 0.92 * fres);
+  // Thin-film colour at the rim, like light on a water surface.
+  col += fres * 0.35 * (0.5 + 0.5 * cos(6.2831 * (fres * 1.3 + vec3(0.0, 0.33, 0.67)))) * vec3(0.5, 0.8, 1.0);
+  // Light gathered inside the drop, near its base.
+  col += vec3(0.55, 0.97, 1.0) * pow(max(dot(n, vec3(0.0, -1.0, 0.3)), 0.0), 3.0) * 0.45;
+  col = col / (col + vec3(0.85)) * 1.55;
+  gl_FragColor = vec4(col, 1.0);
+}`;
+  const VERT = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }';
+
+  function startDrop() {
+    document.querySelectorAll<HTMLCanvasElement>('canvas[data-drop]:not([data-on])').forEach((c) => {
+      c.dataset.on = '1';
+      const gl = c.getContext('webgl', { premultipliedAlpha: false, alpha: true, antialias: true });
+      if (!gl) return;
+      const sh = (type: number, src: string) => { const s = gl.createShader(type)!; gl.shaderSource(s, src); gl.compileShader(s); return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null; };
+      const vs = sh(gl.VERTEX_SHADER, VERT), fs = sh(gl.FRAGMENT_SHADER, FRAG);
+      if (!vs || !fs) return;
+      const pr = gl.createProgram()!; gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return;
+      gl.useProgram(pr);
+      const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      const uRes = gl.getUniformLocation(pr, 'res'), uTime = gl.getUniformLocation(pr, 'time'), uLook = gl.getUniformLocation(pr, 'look');
+      const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const fine = matchMedia('(pointer: fine)').matches;
+      const look = { x: 0, y: 0, tx: 0, ty: 0 };
+      let raf = 0, visible = true; const t0 = performance.now();
+
+      const size = () => {
+        const r = c.getBoundingClientRect();
+        const dpr = Math.min(devicePixelRatio || 1, fine ? 1.6 : 1.2);
+        c.width = Math.max(1, Math.round(r.width * dpr)); c.height = Math.max(1, Math.round(r.height * dpr));
+        gl.viewport(0, 0, c.width, c.height);
+      };
+      const draw = (now: number) => {
+        look.x += (look.tx - look.x) * 0.05; look.y += (look.ty - look.y) * 0.05;
+        gl.uniform2f(uRes, c.width, c.height);
+        gl.uniform1f(uTime, calm ? 2.0 : (now - t0) / 1000);
+        gl.uniform2f(uLook, look.x, look.y);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        if (!calm && visible) raf = requestAnimationFrame(draw);
+      };
+      size();
+      new ResizeObserver(size).observe(c);
+      draw(performance.now());
+      requestAnimationFrame(() => {
+        c.style.opacity = '1';
+        const fb = c.parentElement?.querySelector<HTMLElement>('.drop-fallback'); if (fb) fb.style.opacity = '0';
+      });
+      if (calm) return;
+      new IntersectionObserver(([e]) => {
+        visible = e.isIntersecting;
+        if (visible && !raf) raf = requestAnimationFrame(draw);
+        if (!visible) { cancelAnimationFrame(raf); raf = 0; }
+      }).observe(c);
+      if (fine) addEventListener('pointermove', (e) => { look.tx = (e.clientX / innerWidth) * 2 - 1; look.ty = (e.clientY / innerHeight) * 2 - 1; }, { passive: true });
+    });
+  }
+  document.addEventListener('astro:page-load', startDrop);
+</script>
