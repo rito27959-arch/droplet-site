@@ -2,7 +2,7 @@
 
 The website of Droplet Labs, an independent technology initiative from Yaoundé, Cameroon. Not yet a registered company: the site says so on every page.
 
-Astro 7, TypeScript, Tailwind CSS 4, Lucide icons. Static output, almost no JavaScript (only the phone menu). English at `/`, French at `/fr`.
+Astro 7, TypeScript, Tailwind CSS 4, Lucide icons. Static output; small scripts only for motion (the living mesh in the hero, reveals, videos that play when seen, page transitions) and the phone menu. All motion stops for visitors who ask for reduced motion. English at `/`, French at `/fr`.
 
 ## Run it
 
@@ -26,6 +26,7 @@ npm run preview   # serves dist/
 | All other text, English and French | `src/i18n.ts` |
 | Colours and type scale | `src/styles/global.css` (`@theme`) |
 | Share image (1200 × 630) | `public/og.png` |
+| Product footage and screens | `public/media/` (video loops cut from the Droplet film), `src/assets/media/` (app screens, Kabi) |
 
 Rule for the content: only facts that can be checked. A feature still being built goes under the roadmap, never under "available".
 

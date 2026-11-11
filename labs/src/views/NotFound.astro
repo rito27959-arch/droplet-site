@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import MeshCanvas from '../components/MeshCanvas.astro';
 import { t, href, type Lang } from '../i18n';
 
 interface Props { lang: Lang }
@@ -7,9 +8,13 @@ const { lang } = Astro.props;
 const n = t[lang].notFound;
 ---
 <Base lang={lang} title={n.title} description={n.description}>
-  <section class="wrap py-24 md:py-36">
-    <h1 class="max-w-[14ch] text-[clamp(2.5rem,1.5rem+4.4vw,5.25rem)] leading-[1] tracking-[-0.032em] font-[440]">{n.headline}</h1>
-    <p class="mt-8 text-lead text-slate">{n.text}</p>
-    <a class="mt-10 btn btn-primary" href={href(lang, '/')}>{n.back}</a>
+  <section class="relative isolate flex min-h-[90svh] items-center overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(90%_70%_at_50%_0%,#0d3a4c_0%,#03111a_70%)]"></div>
+    <MeshCanvas />
+    <div class="wrap relative">
+      <h1 class="max-w-[14ch] text-mega font-[500]">{n.headline}</h1>
+      <p class="mt-8 text-lead text-haze">{n.text}</p>
+      <a class="btn btn-light mt-10" href={href(lang, '/')}>{n.back}</a>
+    </div>
   </section>
 </Base>

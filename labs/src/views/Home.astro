@@ -1,8 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
-import Ripple from '../components/Ripple.astro';
+import MeshCanvas from '../components/MeshCanvas.astro';
+import Rise from '../components/Rise.astro';
+import ProductMedia from '../components/ProductMedia.astro';
 import Portrait from '../components/Portrait.astro';
-import ProductIndex from '../components/ProductIndex.astro';
+import { products } from '../products';
 import { t, href, type Lang } from '../i18n';
 import { site, contact, founder } from '../config';
 
@@ -10,88 +12,163 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const d = t[lang];
 const h = d.home;
+const country = lang === 'fr' ? 'Cameroun' : site.country;
 ---
 <Base lang={lang} title={h.title} description={h.description}>
-  <!-- Hero: the headline, and a drop falling into still water. -->
-  <section class="relative overflow-hidden">
-    <div class="pointer-events-none absolute -right-[46vw] top-[27rem] w-[120vw] max-w-none sm:top-[18rem] md:-right-[22vw] md:top-[-6rem] md:w-[78vw] lg:-right-[14vw] lg:w-[64vw]">
-      <Ripple />
-    </div>
-    <div class="wrap relative pt-16 pb-24 md:pt-28 md:pb-36">
-      <h1 class="max-w-[13ch] text-display font-[440]">{h.headline}</h1>
-      <p class="mt-8 max-w-[44ch] text-lead text-slate md:mt-10">{h.lead}</p>
-      <div class="mt-10 flex flex-wrap gap-3">
-        <a class="btn btn-primary" href={href(lang, '/products')}>{h.ctaProducts}</a>
-        <a class="btn btn-quiet bg-mist/70" href={href(lang, '/founder')}>{h.ctaFounder}</a>
-      </div>
-      <p class="mt-16 max-w-[40ch] text-[0.9rem] text-slate md:mt-24">
-        {site.city}, {lang === 'fr' ? 'Cameroun' : site.country}. {d.status}
+  <!-- ── Hero: the mesh, alive ─────────────────────────────────────── -->
+  <section class="relative isolate flex min-h-[100svh] items-end overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(120%_80%_at_70%_0%,#0d3a4c_0%,#06202d_38%,#03111a_75%)]"></div>
+    <div class="glow -z-10 left-[55%] top-[-10%] h-[38rem] w-[38rem] bg-current/40"></div>
+    <MeshCanvas />
+    <div class="pointer-events-none absolute inset-x-0 bottom-0 -z-0 h-[40%] bg-gradient-to-t from-abyss to-transparent"></div>
+
+    <div class="wrap relative pb-14 pt-36 md:pb-20">
+      <p class="mb-8 inline-flex items-center gap-2.5 rounded-full bg-foam/[0.06] py-1.5 pl-2 pr-4 text-[0.88rem] text-haze ring-1 ring-foam/10 backdrop-blur" data-reveal>
+        <span class="relative flex size-2.5"><span class="absolute inset-0 animate-ping rounded-full bg-ice/60 motion-reduce:animate-none"></span><span class="relative size-2.5 rounded-full bg-ice"></span></span>
+        {site.city}, {country}
       </p>
-    </div>
-  </section>
-
-  <!-- Introduction -->
-  <section class="wrap rule grid gap-6 py-20 md:grid-cols-12 md:gap-8 md:py-28">
-    <h2 class="md:col-span-4 text-[1.05rem] font-[560] text-river">{h.introTitle}</h2>
-    <p class="md:col-span-8 text-[clamp(1.4rem,1.1rem+1.2vw,2.1rem)] leading-[1.3] tracking-[-0.015em]">{h.intro}</p>
-  </section>
-
-  <!-- Projects -->
-  <section class="wrap pb-20 md:pb-28" aria-labelledby="projects-title">
-    <div class="flex flex-wrap items-end justify-between gap-4 pb-8">
-      <div>
-        <h2 id="projects-title" class="text-title">{h.productsTitle}</h2>
-        <p class="mt-3 text-slate">{h.productsLead}</p>
+      <Rise as="h1" text={h.headline} class="max-w-[12ch] text-hero font-[500]" />
+      <div class="mt-10 grid gap-10 md:mt-14 md:grid-cols-12 md:items-end">
+        <p class="md:col-span-6 max-w-[46ch] text-lead text-haze" data-reveal style="--d:500ms">{h.lead}</p>
+        <div class="md:col-span-6 flex flex-wrap gap-3 md:justify-end" data-reveal style="--d:650ms">
+          <a class="btn btn-light" href={href(lang, '/products')} data-magnet>{h.ctaProducts}</a>
+          <a class="btn btn-glass" href={href(lang, '/founder')} data-magnet>{h.ctaFounder}</a>
+        </div>
       </div>
-      <a class="link text-[0.97rem]" href={href(lang, '/products')}>{h.allProducts}</a>
+      <p class="mt-14 max-w-[52ch] border-t border-foam/10 pt-5 text-[0.88rem] text-haze/80" data-reveal style="--d:800ms">{d.status}</p>
     </div>
-    <ProductIndex lang={lang} />
   </section>
 
-  <!-- How we build -->
-  <section class="bg-foam">
-    <div class="wrap py-20 md:py-28">
-      <h2 class="text-title max-w-[16ch]">{h.philosophyTitle}</h2>
-      <div class="mt-14 grid gap-10 md:grid-cols-3 md:gap-0">
-        {h.principles.map((p, i) => (
-          <div class:list={['md:px-8', i === 0 && 'md:pl-0', i > 0 && 'md:border-l md:border-ink/12']}>
-            <h3 class="text-[1.35rem] leading-snug tracking-[-0.015em]">{p.title}</h3>
-            <p class="mt-3 text-slate max-w-[38ch]">{p.text}</p>
+  <!-- ── Manifesto: words light up as you read ─────────────────────── -->
+  <section class="wrap py-28 md:py-44">
+    <p class="lit-words max-w-[24ch] text-[clamp(1.9rem,1.1rem+3.4vw,4.4rem)] leading-[1.08] tracking-[-0.035em] font-[480]">
+      {h.manifesto.split(' ').map((w) => <><span class="w">{w}</span>{' '}</>)}
+    </p>
+  </section>
+
+  <!-- ── The projects, one chapter each ────────────────────────────── -->
+  <section aria-labelledby="projects-title" class="relative">
+    <div class="wrap flex flex-wrap items-end justify-between gap-6 pb-16">
+      <Rise text={h.productsTitle} class="text-mega" />
+      <p class="max-w-[32ch] text-haze" data-reveal>{h.productsLead}</p>
+    </div>
+    <h2 id="projects-title" class="sr-only">{h.productsTitle}</h2>
+
+    {products.map((p, i) => (
+      <article class="relative isolate overflow-hidden border-t border-foam/[0.08] py-20 md:py-32" style={`--accent:${p.accent}`}>
+        <div class:list={['glow -z-10 top-[10%] h-[30rem] w-[30rem] opacity-25', i % 2 ? 'left-[-10%]' : 'right-[-10%]']} style={`background:${p.accent}`}></div>
+        <div class="wrap grid items-center gap-12 md:grid-cols-12 md:gap-10">
+          <div class:list={['md:col-span-5', i % 2 ? 'md:order-2 md:col-start-8' : '']}>
+            <p class="flex items-center gap-3 text-[0.92rem] text-haze" data-reveal>
+              <span class="size-2 rounded-full" style={`background:${p.accent};box-shadow:0 0 18px ${p.accent}`}></span>
+              {p.stage[lang]}
+            </p>
+            <Rise as="h3" text={p.name} class="mt-5 text-title" />
+            <p class="mt-6 max-w-[40ch] text-lead text-haze" data-reveal>{p.line[lang]}</p>
+            <div class="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3" data-reveal style="--d:120ms">
+              <a class="btn btn-glass" href={href(lang, `/products/${p.slug}`)} data-magnet>{h.discover} {p.name}</a>
+              {p.website && <a class="link text-[0.95rem] text-haze hover:text-foam" href={p.website} rel="noopener">{new URL(p.website).host}</a>}
+            </div>
+          </div>
+          <div class:list={['md:col-span-7', i % 2 ? 'md:order-1 md:col-start-1' : '']} data-lift>
+            <ProductMedia slug={p.slug} lang={lang} />
+          </div>
+        </div>
+      </article>
+    ))}
+  </section>
+
+  <!-- ── Real numbers ──────────────────────────────────────────────── -->
+  <section class="border-t border-foam/[0.08] bg-trench/60">
+    <div class="wrap py-24 md:py-32">
+      <Rise text={h.statsTitle} class="text-title max-w-[14ch]" />
+      <dl class="mt-16 grid gap-px overflow-hidden rounded-[28px] bg-foam/[0.08] sm:grid-cols-2 lg:grid-cols-4">
+        {h.stats.map((s, i) => (
+          <div class="bg-abyss/90 p-8 md:p-10" data-reveal style={`--d:${i * 90}ms`}>
+            <dt class="sr-only">{s.label}</dt>
+            <dd>
+              <span class="block text-[clamp(3.2rem,2rem+3vw,5rem)] leading-none tracking-[-0.05em] font-[500] tabular-nums" data-count={s.value} data-suffix={s.suffix}>{s.value}{s.suffix}</span>
+              <span class="mt-5 block max-w-[24ch] text-[0.95rem] text-haze">{s.label}</span>
+            </dd>
           </div>
         ))}
-      </div>
+      </dl>
+      <p class="mt-6 text-[0.85rem] text-haze/70">{h.statsNote}</p>
     </div>
   </section>
 
-  <!-- The founder -->
-  <section class="on-deep bg-deep text-foam">
-    <div class="wrap grid gap-12 py-20 md:grid-cols-12 md:items-center md:gap-8 md:py-28">
-      <div class="md:col-span-5">
-        <Portrait lang={lang} sizes="(min-width: 48rem) 40vw, 100vw" />
+  <!-- ── The founder ───────────────────────────────────────────────── -->
+  <section class="relative isolate overflow-hidden border-t border-foam/[0.08]">
+    <div class="glow -z-10 left-[5%] top-[20%] h-[34rem] w-[34rem] bg-current/30"></div>
+    <div class="wrap grid gap-14 py-24 md:grid-cols-12 md:items-center md:gap-10 md:py-36">
+      <div class="md:col-span-5" data-lift>
+        <div class="relative">
+          <Portrait lang={lang} sizes="(min-width: 48rem) 40vw, 100vw" class="!rounded-[40px]" />
+          <div class="pointer-events-none absolute inset-0 rounded-[40px] ring-1 ring-inset ring-foam/15"></div>
+          <div class="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 rounded-b-[40px] bg-gradient-to-t from-abyss/80 to-transparent"></div>
+          <p class="absolute bottom-6 left-6 right-6 text-[0.95rem]">{founder.name ?? d.TheFounder}<span class="block text-haze">{d.roleTitle}</span></p>
+        </div>
       </div>
       <div class="md:col-span-6 md:col-start-7">
-        <h2 class="text-title">{h.founderTitle}</h2>
-        {founder.name && <p class="mt-6 text-lead">{founder.name}, {d.roleTitle.toLowerCase()}</p>}
-        <p class="mt-6 max-w-[46ch] text-lead text-foam/80">{h.founderText}</p>
-        <a class="mt-10 btn bg-foam text-deep hover:bg-white" href={href(lang, '/founder')}>{h.founderLink}</a>
+        <Rise text={h.founderTitle} class="text-title" />
+        <p class="mt-8 max-w-[42ch] text-[clamp(1.25rem,1.05rem+0.8vw,1.75rem)] leading-[1.4] tracking-[-0.015em]" data-reveal>{h.founderText}</p>
+
+        <h3 class="mt-14 text-[0.95rem] text-haze" data-reveal>{h.timelineTitle}</h3>
+        <ol class="relative mt-6 border-l border-foam/15 pl-7">
+          {h.timeline.map((e, i) => (
+            <li class="relative pb-6 last:pb-0" data-reveal style={`--d:${i * 80}ms`}>
+              <span class:list={['absolute -left-[calc(1.75rem+5px)] top-[0.45rem] size-[9px] rounded-full', i === h.timeline.length - 1 ? 'bg-ice shadow-[0_0_16px_#8eeaf5]' : 'bg-foam/40']}></span>
+              <p class="text-[0.9rem] text-haze">{e.when}</p>
+              <p>{e.what}</p>
+            </li>
+          ))}
+        </ol>
+        <a class="btn btn-light mt-12" href={href(lang, '/founder')} data-magnet>{h.founderLink}</a>
       </div>
     </div>
   </section>
 
-  <!-- Vision and contact -->
-  <section class="wrap grid gap-16 py-20 md:grid-cols-2 md:gap-8 md:py-28">
-    <div class="md:pr-8">
-      <h2 class="text-title">{h.visionTitle}</h2>
-      <p class="mt-6 max-w-[44ch] text-slate">{h.visionText}</p>
-      <a class="mt-8 inline-block link" href={href(lang, '/vision')}>{h.visionLink}</a>
-    </div>
-    <div class="md:border-l md:border-ink/12 md:pl-8">
-      <h2 class="text-title">{h.contactTitle}</h2>
-      <p class="mt-6 max-w-[44ch] text-slate">{h.contactText}</p>
-      {contact.general && (
-        <a class="mt-8 inline-block text-[clamp(1.3rem,1rem+1.2vw,1.9rem)] tracking-[-0.015em] text-river link break-all" href={`mailto:${contact.general}`}>{contact.general}</a>
-      )}
-      <p class="mt-6"><a class="link" href={href(lang, '/contact')}>{h.contactLink}</a></p>
+  <!-- ── Vision and contact ────────────────────────────────────────── -->
+  <section class="border-t border-foam/[0.08]">
+    <div class="wrap grid gap-20 py-24 md:grid-cols-2 md:gap-10 md:py-32">
+      <div>
+        <Rise text={h.visionTitle} class="text-title max-w-[12ch]" />
+        <p class="mt-8 max-w-[42ch] text-lead text-haze" data-reveal>{h.visionText}</p>
+        <a class="mt-8 inline-block link text-lead" href={href(lang, '/vision')} data-reveal>{h.visionLink}</a>
+      </div>
+      <div class="glass rounded-[32px] p-8 md:p-12" data-lift>
+        <h2 class="text-title">{h.contactTitle}</h2>
+        <p class="mt-6 max-w-[38ch] text-haze">{h.contactText}</p>
+        {contact.general && (
+          <a class="mt-10 block break-all text-[clamp(1.5rem,1rem+1.8vw,2.4rem)] tracking-[-0.025em] text-ice link" href={`mailto:${contact.general}`}>{contact.general}</a>
+        )}
+        <a class="mt-8 inline-block link text-haze hover:text-foam" href={href(lang, '/contact')}>{h.contactLink}</a>
+      </div>
     </div>
   </section>
+
+  <script>
+    // Numbers count up once, when they come into view.
+    function counters() {
+      const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const els = document.querySelectorAll<HTMLElement>('[data-count]');
+      if (calm) return;
+      const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        io.unobserve(e.target);
+        const el = e.target as HTMLElement;
+        const end = Number(el.dataset.count), suffix = el.dataset.suffix ?? '';
+        const t0 = performance.now(), dur = 1400;
+        const step = (now: number) => {
+          const k = Math.min(1, (now - t0) / dur), ease = 1 - Math.pow(1 - k, 4);
+          el.textContent = Math.round(end * ease) + suffix;
+          if (k < 1) requestAnimationFrame(step);
+        };
+        el.textContent = '0' + suffix;
+        requestAnimationFrame(step);
+      }), { threshold: 0.6 });
+      els.forEach((el) => io.observe(el));
+    }
+    document.addEventListener('astro:page-load', counters);
+  </script>
 </Base>

@@ -1,0 +1,158 @@
+---
+// The hero's living picture: devices drifting in deep water, linking up
+// when they come close, and messages travelling from one to the next as
+// drops of light — what Droplet's mesh does, drawn rather than described.
+// Canvas 2D, a few hundred lines drawn per frame, paused when off screen.
+---
+<canvas id="mesh" class="absolute inset-0 h-full w-full" aria-hidden="true"></canvas>
+
+<script>
+  type Node = { x: number; y: number; vx: number; vy: number; r: number; ping: number };
+  type Packet = { a: number; b: number; t: number; speed: number; hops: number };
+
+  function start() {
+    const canvas = document.getElementById('mesh') as HTMLCanvasElement | null;
+    if (!canvas || canvas.dataset.on) return;
+    canvas.dataset.on = '1';
+    const ctx = canvas.getContext('2d')!;
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let w = 0, h = 0, dpr = 1, link = 160;
+    let nodes: Node[] = [];
+    const packets: Packet[] = [];
+    const pointer = { x: -9999, y: -9999, on: false };
+    let visible = true, raf = 0, last = performance.now();
+
+    const rand = (a: number, b: number) => a + Math.random() * (b - a);
+
+    function size() {
+      const r = canvas!.getBoundingClientRect();
+      dpr = Math.min(devicePixelRatio || 1, 2);
+      w = r.width; h = r.height;
+      canvas!.width = Math.round(w * dpr); canvas!.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      link = Math.max(120, Math.min(190, w / 8));
+      const count = Math.round(Math.min(90, Math.max(28, (w * h) / 16000)));
+      nodes = Array.from({ length: count }, () => ({
+        x: rand(0, w), y: rand(0, h), vx: rand(-0.12, 0.12), vy: rand(-0.08, 0.08), r: rand(1.2, 2.6), ping: 0,
+      }));
+    }
+
+    function neighbours(i: number) {
+      const out: number[] = [];
+      const n = nodes[i];
+      for (let j = 0; j < nodes.length; j++) {
+        if (j === i) continue;
+        const dx = nodes[j].x - n.x, dy = nodes[j].y - n.y;
+        if (dx * dx + dy * dy < link * link) out.push(j);
+      }
+      return out;
+    }
+
+    function launch() {
+      const a = Math.floor(Math.random() * nodes.length);
+      const ns = neighbours(a);
+      if (!ns.length) return;
+      packets.push({ a, b: ns[Math.floor(Math.random() * ns.length)], t: 0, speed: rand(0.006, 0.012), hops: Math.floor(rand(3, 9)) });
+    }
+
+    function frame(now: number) {
+      const dt = Math.min(48, now - last); last = now;
+      ctx.clearRect(0, 0, w, h);
+
+      // Drift, wrapping gently at the edges; the pointer pulls a little.
+      for (const n of nodes) {
+        n.x += n.vx * dt * 0.06; n.y += n.vy * dt * 0.06;
+        if (n.x < -20) n.x = w + 20; if (n.x > w + 20) n.x = -20;
+        if (n.y < -20) n.y = h + 20; if (n.y > h + 20) n.y = -20;
+        if (pointer.on) {
+          const dx = pointer.x - n.x, dy = pointer.y - n.y, d2 = dx * dx + dy * dy;
+          if (d2 < 220 * 220 && d2 > 400) { n.x += dx * 0.0009 * dt * 0.06; n.y += dy * 0.0009 * dt * 0.06; }
+        }
+        n.ping = Math.max(0, n.ping - dt * 0.0012);
+      }
+
+      // Links: fainter with distance.
+      ctx.lineWidth = 1;
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
+          if (d2 < link * link) {
+            const k = 1 - Math.sqrt(d2) / link;
+            ctx.strokeStyle = `rgba(142,234,245,${(k * 0.22).toFixed(3)})`;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+        if (pointer.on) {
+          const dx = a.x - pointer.x, dy = a.y - pointer.y, d2 = dx * dx + dy * dy;
+          if (d2 < 200 * 200) {
+            ctx.strokeStyle = `rgba(142,234,245,${((1 - Math.sqrt(d2) / 200) * 0.45).toFixed(3)})`;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(pointer.x, pointer.y); ctx.stroke();
+          }
+        }
+      }
+
+      // Devices, with a ring when a message lands.
+      for (const n of nodes) {
+        ctx.fillStyle = 'rgba(233,243,246,0.75)';
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill();
+        if (n.ping > 0) {
+          const k = 1 - n.ping;
+          ctx.strokeStyle = `rgba(142,234,245,${(n.ping * 0.7).toFixed(3)})`;
+          ctx.beginPath(); ctx.arc(n.x, n.y, 4 + k * 26, 0, Math.PI * 2); ctx.stroke();
+        }
+      }
+
+      // Messages: a bright drop with a short trail, hopping node to node.
+      for (let p = packets.length - 1; p >= 0; p--) {
+        const pk = packets[p];
+        const a = nodes[pk.a], b = nodes[pk.b];
+        pk.t += pk.speed * dt * 0.06;
+        const x = a.x + (b.x - a.x) * pk.t, y = a.y + (b.y - a.y) * pk.t;
+        const tx = a.x + (b.x - a.x) * Math.max(0, pk.t - 0.25), ty = a.y + (b.y - a.y) * Math.max(0, pk.t - 0.25);
+        const g = ctx.createLinearGradient(tx, ty, x, y);
+        g.addColorStop(0, 'rgba(142,234,245,0)'); g.addColorStop(1, 'rgba(142,234,245,0.9)');
+        ctx.strokeStyle = g; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(x, y); ctx.stroke(); ctx.lineWidth = 1;
+        ctx.fillStyle = '#e9fbff';
+        ctx.shadowColor = 'rgba(142,234,245,0.9)'; ctx.shadowBlur = 14;
+        ctx.beginPath(); ctx.arc(x, y, 2.6, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        if (pk.t >= 1) {
+          b.ping = 1;
+          const ns = neighbours(pk.b).filter((j) => j !== pk.a);
+          if (--pk.hops > 0 && ns.length) { pk.a = pk.b; pk.b = ns[Math.floor(Math.random() * ns.length)]; pk.t = 0; }
+          else packets.splice(p, 1);
+        }
+      }
+      if (packets.length < Math.max(3, nodes.length / 9) && Math.random() < 0.04) launch();
+
+      if (visible && !calm) raf = requestAnimationFrame(frame);
+    }
+
+    size();
+    for (let i = 0; i < 4; i++) launch();
+    if (calm) { frame(performance.now()); return; }
+    raf = requestAnimationFrame(frame);
+
+    const ro = new ResizeObserver(() => { size(); });
+    ro.observe(canvas);
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
+      if (!visible) { cancelAnimationFrame(raf); raf = 0; }
+    }).observe(canvas);
+    const host = canvas.parentElement!;
+    host.addEventListener('pointermove', (e) => {
+      const r = canvas.getBoundingClientRect();
+      pointer.x = e.clientX - r.left; pointer.y = e.clientY - r.top; pointer.on = e.pointerType === 'mouse';
+    });
+    host.addEventListener('pointerleave', () => { pointer.on = false; });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }
+      else if (visible && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
+    });
+  }
+  document.addEventListener('astro:page-load', start);
+</script>

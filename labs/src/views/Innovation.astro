@@ -8,19 +8,27 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const n = t[lang].innovation;
 const icons = { code: CodeXml, brain: Brain, network: Network, flask: FlaskConical } as const;
+const hues = ['#22b4cb', '#8e7bff', '#2e8bff', '#12b68a'];
+const nowWord = lang === 'fr' ? 'Aujourd’hui' : 'Today';
+const aimWord = lang === 'fr' ? 'Objectif' : 'Aim';
 ---
 <Base lang={lang} title={n.title} description={n.description}>
   <PageHead title={n.headline} lead={n.lead} />
-  <section class="wrap pb-20 md:pb-28">
-    <div class="grid border-t border-ink/12 md:grid-cols-2">
+  <section class="wrap pb-28 md:pb-36">
+    <div class="grid gap-5 md:grid-cols-2">
       {n.areas.map((a, i) => {
         const Icon = icons[a.icon as keyof typeof icons];
+        const [, now] = a.now.split(/:\s/);
+        const [, aim] = a.aim.split(/:\s/);
         return (
-          <article class:list={['border-b border-ink/12 py-12 md:py-16', i % 2 === 0 ? 'md:pr-12 md:border-r' : 'md:pl-12']}>
-            <Icon class="size-8 text-river" stroke-width={1.5} aria-hidden="true" />
-            <h2 class="mt-6 text-[clamp(1.6rem,1.25rem+1.2vw,2.3rem)] leading-tight tracking-[-0.025em]">{a.title}</h2>
-            <p class="mt-5 max-w-[46ch] text-slate">{a.now}</p>
-            <p class="mt-3 max-w-[46ch]">{a.aim}</p>
+          <article class="glass group relative isolate overflow-hidden rounded-[32px] p-8 md:p-12" data-reveal style={`--d:${(i % 2) * 120}ms`}>
+            <div class="glow -z-10 -right-24 -top-24 h-72 w-72 opacity-30 transition-opacity duration-700 group-hover:opacity-60" style={`background:${hues[i]}`}></div>
+            <Icon class="size-9" stroke-width={1.4} style={`color:${hues[i]}`} aria-hidden="true" />
+            <h2 class="mt-10 text-[clamp(1.8rem,1.3rem+1.6vw,2.8rem)] leading-[1.05] tracking-[-0.035em]">{a.title}</h2>
+            <dl class="mt-8 space-y-6">
+              <div><dt class="text-[0.88rem] text-haze">{nowWord}</dt><dd class="mt-1 max-w-[44ch] text-foam/85">{now ?? a.now}</dd></div>
+              <div><dt class="text-[0.88rem] text-haze">{aimWord}</dt><dd class="mt-1 max-w-[44ch]">{aim ?? a.aim}</dd></div>
+            </dl>
           </article>
         );
       })}

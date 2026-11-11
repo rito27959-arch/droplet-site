@@ -9,42 +9,43 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const c = t[lang].contact;
 type Key = keyof typeof contact;
-// A dedicated address when it exists, otherwise the general one.
 const address = (k: Key) => contact[k] ?? contact.general;
 const mailto = (k: Key) => {
   const a = address(k);
   return a ? `mailto:${a}?subject=${encodeURIComponent(c.subject[k] + ' | Droplet Labs')}` : null;
 };
+const hues = ['#22b4cb', '#8e7bff', '#2e8bff', '#12b68a'];
 ---
 <Base lang={lang} title={c.title} description={c.description}>
   <PageHead title={c.headline} lead={c.lead}>
     {contact.general && (
-      <a class="mt-10 inline-flex items-center gap-3 text-[clamp(1.4rem,1rem+1.8vw,2.6rem)] tracking-[-0.02em] text-river link break-all" href={`mailto:${contact.general}`}>
-        <Mail class="size-[0.9em] shrink-0" stroke-width={1.6} aria-hidden="true" />{contact.general}
+      <a class="mt-12 inline-flex items-center gap-4 break-all text-[clamp(1.6rem,1rem+2.6vw,3.4rem)] tracking-[-0.035em] text-ice link" href={`mailto:${contact.general}`} data-reveal style="--d:450ms">
+        <Mail class="size-[0.8em] shrink-0" stroke-width={1.4} aria-hidden="true" />{contact.general}
       </a>
     )}
   </PageHead>
 
-  <section class="wrap pb-20 md:pb-28">
-    <div class="grid border-t border-ink/12 md:grid-cols-2">
+  <section class="wrap pb-28 md:pb-36">
+    <div class="grid gap-5 md:grid-cols-2">
       {c.topics.map((topic, i) => {
         const k = topic.key as Key;
         const link = mailto(k);
         return (
-          <article class:list={['border-b border-ink/12 py-10 md:py-12', i % 2 === 0 ? 'md:pr-12 md:border-r' : 'md:pl-12']}>
-            <h2 class="text-[clamp(1.4rem,1.15rem+0.9vw,1.9rem)] leading-tight tracking-[-0.02em]">{topic.title}</h2>
-            <p class="mt-4 max-w-[46ch] text-slate">{topic.text}</p>
-            {link ? <a class="mt-6 btn btn-quiet" href={link}>{c.write}</a> : <p class="mt-6 text-slate">{c.noAddress}</p>}
+          <article class="glass group relative isolate overflow-hidden rounded-[32px] p-8 md:p-10" data-reveal style={`--d:${(i % 2) * 120}ms`}>
+            <div class="glow -z-10 -right-20 -top-20 h-64 w-64 opacity-25 transition-opacity duration-700 group-hover:opacity-55" style={`background:${hues[i]}`}></div>
+            <h2 class="text-[clamp(1.6rem,1.2rem+1.2vw,2.3rem)] leading-tight tracking-[-0.03em]">{topic.title}</h2>
+            <p class="mt-4 max-w-[44ch] text-haze">{topic.text}</p>
+            {link ? <a class="btn btn-glass mt-8" href={link} data-magnet>{c.write}</a> : <p class="mt-8 text-haze">{c.noAddress}</p>}
           </article>
         );
       })}
     </div>
 
     {social.length > 0 && (
-      <div class="mt-16">
-        <h2 class="text-[1.05rem] font-[560] text-river">{c.elsewhere}</h2>
-        <ul class="mt-4 flex flex-wrap gap-x-8 gap-y-2">
-          {social.map((s) => <li><a class="link text-lead" href={s.url} rel="me noopener">{s.label}</a></li>)}
+      <div class="mt-20" data-reveal>
+        <h2 class="text-[0.95rem] text-haze">{c.elsewhere}</h2>
+        <ul class="mt-4 flex flex-wrap gap-x-10 gap-y-2">
+          {social.map((s) => <li><a class="link text-[clamp(1.4rem,1.1rem+1vw,2rem)] tracking-[-0.02em]" href={s.url} rel="me noopener">{s.label}</a></li>)}
         </ul>
       </div>
     )}

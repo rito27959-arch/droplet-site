@@ -1,9 +1,14 @@
 ---
-interface Props { title: string; lead?: string }
-const { title, lead } = Astro.props;
+import Rise from './Rise.astro';
+interface Props { title: string; lead?: string; accent?: string }
+const { title, lead, accent = 'var(--color-current)' } = Astro.props;
 ---
-<header class="wrap pt-16 pb-14 md:pt-24 md:pb-20">
-  <h1 class="max-w-[18ch] text-[clamp(2.5rem,1.5rem+4.4vw,5.25rem)] leading-[1] tracking-[-0.032em] font-[440]">{title}</h1>
-  {lead && <p class="mt-8 max-w-[52ch] text-lead text-slate">{lead}</p>}
-  <slot />
+<header class="relative isolate overflow-hidden">
+  <div class="absolute inset-0 -z-10 bg-[radial-gradient(90%_70%_at_80%_0%,#0d3a4c_0%,#06202d_40%,transparent_75%)]"></div>
+  <div class="glow -z-10 right-[-8%] top-[-30%] h-[34rem] w-[34rem] opacity-35" style={`background:${accent}`}></div>
+  <div class="wrap pt-40 pb-16 md:pt-52 md:pb-24">
+    <Rise as="h1" text={title} class="max-w-[16ch] text-mega font-[500]" />
+    {lead && <p class="mt-10 max-w-[50ch] text-lead text-haze" data-reveal style="--d:350ms">{lead}</p>}
+    <slot />
+  </div>
 </header>

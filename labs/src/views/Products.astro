@@ -10,8 +10,8 @@ const p = t[lang].products;
 ---
 <Base lang={lang} title={p.title} description={p.description}>
   <PageHead title={p.headline} lead={p.lead} />
-  <section class="wrap pb-20 md:pb-28">
+  <section class="wrap pb-28 md:pb-36">
     <ProductIndex lang={lang} headingLevel="h2" />
-    <p class="mt-6 text-[0.9rem] text-slate">{p.checked}</p>
+    <p class="mt-6 text-[0.88rem] text-haze/80">{p.checked}</p>
   </section>
 </Base>

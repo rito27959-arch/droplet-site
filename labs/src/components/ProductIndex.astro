@@ -1,5 +1,5 @@
 ---
-// The projects as an index, one row each: name, what it does, how far along.
+// The projects as a list of rows: the row glows in the project's colour on hover.
 import { products } from '../products';
 import { href, type Lang } from '../i18n';
 
@@ -7,14 +7,18 @@ interface Props { lang: Lang; headingLevel?: 'h2' | 'h3' }
 const { lang, headingLevel = 'h3' } = Astro.props;
 const H = headingLevel;
 ---
-<ul class="border-b border-ink/12">
-  {products.map((p) => (
-    <li class="rule">
-      <a href={href(lang, `/products/${p.slug}`)}
-         class="group grid gap-2 py-7 md:grid-cols-12 md:items-baseline md:gap-8 md:py-9">
-        <H class="md:col-span-4 text-[clamp(1.6rem,1.2rem+1.4vw,2.35rem)] leading-[1.08] tracking-[-0.025em] transition-colors group-hover:text-river">{p.name}</H>
-        <p class="md:col-span-5 text-slate max-w-[52ch]">{p.line[lang]}</p>
-        <p class="md:col-span-3 md:text-right text-[0.92rem] text-ink/80">{p.stage[lang]}</p>
+<ul class="border-b border-foam/[0.08]">
+  {products.map((p, i) => (
+    <li class="border-t border-foam/[0.08]" data-reveal style={`--d:${i * 70}ms`}>
+      <a href={href(lang, `/products/${p.slug}`)} style={`--accent:${p.accent}`}
+         class="group relative grid gap-2 py-8 md:grid-cols-12 md:items-center md:gap-8 md:py-10">
+        <span class="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+              style={`background:radial-gradient(60% 120% at 0% 50%, color-mix(in oklab, ${p.accent} 18%, transparent), transparent)`}></span>
+        <H class="md:col-span-5 flex items-center gap-4 text-[clamp(1.8rem,1.2rem+2vw,3rem)] leading-[1.05] tracking-[-0.035em] transition-transform duration-500 group-hover:translate-x-2">
+          <span class="size-2.5 shrink-0 rounded-full" style={`background:${p.accent};box-shadow:0 0 18px ${p.accent}`}></span>{p.name}
+        </H>
+        <p class="md:col-span-4 max-w-[46ch] text-haze">{p.line[lang]}</p>
+        <p class="md:col-span-3 md:text-right text-[0.92rem] text-foam/80">{p.stage[lang]}</p>
       </a>
     </li>
   ))}

@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { cleanPath, t, switchHref, type Lang } from '../i18n';
@@ -45,7 +46,7 @@ const website = {
     <link rel="alternate" hreflang="x-default" href={enUrl} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <meta name="theme-color" content="#eef2f1" />
+    <meta name="theme-color" content="#03111a" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.name} />
@@ -62,13 +63,82 @@ const website = {
     <meta name="twitter:image" content={og} />
 
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd ? [website, jsonLd] : website)} />
+    <script is:inline>document.documentElement.classList.add('js')</script>
+    <ClientRouter fallback="swap" />
   </head>
-  <body class="min-h-dvh flex flex-col">
-    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 btn btn-primary">{d.skip}</a>
+  <body class="min-h-dvh flex flex-col overflow-x-clip">
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] btn btn-light">{d.skip}</a>
     <Header lang={lang} />
     <main id="main" class="flex-1">
       <slot />
     </main>
     <Footer lang={lang} />
+
+    <script>
+      // ── Motion for every page ────────────────────────────────────────
+      // Reveals, the lit manifesto, videos that play only when seen, and
+      // buttons that lean towards the pointer. Re-run after each page swap.
+      const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let cleanups: (() => void)[] = [];
+
+      function init() {
+        cleanups.forEach((f) => f());
+        cleanups = [];
+        document.documentElement.classList.add('js');
+
+        // Reveal once, when 15% of the element is visible.
+        const io = new IntersectionObserver(
+          (entries) => entries.forEach((e) => {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+          }),
+          { threshold: 0.15, rootMargin: '0px 0px -5% 0px' },
+        );
+        document.querySelectorAll('[data-reveal],[data-lift],[data-rise]').forEach((el) => io.observe(el));
+        cleanups.push(() => io.disconnect());
+
+        // Videos: play when on screen, pause when not (battery, data).
+        const vids = new IntersectionObserver(
+          (entries) => entries.forEach((e) => {
+            const v = e.target as HTMLVideoElement;
+            if (e.isIntersecting && !calm) v.play().catch(() => {}); else v.pause();
+          }),
+          { threshold: 0.35 },
+        );
+        document.querySelectorAll('video[data-auto]').forEach((v) => vids.observe(v));
+        cleanups.push(() => vids.disconnect());
+
+        // The manifesto: each word lights up as it crosses 65% of the screen.
+        const lit = document.querySelectorAll<HTMLElement>('.lit-words .w');
+        if (lit.length && !calm) {
+          let raf = 0;
+          const tick = () => {
+            raf = 0;
+            const line = innerHeight * 0.68;
+            lit.forEach((w) => w.classList.toggle('on', w.getBoundingClientRect().top < line));
+          };
+          const onScroll = () => { if (!raf) raf = requestAnimationFrame(tick); };
+          addEventListener('scroll', onScroll, { passive: true });
+          tick();
+          cleanups.push(() => removeEventListener('scroll', onScroll));
+        }
+
+        // Buttons lean a few pixels towards the pointer (fine pointers only).
+        if (!calm && matchMedia('(pointer: fine)').matches) {
+          document.querySelectorAll<HTMLElement>('[data-magnet]').forEach((b) => {
+            const move = (e: PointerEvent) => {
+              const r = b.getBoundingClientRect();
+              const x = (e.clientX - r.left - r.width / 2) * 0.18;
+              const y = (e.clientY - r.top - r.height / 2) * 0.28;
+              b.style.transform = `translate(${x}px, ${y}px)`;
+            };
+            const leave = () => { b.style.transform = ''; };
+            b.addEventListener('pointermove', move);
+            b.addEventListener('pointerleave', leave);
+            cleanups.push(() => { b.removeEventListener('pointermove', move); b.removeEventListener('pointerleave', leave); });
+          });
+        }
+      }
+      document.addEventListener('astro:page-load', init);
+    </script>
   </body>
 </html>

@@ -17,65 +17,60 @@ const links = [
   { to: '/contact', label: d.nav.contact },
 ];
 const isHere = (to: string) => bare === to || bare.startsWith(to + '/');
+const other = lang === 'en' ? 'fr' : 'en';
 ---
 
-<header class="sticky top-0 z-40 bg-mist/85 backdrop-blur-md backdrop-saturate-150">
-  <div class="wrap flex h-16 items-center justify-between gap-6">
-    <a href={href(lang, '/')} class="flex items-center gap-2.5 text-ink" aria-label={d.nav.home}>
-      <Logo class="size-7 text-river" />
-      <span class="text-[1.05rem] font-[620] tracking-[-0.01em]">Droplet Labs</span>
+<!-- A floating capsule of glass: the page shows through it. -->
+<header class="fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-5 md:pt-4">
+  <div class="mx-auto flex h-14 max-w-[80rem] items-center justify-between gap-4 rounded-full bg-abyss/55 pl-4 pr-2 shadow-[inset_0_0_0_1px_rgba(233,243,246,0.09),0_20px_60px_-30px_rgba(0,0,0,0.8)] backdrop-blur-xl backdrop-saturate-150 md:pl-5">
+    <a href={href(lang, '/')} class="flex items-center gap-2.5" aria-label={d.nav.home}>
+      <Logo class="size-7 text-ice" />
+      <span class="text-[1.02rem] font-[620] tracking-[-0.01em]">Droplet Labs</span>
     </a>
 
     <nav class="hidden lg:block" aria-label="Main">
-      <ul class="flex items-center gap-7 text-[0.95rem]">
+      <ul class="flex items-center gap-1 text-[0.93rem]">
         {links.map((l) => (
           <li>
-            <a
-              href={href(lang, l.to)}
-              class:list={['transition-colors hover:text-ink', isHere(l.to) ? 'text-ink font-[560]' : 'text-slate']}
-              aria-current={isHere(l.to) ? 'page' : undefined}
-            >{l.label}</a>
+            <a href={href(lang, l.to)}
+               class:list={['rounded-full px-3.5 py-2 transition-colors', isHere(l.to) ? 'bg-foam/10 text-foam' : 'text-haze hover:text-foam']}
+               aria-current={isHere(l.to) ? 'page' : undefined}>{l.label}</a>
           </li>
         ))}
       </ul>
     </nav>
 
-    <div class="flex items-center gap-2">
-      <a href={switchHref(lang, path)} hreflang={lang === 'en' ? 'fr' : 'en'} lang={lang === 'en' ? 'fr' : 'en'}
-         class="hidden sm:inline-flex h-9 items-center rounded-full px-3.5 text-[0.9rem] text-slate hover:text-ink">
-        {d.otherLang}
-      </a>
-      <button id="menu-open" type="button" class="lg:hidden inline-flex size-11 items-center justify-center rounded-full text-ink hover:bg-dew"
+    <div class="flex items-center gap-1.5">
+      <a href={switchHref(lang, path)} hreflang={other} lang={other} data-astro-reload
+         class="hidden sm:inline-flex h-10 items-center rounded-full px-4 text-[0.9rem] text-haze hover:text-foam">{d.otherLang}</a>
+      <a href={href(lang, '/contact')} class="hidden md:inline-flex btn btn-light !h-10 !px-4 !text-[0.9rem]">{d.nav.contact}</a>
+      <button id="menu-open" type="button" class="lg:hidden inline-flex size-10 items-center justify-center rounded-full hover:bg-foam/10"
               aria-controls="menu-panel" aria-expanded="false">
-        <Menu class="size-6" aria-hidden="true" />
+        <Menu class="size-5" aria-hidden="true" />
         <span class="sr-only">{d.nav.menu}</span>
       </button>
     </div>
   </div>
-  <div class="rule"></div>
 
-  <!-- The phone menu: a full-height sheet, large targets. -->
-  <div id="menu-panel" data-open="false" class="lg:hidden fixed inset-0 z-50 bg-mist" role="dialog" aria-modal="true" aria-label="Menu">
-    <div class="wrap flex h-16 items-center justify-between">
+  <div id="menu-panel" data-open="false" class="lg:hidden fixed inset-0 z-50 bg-abyss/95 backdrop-blur-2xl" role="dialog" aria-modal="true" aria-label="Menu">
+    <div class="flex h-[4.25rem] items-center justify-between px-6 pt-3">
       <a href={href(lang, '/')} class="flex items-center gap-2.5" aria-label={d.nav.home}>
-        <Logo class="size-7 text-river" />
-        <span class="text-[1.05rem] font-[620]">Droplet Labs</span>
+        <Logo class="size-7 text-ice" /><span class="font-[620]">Droplet Labs</span>
       </a>
-      <button id="menu-close" type="button" class="inline-flex size-11 items-center justify-center rounded-full hover:bg-dew">
-        <X class="size-6" aria-hidden="true" />
-        <span class="sr-only">{d.nav.close}</span>
+      <button id="menu-close" type="button" class="inline-flex size-10 items-center justify-center rounded-full hover:bg-foam/10">
+        <X class="size-5" aria-hidden="true" /><span class="sr-only">{d.nav.close}</span>
       </button>
     </div>
-    <nav class="wrap pt-6" aria-label="Main">
+    <nav class="px-6 pt-8" aria-label="Main">
       <ul>
-        {links.map((l) => (
-          <li class="rule">
-            <a href={href(lang, l.to)} class:list={['flex py-4 text-[1.9rem] leading-tight tracking-[-0.02em]', isHere(l.to) ? 'text-river' : 'text-ink']}
+        {links.map((l, i) => (
+          <li style={`--i:${i}`}>
+            <a href={href(lang, l.to)} class:list={['block py-2.5 text-[2.4rem] leading-tight tracking-[-0.035em]', isHere(l.to) ? 'text-ice' : 'text-foam']}
                aria-current={isHere(l.to) ? 'page' : undefined}>{l.label}</a>
           </li>
         ))}
-        <li class="rule pt-6">
-          <a href={switchHref(lang, path)} hreflang={lang === 'en' ? 'fr' : 'en'} lang={lang === 'en' ? 'fr' : 'en'} class="btn btn-quiet">{d.otherLang}</a>
+        <li style={`--i:${links.length}`} class="pt-8">
+          <a href={switchHref(lang, path)} hreflang={other} lang={other} data-astro-reload class="btn btn-glass">{d.otherLang}</a>
         </li>
       </ul>
     </nav>
@@ -83,21 +78,22 @@ const isHere = (to: string) => bare === to || bare.startsWith(to + '/');
 </header>
 
 <script>
-  const panel = document.getElementById('menu-panel')!;
-  const open = document.getElementById('menu-open')!;
-  const close = document.getElementById('menu-close')!;
-  const set = (on: boolean) => {
-    panel.dataset.open = String(on);
-    open.setAttribute('aria-expanded', String(on));
-    document.documentElement.style.overflow = on ? 'hidden' : '';
-    (on ? close : open).focus();
-  };
-  open.addEventListener('click', () => set(true));
-  close.addEventListener('click', () => set(false));
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && panel.dataset.open === 'true') set(false);
-  });
-  matchMedia('(min-width: 64rem)').addEventListener('change', (e) => {
-    if (e.matches && panel.dataset.open === 'true') set(false);
-  });
+  function menu() {
+    const panel = document.getElementById('menu-panel');
+    const open = document.getElementById('menu-open');
+    const close = document.getElementById('menu-close');
+    if (!panel || !open || !close || panel.dataset.ready) return;
+    panel.dataset.ready = '1';
+    const set = (on: boolean) => {
+      panel.dataset.open = String(on);
+      open.setAttribute('aria-expanded', String(on));
+      document.documentElement.style.overflow = on ? 'hidden' : '';
+      (on ? close : open).focus();
+    };
+    open.addEventListener('click', () => set(true));
+    close.addEventListener('click', () => set(false));
+    panel.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => set(false)));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && panel.dataset.open === 'true') set(false); });
+  }
+  document.addEventListener('astro:page-load', menu);
 </script>

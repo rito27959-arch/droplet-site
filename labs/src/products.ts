@@ -25,6 +25,10 @@ export type Product = {
   stage: T;
   roadmap: TList;
   website: string | null;
+  /** The product's own brand colour, taken from its interface. */
+  accent: string;
+  /** When the work started (first commit), month precision. */
+  started: T;
 };
 
 export const products: Product[] = [
@@ -70,6 +74,8 @@ export const products: Product[] = [
       ],
     },
     website: 'https://dropletmesh.app',
+    accent: '#ff3b5c',
+    started: { en: 'August 2026', fr: 'Août 2026' },
   },
   {
     slug: 'droplet-drop',
@@ -105,6 +111,8 @@ export const products: Product[] = [
       fr: ['Sortie sur iPhone et iPad.', 'Une version macOS signée.', 'Connexion avec la même identité que Droplet Messenger.'],
     },
     website: 'https://drop.dropletmesh.app',
+    accent: '#2e8bff',
+    started: { en: 'October 2026', fr: 'Octobre 2026' },
   },
   {
     slug: 'kunfox',
@@ -132,6 +140,8 @@ export const products: Product[] = [
       fr: ['Davantage de leçons et de matières.', 'Des essais avec des élèves et des enseignants.'],
     },
     website: 'https://kunfox.dropletmesh.app',
+    accent: '#f07a2a',
+    started: { en: 'July 2026', fr: 'Juillet 2026' },
   },
   {
     slug: 'parole',
@@ -165,17 +175,19 @@ export const products: Product[] = [
       fr: ['Ouvrir les séances IA en production.', 'Terminer l’historique des séances dans le cloud.'],
     },
     website: null,
+    accent: '#4b7bff',
+    started: { en: 'October 2026', fr: 'Octobre 2026' },
   },
   {
-    slug: 'nextfleet',
-    name: 'NextFleet',
+    slug: 'nexfleet',
+    name: 'NexFleet',
     line: {
       en: 'Fleet management that joins vehicles, missions and GPS in one place.',
       fr: 'Une gestion de parc qui réunit véhicules, missions et GPS au même endroit.',
     },
     description: {
-      en: 'NextFleet brings a vehicle fleet into one system: the vehicles and their deadlines, fuel and maintenance costs, missions authorised by a manager and started by the driver, and the GPS track of each mission.',
-      fr: 'NextFleet rassemble un parc automobile dans un seul système : les véhicules et leurs échéances, le carburant et l’entretien, les missions autorisées par un gestionnaire et lancées par le conducteur, et le tracé GPS de chaque mission.',
+      en: 'NexFleet brings a vehicle fleet into one system: the vehicles and their deadlines, fuel and maintenance costs, missions authorised by a manager and started by the driver, and the GPS track of each mission.',
+      fr: 'NexFleet rassemble un parc automobile dans un seul système : les véhicules et leurs échéances, le carburant et l’entretien, les missions autorisées par un gestionnaire et lancées par le conducteur, et le tracé GPS de chaque mission.',
     },
     objectives: {
       en: ['Know at any time where vehicles are and what they cost.', 'Replace scattered spreadsheets with one shared history.'],
@@ -192,5 +204,7 @@ export const products: Product[] = [
       fr: ['Des essais sur le terrain avec des conducteurs et des gestionnaires.', 'Un premier déploiement en production.'],
     },
     website: null,
+    accent: '#12b68a',
+    started: { en: 'September 2026', fr: 'Septembre 2026' },
   },
 ];

@@ -60,6 +60,27 @@ const en = {
     introTitle: 'Five projects, one question',
     intro:
       'Every project here starts from the same question: what does good software look like when data is expensive, power is unreliable and the nearest server is far away? The answers are working code, published and open to inspection.',
+    manifesto:
+      'Most software is built for a fast, cheap, permanent connection. Much of the world does not have one. We build for that world first: messages that hop from phone to phone, files that cross a room without the internet, learning that fits on a modest device.',
+    scroll: 'Scroll',
+    chapter: 'Project',
+    discover: 'Discover',
+    statsTitle: 'Measured, not claimed',
+    stats: [
+      { value: 5, suffix: '', label: 'projects built and published since July 2026' },
+      { value: 500, suffix: '+', label: 'commits across the public repositories' },
+      { value: 5, suffix: '', label: 'programming languages: Dart, Kotlin, Rust, Java, TypeScript' },
+      { value: 4, suffix: '', label: 'systems Droplet Drop runs on: Android, Windows, macOS, Linux' },
+    ],
+    statsNote: 'Counted from the repositories on 11 November 2026.',
+    timelineTitle: 'Four months of work',
+    timeline: [
+      { when: 'July 2026', what: 'Work begins on the learning app that becomes Kunfox.' },
+      { when: 'August 2026', what: 'Droplet Messenger begins.' },
+      { when: 'September 2026', what: 'First NexFleet version; Droplet servers go live.' },
+      { when: 'October 2026', what: 'Droplet Drop, Droplet Web and Parole begin.' },
+      { when: 'November 2026', what: 'Kunfox 1.0.5 is released. Droplet Labs gets its website.' },
+    ],
     productsTitle: 'Projects',
     productsLead: 'What exists today, and how far along each one is.',
     allProducts: 'All projects',
@@ -121,7 +142,7 @@ const en = {
 
   products: {
     title: 'Projects',
-    description: 'Droplet Messenger, Droplet Drop, Kunfox, Parole and NextFleet: what each project does and how far along it is.',
+    description: 'Droplet Messenger, Droplet Drop, Kunfox, Parole and NexFleet: what each project does and how far along it is.',
     headline: 'Projects',
     lead: 'Each project is described as it stands today. Technologies are those found in its code; anything not yet available is listed under the roadmap.',
     statusLabel: 'Status',
@@ -284,6 +305,27 @@ const fr: typeof en = {
     introTitle: 'Cinq projets, une question',
     intro:
       'Chaque projet part de la même question : à quoi ressemble un bon logiciel quand les données coûtent cher, que le courant est incertain et que le serveur le plus proche est loin ? Les réponses sont du code qui fonctionne, publié et ouvert à l’examen.',
+    manifesto:
+      'La plupart des logiciels sont faits pour une connexion rapide, bon marché et permanente. Une grande partie du monde n’en a pas. Nous construisons d’abord pour ce monde-là : des messages qui sautent d’un téléphone à l’autre, des fichiers qui traversent une salle sans Internet, un apprentissage qui tient sur un appareil modeste.',
+    scroll: 'Défiler',
+    chapter: 'Projet',
+    discover: 'Découvrir',
+    statsTitle: 'Mesuré, pas promis',
+    stats: [
+      { value: 5, suffix: '', label: 'projets construits et publiés depuis juillet 2026' },
+      { value: 500, suffix: '+', label: 'commits dans les dépôts publics' },
+      { value: 5, suffix: '', label: 'langages : Dart, Kotlin, Rust, Java, TypeScript' },
+      { value: 4, suffix: '', label: 'systèmes pour Droplet Drop : Android, Windows, macOS, Linux' },
+    ],
+    statsNote: 'Compté dans les dépôts le 11 novembre 2026.',
+    timelineTitle: 'Quatre mois de travail',
+    timeline: [
+      { when: 'Juillet 2026', what: 'Début de l’app d’apprentissage qui deviendra Kunfox.' },
+      { when: 'Août 2026', what: 'Droplet Messenger commence.' },
+      { when: 'Septembre 2026', what: 'Première version de NexFleet ; les serveurs Droplet sont en ligne.' },
+      { when: 'Octobre 2026', what: 'Droplet Drop, Droplet Web et Parole commencent.' },
+      { when: 'Novembre 2026', what: 'Kunfox 1.0.5 est publiée. Droplet Labs a son site.' },
+    ],
     productsTitle: 'Projets',
     productsLead: 'Ce qui existe aujourd’hui, et où en est chacun.',
     allProducts: 'Tous les projets',
@@ -345,7 +387,7 @@ const fr: typeof en = {
 
   products: {
     title: 'Projets',
-    description: 'Droplet Messenger, Droplet Drop, Kunfox, Parole et NextFleet : ce que fait chaque projet et où il en est.',
+    description: 'Droplet Messenger, Droplet Drop, Kunfox, Parole et NexFleet : ce que fait chaque projet et où il en est.',
     headline: 'Projets',
     lead: 'Chaque projet est décrit tel qu’il est aujourd’hui. Les technologies sont celles trouvées dans son code ; ce qui n’est pas encore disponible figure dans la feuille de route.',
     statusLabel: 'État',

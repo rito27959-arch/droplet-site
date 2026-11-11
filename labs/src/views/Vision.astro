@@ -10,30 +10,27 @@ const v = t[lang].vision;
 <Base lang={lang} title={v.title} description={v.description}>
   <PageHead title={v.headline} lead={v.lead} />
 
-  <!-- A real sequence, so it is numbered. Only phase 1 is under way: it is
-       the only filled marker on the line. -->
-  <section class="wrap pb-20 md:pb-28">
-    <ol class="relative">
-      {v.phases.map((p, i) => (
-        <li class="relative grid gap-3 pb-14 pl-12 md:grid-cols-12 md:gap-8 md:pl-0 last:pb-0">
-          <span aria-hidden="true" class:list={[
-            'absolute left-[0.6rem] top-0 h-full w-px md:left-[calc(25%-2rem+0.6rem)]',
-            i === v.phases.length - 1 ? 'bg-transparent' : 'bg-ink/15',
-          ]}></span>
-          <span aria-hidden="true" class:list={[
-            'absolute left-0 top-[0.35rem] size-[1.25rem] rounded-full md:left-[calc(25%-2rem)]',
-            i === 0 ? 'bg-river ring-4 ring-river/20' : 'border border-ink/35 bg-mist',
-          ]}></span>
-          <div class="md:col-span-3 md:pr-14">
-            <p class="text-[0.95rem] text-slate">{lang === 'fr' ? 'Phase' : 'Phase'} {i + 1}</p>
-            <p class:list={['mt-1 text-[0.92rem] font-[560]', i === 0 ? 'text-river' : 'text-slate']}>{i === 0 ? v.current : v.planned}</p>
-          </div>
-          <div class="md:col-span-8 md:col-start-5">
-            <h2 class="text-[clamp(1.5rem,1.2rem+1.1vw,2.2rem)] leading-tight tracking-[-0.025em]">{p.title}</h2>
-            <p class="mt-4 max-w-[50ch] text-slate">{p.text}</p>
-          </div>
-        </li>
-      ))}
-    </ol>
+  <!-- A real sequence: numbered. Only phase 1 is lit; the line fills up to
+       it when the roadmap comes into view, and stops there. -->
+  <section class="wrap pb-28 md:pb-40">
+    <div class="relative" data-reveal>
+      <div class="absolute left-[11px] top-3 bottom-3 w-px bg-foam/12 lg:left-0 lg:right-0 lg:top-[11px] lg:bottom-auto lg:h-px lg:w-auto" aria-hidden="true">
+        <div id="vision-fill" class="h-[12%] w-full origin-top bg-gradient-to-b from-ice to-current shadow-[0_0_20px_#8eeaf5] lg:h-full lg:w-[12.5%] lg:origin-left lg:bg-gradient-to-r"></div>
+      </div>
+      <ol class="grid gap-14 lg:grid-cols-4 lg:gap-8">
+        {v.phases.map((p, i) => (
+          <li class="relative pl-12 lg:pl-0 lg:pt-14" data-reveal style={`--d:${200 + i * 140}ms`}>
+            <span aria-hidden="true" class:list={[
+              'absolute left-0 top-0 size-[23px] rounded-full',
+              i === 0 ? 'bg-ice shadow-[0_0_0_6px_rgba(142,234,245,0.18),0_0_30px_#8eeaf5]' : 'border border-foam/35 bg-abyss',
+            ]}></span>
+            <p class="text-[clamp(3rem,2rem+3vw,5rem)] leading-none tracking-[-0.05em] font-[500] tabular-nums" style={i === 0 ? '' : 'color:color-mix(in oklab, var(--color-foam) 35%, transparent)'}>{String(i + 1).padStart(2, '0')}</p>
+            <p class:list={['mt-4 text-[0.9rem]', i === 0 ? 'text-ice' : 'text-haze']}>{i === 0 ? v.current : v.planned}</p>
+            <h2 class="mt-3 text-[clamp(1.4rem,1.15rem+0.9vw,1.9rem)] leading-[1.15] tracking-[-0.025em]">{p.title}</h2>
+            <p class="mt-4 max-w-[34ch] text-haze">{p.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
   </section>
 </Base>

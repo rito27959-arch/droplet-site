@@ -6,35 +6,39 @@ import { site, social, contact } from '../config';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const d = t[lang];
-const year = 2026;
 ---
 
-<footer class="on-deep bg-deep text-foam mt-auto">
-  <div class="wrap py-16 md:py-20 grid gap-12 md:grid-cols-12">
+<footer class="relative isolate mt-auto overflow-hidden border-t border-foam/[0.08]">
+  <div class="glow -z-10 bottom-[-40%] left-1/2 h-[30rem] w-[60rem] -translate-x-1/2 bg-current/25"></div>
+  <div class="wrap grid gap-14 pt-20 pb-10 md:grid-cols-12 md:pt-28">
     <div class="md:col-span-6">
-      <a href={href(lang, '/')} class="inline-flex items-center gap-2.5" aria-label={d.nav.home}>
-        <Logo class="size-8 text-foam" />
-        <span class="text-lg font-[620]">Droplet Labs</span>
-      </a>
-      <p class="mt-6 max-w-[28ch] text-[1.6rem] leading-[1.15] tracking-[-0.02em]">{d.footer.tagline}</p>
-      <p class="mt-6 max-w-[48ch] text-[0.92rem] text-foam/70">{d.status}</p>
+      <p class="max-w-[16ch] text-[clamp(2rem,1.3rem+2.6vw,3.6rem)] leading-[1.02] tracking-[-0.04em] font-[480]">{d.footer.tagline}</p>
+      <p class="mt-8 max-w-[44ch] text-[0.92rem] text-haze">{d.status}</p>
     </div>
     <nav class="md:col-span-3" aria-label="Footer">
-      <ul class="space-y-2.5 text-[0.95rem]">
-        <li><a class="link" href={href(lang, '/products')}>{d.nav.products}</a></li>
-        <li><a class="link" href={href(lang, '/innovation')}>{d.nav.innovation}</a></li>
-        <li><a class="link" href={href(lang, '/vision')}>{d.nav.vision}</a></li>
-        <li><a class="link" href={href(lang, '/about')}>{d.nav.about}</a></li>
-        <li><a class="link" href={href(lang, '/founder')}>{d.nav.founder}</a></li>
-        <li><a class="link" href={href(lang, '/contact')}>{d.nav.contact}</a></li>
+      <ul class="space-y-3 text-[0.97rem]">
+        <li><a class="text-haze hover:text-foam" href={href(lang, '/products')}>{d.nav.products}</a></li>
+        <li><a class="text-haze hover:text-foam" href={href(lang, '/innovation')}>{d.nav.innovation}</a></li>
+        <li><a class="text-haze hover:text-foam" href={href(lang, '/vision')}>{d.nav.vision}</a></li>
+        <li><a class="text-haze hover:text-foam" href={href(lang, '/about')}>{d.nav.about}</a></li>
+        <li><a class="text-haze hover:text-foam" href={href(lang, '/founder')}>{d.nav.founder}</a></li>
+        <li><a class="text-haze hover:text-foam" href={href(lang, '/contact')}>{d.nav.contact}</a></li>
       </ul>
     </nav>
-    <div class="md:col-span-3 text-[0.95rem] space-y-2.5 [overflow-wrap:anywhere]">
+    <div class="md:col-span-3 space-y-3 text-[0.97rem] [overflow-wrap:anywhere]">
       <p>{site.city}, {lang === 'fr' ? 'Cameroun' : site.country}</p>
-      <p class="text-foam/70">{site.coordinates.lat}, {site.coordinates.lon}</p>
+      <p class="text-haze">{site.coordinates.lat}, {site.coordinates.lon}</p>
       {contact.general && <p><a class="link" href={`mailto:${contact.general}`}>{contact.general}</a></p>}
       {social.map((s) => <p><a class="link" href={s.url} rel="me noopener">{s.label}</a></p>)}
     </div>
   </div>
-  <div class="wrap rule py-6 text-[0.85rem] text-foam/60">© {year} {d.footer.rights}</div>
+  <!-- The name, set as large as the page allows: the signature of the site. -->
+  <div class="wrap select-none pb-6" aria-hidden="true">
+    <p class="flex items-center gap-[0.12em] text-[clamp(3.4rem,1rem+12.5vw,13.5rem)] leading-[0.85] tracking-[-0.06em] font-[560] text-transparent bg-clip-text bg-gradient-to-b from-foam/25 to-foam/[0.02]">
+      Droplet Labs
+    </p>
+  </div>
+  <div class="wrap flex flex-wrap items-center justify-between gap-4 border-t border-foam/[0.08] py-6 text-[0.85rem] text-haze">
+    <a href={href(lang, '/')} class="flex items-center gap-2" aria-label={d.nav.home}><Logo class="size-5 text-ice" /> © 2026 {d.footer.rights}</a>
+  </div>
 </footer>

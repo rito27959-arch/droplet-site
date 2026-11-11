@@ -1,0 +1,125 @@
+---
+// The real thing, for each project: footage from the product films, the
+// app's own screens, Kunfox's animated mascot. Nothing here is a mock-up
+// of a feature that does not exist.
+import { Image } from 'astro:assets';
+import kabi from '../assets/media/kabi.png';
+import paroleHome from '../assets/media/parole-home.png';
+import paroleSession from '../assets/media/parole-session.png';
+import nexfleet from '../assets/media/nexfleet-missions.png';
+import type { Lang } from '../i18n';
+
+interface Props { slug: string; lang: Lang; large?: boolean }
+const { slug, lang, large = false } = Astro.props;
+const fr = lang === 'fr';
+---
+
+{slug === 'droplet-messenger' && (
+  <div class="relative">
+    <div class="overflow-hidden rounded-[28px] bg-[#f2f3f5] shadow-[0_50px_120px_-40px_rgba(255,59,92,0.45)]">
+      <video data-auto muted loop playsinline preload="none" poster="/media/messenger.jpg" class="aspect-video w-full object-cover"
+             aria-label={fr ? 'Trois téléphones se passent un message par Bluetooth, sans réseau' : 'Three phones pass a message along over Bluetooth, with no network'}>
+        <source src="/media/messenger.mp4" type="video/mp4" />
+      </video>
+    </div>
+    {large && (
+      <div class="mt-6 overflow-hidden rounded-[28px] bg-[#f2f3f5]">
+        <video data-auto muted loop playsinline preload="none" poster="/media/messenger-web.jpg" class="w-full"
+               aria-label={fr ? 'Droplet Web : les discussions du téléphone sur un ordinateur' : 'Droplet Web: the phone’s chats on a computer'}>
+          <source src="/media/messenger-web.mp4" type="video/mp4" />
+        </video>
+      </div>
+    )}
+  </div>
+)}
+
+{slug === 'droplet-drop' && (
+  <div>
+    <div class="overflow-hidden rounded-[28px] bg-black shadow-[0_50px_120px_-40px_rgba(46,139,255,0.55)] ring-1 ring-white/10">
+      <video data-auto muted loop playsinline preload="none" poster="/media/drop.jpg" class="w-full"
+             aria-label={fr ? 'Un dossier passe d’un ordinateur à un téléphone par le Wi-Fi local' : 'A folder moves from a laptop to a phone over local Wi-Fi'}>
+        <source src="/media/drop.mp4" type="video/mp4" />
+      </video>
+    </div>
+    {large && (
+      <div class="mt-6 overflow-hidden rounded-[28px] bg-black ring-1 ring-white/10">
+        <video data-auto muted loop playsinline preload="none" poster="/media/drop-group.jpg" class="w-full"
+               aria-label={fr ? 'Group Drop : un envoi vers trente appareils à la fois' : 'Group Drop: one send to thirty devices at once'}>
+          <source src="/media/drop-group.mp4" type="video/mp4" />
+        </video>
+      </div>
+    )}
+  </div>
+)}
+
+{slug === 'kunfox' && (
+  <div class="relative mx-auto aspect-[5/6] w-full max-w-[26rem]">
+    <div class="absolute inset-[12%] rounded-full bg-[#f07a2a] opacity-40 blur-[70px]"></div>
+    <Image src={kabi} alt={fr ? 'Kabi, la mascotte de Kunfox' : 'Kabi, the Kunfox mascot'} widths={[300, 500]} sizes="(min-width: 64rem) 26rem, 80vw"
+           class="kabi-still relative h-full w-full object-contain transition-opacity duration-500" />
+    <canvas data-kabi class="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-500" aria-hidden="true"></canvas>
+  </div>
+)}
+
+{slug === 'parole' && (
+  <div class="relative mx-auto flex max-w-[34rem] items-end justify-center gap-5">
+    <div class="absolute inset-x-[10%] top-[20%] bottom-0 rounded-full bg-[#4b7bff] opacity-30 blur-[80px]"></div>
+    <div class="relative w-[46%] translate-y-8 rounded-[2.2rem] bg-[#0b0d12] p-2 ring-1 ring-white/15 shadow-2xl">
+      <Image src={paroleHome} alt={fr ? 'Parole : l’accueil, avec une préparation en cours' : 'Parole: the home screen, with a preparation in progress'} widths={[320, 540]} sizes="(min-width: 64rem) 16rem, 44vw" class="rounded-[1.8rem]" />
+    </div>
+    <div class="relative w-[46%] rounded-[2.2rem] bg-[#0b0d12] p-2 ring-1 ring-white/15 shadow-2xl">
+      <Image src={paroleSession} alt={fr ? 'Parole : une question du jury, tirée de la page 18 du rapport' : 'Parole: a jury question, taken from page 18 of the report'} widths={[320, 540]} sizes="(min-width: 64rem) 16rem, 44vw" class="rounded-[1.8rem]" />
+    </div>
+  </div>
+)}
+
+{slug === 'nexfleet' && (
+  <div class="relative">
+    <div class="absolute inset-x-[8%] -bottom-6 top-[30%] rounded-full bg-[#12b68a] opacity-30 blur-[90px]"></div>
+    <div class="relative overflow-hidden rounded-[22px] bg-[#16222b] ring-1 ring-white/12 shadow-2xl">
+      <div class="flex h-8 items-center gap-1.5 px-4">
+        <span class="size-2.5 rounded-full bg-white/20"></span><span class="size-2.5 rounded-full bg-white/20"></span><span class="size-2.5 rounded-full bg-white/20"></span>
+      </div>
+      <Image src={nexfleet} alt={fr ? 'NexFleet : une mission en cours et son tracé GPS (données de démonstration)' : 'NexFleet: a mission in progress and its GPS track (demo data)'} widths={[700, 1100, 1440]} sizes="(min-width: 64rem) 50vw, 100vw" class="w-full" />
+    </div>
+  </div>
+)}
+
+<script>
+  // Kabi comes to life only when seen, and only on screens and connections
+  // that can afford the animation engine (2 MB). Otherwise: the still image.
+  async function wake() {
+    const canvases = document.querySelectorAll<HTMLCanvasElement>('canvas[data-kabi]:not([data-on])');
+    if (!canvases.length || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    if (conn?.saveData) return;
+    const io = new IntersectionObserver(async (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        io.unobserve(e.target);
+        const c = e.target as HTMLCanvasElement;
+        c.dataset.on = '1';
+        const { Rive, Layout, Fit, Alignment, RuntimeLoader } = await import('@rive-app/canvas');
+        RuntimeLoader.setWasmUrl('/media/rive.wasm');
+        const r = new Rive({
+          src: '/media/kabi.riv', canvas: c, stateMachines: 'Kabi', autoplay: true,
+          layout: new Layout({ fit: Fit.Contain, alignment: Alignment.Center }),
+          onLoad: () => {
+            r.resizeDrawingSurfaceToCanvas();
+            const inputs = r.stateMachineInputs('Kabi') ?? [];
+            const color = inputs.find((i) => i.name === 'color'); if (color) color.value = 6;
+            requestAnimationFrame(() => {
+              c.style.opacity = '1';
+              const still = c.parentElement?.querySelector<HTMLElement>('.kabi-still'); if (still) still.style.opacity = '0';
+            });
+            const hi = inputs.find((i) => i.name === 'hi'); hi?.fire();
+            c.addEventListener('pointerdown', () => inputs.find((i) => i.name === 'jump')?.fire());
+            c.style.pointerEvents = 'auto';
+          },
+        });
+      }
+    }, { threshold: 0.3 });
+    canvases.forEach((c) => io.observe(c));
+  }
+  document.addEventListener('astro:page-load', wake);
+</script>
