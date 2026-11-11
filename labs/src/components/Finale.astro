@@ -1,0 +1,109 @@
+---
+// The end of every page: the name, made of the mesh itself. Thousands of
+// points drift like the devices in the hero, then gather into the letters
+// "Droplet Labs" as the bottom of the page comes into view. The pointer
+// scatters them; they come back. Scroll back up and they let go.
+---
+<div class="relative h-[clamp(9rem,4rem+17vw,22rem)] w-full" data-finale>
+  <canvas class="absolute inset-0 h-full w-full" aria-hidden="true"></canvas>
+  <p class="sr-only">Droplet Labs</p>
+</div>
+
+<script>
+  type P = { x: number; y: number; hx: number; hy: number; sx: number; sy: number; vx: number; vy: number; s: number; d: number };
+
+  function finale() {
+    document.querySelectorAll<HTMLElement>('[data-finale]:not([data-on])').forEach((host) => {
+      host.dataset.on = '1';
+      const canvas = host.querySelector('canvas')!;
+      const ctx = canvas.getContext('2d')!;
+      const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let w = 0, h = 0, dpr = 1, pts: P[] = [], raf = 0, visible = false, progress = calm ? 1 : 0;
+      const mouse = { x: -1e4, y: -1e4 };
+
+      // Where the letters are: draw the name off screen, keep its filled pixels.
+      async function build() {
+        const r = host.getBoundingClientRect();
+        dpr = Math.min(devicePixelRatio || 1, 2);
+        w = r.width; h = r.height;
+        canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        await document.fonts.ready;
+        const off = document.createElement('canvas');
+        off.width = Math.round(w); off.height = Math.round(h);
+        const o = off.getContext('2d')!;
+        let size = h * 0.92;
+        o.font = `560 ${size}px 'Schibsted Grotesk Variable', system-ui, sans-serif`;
+        const textW = o.measureText('Droplet Labs').width;
+        if (textW > w * 0.98) { size *= (w * 0.98) / textW; o.font = `560 ${size}px 'Schibsted Grotesk Variable', system-ui, sans-serif`; }
+        o.textBaseline = 'alphabetic';
+        o.fillStyle = '#fff';
+        o.letterSpacing = `${-0.055 * size}px`;
+        o.fillText('Droplet Labs', 0, h * 0.8);
+        const data = o.getImageData(0, 0, off.width, off.height).data;
+        const step = w < 600 ? 3 : w < 1100 ? 3 : 4;
+        const fresh: P[] = [];
+        for (let y = 0; y < off.height; y += step) {
+          for (let x = 0; x < off.width; x += step) {
+            if (data[(y * off.width + x) * 4 + 3] > 140) {
+              // Each point starts somewhere in the water above and around.
+              const sx = Math.random() * w, sy = Math.random() * h * 1.6 - h * 0.6;
+              fresh.push({ x: sx, y: sy, hx: x, hy: y, sx, sy, vx: 0, vy: 0, s: Math.random() * 0.7 + 0.8, d: Math.random() });
+            }
+          }
+        }
+        pts = fresh;
+      }
+
+      // How far into view the end of the page is: 0 just appearing, 1 fully in.
+      const scrollProgress = () => {
+        const r = host.getBoundingClientRect();
+        // 0 while the name is still below the screen, 1 once the page has
+        // reached its very end (or the name is well inside the screen).
+        const k = 1 - (r.bottom - (innerHeight - 40)) / (innerHeight * 0.55);
+        return Math.max(0, Math.min(1, k));
+      };
+
+      function frame(now: number) {
+        raf = 0;
+        if (!calm) progress += (scrollProgress() - progress) * 0.08;
+        ctx.clearRect(0, 0, w, h);
+        const t = now / 1000;
+        for (const p of pts) {
+          // Each point leaves for home a little after its neighbour: a wave.
+          const k = Math.max(0, Math.min(1, (progress - p.d * 0.35) / 0.65));
+          const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+          let tx = p.sx + (p.hx - p.sx) * e + Math.sin(t * 0.7 + p.d * 9) * (1 - e) * 14;
+          let ty = p.sy + (p.hy - p.sy) * e + Math.cos(t * 0.6 + p.d * 7) * (1 - e) * 10;
+          // The pointer pushes points away.
+          const dx = p.x - mouse.x, dy = p.y - mouse.y, d2 = dx * dx + dy * dy;
+          if (d2 < 90 * 90) { const f = (1 - Math.sqrt(d2) / 90) * 9; p.vx += (dx / (Math.sqrt(d2) + 0.01)) * f; p.vy += (dy / (Math.sqrt(d2) + 0.01)) * f; }
+          p.vx += (tx - p.x) * 0.08; p.vy += (ty - p.y) * 0.08;
+          p.vx *= 0.78; p.vy *= 0.78;
+          p.x += p.vx; p.y += p.vy;
+          // Brighter towards the top of the letters: light from the surface.
+          const a = 0.3 + 0.7 * e * (1 - p.hy / h * 0.35);
+          ctx.fillStyle = `rgba(${Math.round(142 + 91 * (1 - p.hy / h))},${Math.round(234 + 9 * (1 - p.hy / h))},${245},${a.toFixed(3)})`;
+          ctx.fillRect(p.x, p.y, p.s * 1.6, p.s * 1.6);
+        }
+        if (visible && !calm) raf = requestAnimationFrame(frame);
+      }
+
+      build().then(() => {
+        if (calm) { pts.forEach((p) => { p.x = p.hx; p.y = p.hy; }); frame(performance.now()); return; }
+        new IntersectionObserver(([e]) => {
+          visible = e.isIntersecting;
+          if (visible && !raf) raf = requestAnimationFrame(frame);
+        }, { rootMargin: '200px 0px' }).observe(host);
+      });
+      let resizeTimer = 0;
+      new ResizeObserver(() => {
+        clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(() => build().then(() => { if (calm) { pts.forEach((p) => { p.x = p.hx; p.y = p.hy; }); frame(performance.now()); } }), 150);
+      }).observe(host);
+      host.addEventListener('pointermove', (e) => { const r = canvas.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; });
+      host.addEventListener('pointerleave', () => { mouse.x = -1e4; mouse.y = -1e4; });
+    });
+  }
+  document.addEventListener('astro:page-load', finale);
+</script>

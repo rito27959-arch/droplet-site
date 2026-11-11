@@ -147,4 +147,3 @@ header > div:first-child { transition: transform 0.5s cubic-bezier(0.16, 1, 0.3,
 /* Reading progress: a hairline of light under the header. */
 #progress { position: fixed; left: 0; top: 0; height: 2px; width: 100%; z-index: 80; transform-origin: 0 50%; transform: scaleX(var(--p, 0));
   background: linear-gradient(90deg, transparent, var(--color-ice)); box-shadow: 0 0 12px var(--color-ice); pointer-events: none; }
-.drop-fallback { transition: opacity 1s; }

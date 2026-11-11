@@ -1,7 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
 import MeshCanvas from '../components/MeshCanvas.astro';
-import LiquidDrop from '../components/LiquidDrop.astro';
 import Story from '../components/Story.astro';
 import Rise from '../components/Rise.astro';
 import ProductMedia from '../components/ProductMedia.astro';
@@ -24,11 +23,7 @@ const country = lang === 'fr' ? 'Cameroun' : site.country;
     <MeshCanvas />
     <div class="pointer-events-none absolute inset-x-0 bottom-0 -z-0 h-[40%] bg-gradient-to-t from-abyss to-transparent"></div>
 
-    <!-- The drop: centre stage on phones, to the right of the headline on large screens. -->
-    <div class="pointer-events-none absolute left-1/2 top-[4.75rem] size-[min(62vw,22rem)] -translate-x-1/2 md:left-auto md:right-[2%] md:top-[12%] md:size-[min(46vw,40rem)] md:translate-x-0" data-reveal style="--d:250ms">
-      <LiquidDrop class="h-full w-full" />
-    </div>
-    <div class="wrap relative pb-14 pt-[calc(5rem+min(62vw,22rem))] md:pb-20 md:pt-36">
+    <div class="wrap relative pb-14 pt-36 md:pb-20">
       <p class="mb-8 inline-flex items-center gap-2.5 rounded-full bg-foam/[0.06] py-1.5 pl-2 pr-4 text-[0.88rem] text-haze ring-1 ring-foam/10 backdrop-blur" data-reveal>
         <span class="relative flex size-2.5"><span class="absolute inset-0 animate-ping rounded-full bg-ice/60 motion-reduce:animate-none"></span><span class="relative size-2.5 rounded-full bg-ice"></span></span>
         {site.city}, {country}

@@ -1,5 +1,6 @@
 ---
 import Logo from './Logo.astro';
+import Finale from './Finale.astro';
 import { t, href, type Lang } from '../i18n';
 import { site, social, contact } from '../config';
 
@@ -32,11 +33,9 @@ const d = t[lang];
       {social.map((s) => <p><a class="link" href={s.url} rel="me noopener">{s.label}</a></p>)}
     </div>
   </div>
-  <!-- The name, set as large as the page allows: the signature of the site. -->
-  <div class="wrap select-none pb-6" aria-hidden="true">
-    <p class="flex items-center gap-[0.12em] text-[clamp(3.4rem,1rem+12.5vw,13.5rem)] leading-[0.85] tracking-[-0.06em] font-[560] text-transparent bg-clip-text bg-gradient-to-b from-foam/25 to-foam/[0.02]">
-      Droplet Labs
-    </p>
+  <!-- The name, made of the mesh: the points gather as the page ends. -->
+  <div class="wrap pb-4 pt-6">
+    <Finale />
   </div>
   <div class="wrap flex flex-wrap items-center justify-between gap-4 border-t border-foam/[0.08] py-6 text-[0.85rem] text-haze">
     <a href={href(lang, '/')} class="flex items-center gap-2" aria-label={d.nav.home}><Logo class="size-5 text-ice" /> © 2026 {d.footer.rights}</a>
