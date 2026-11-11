@@ -17,7 +17,7 @@ export const site = {
 export const founder: { name: string | null } = {
   // The founder's full name, exactly as it should appear on the site.
   // null → the pages say "the founder" and show no name.
-  name: null,
+  name: 'Effi Djimeli Miguel Batime',
 };
 
 export const contact: {
