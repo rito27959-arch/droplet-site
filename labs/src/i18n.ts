@@ -109,7 +109,7 @@ const en = {
     ],
     founderTitle: 'The person behind it',
     founderText:
-      'Droplet Labs is, for now, the work of one developer who designs, writes, tests and ships each project, from the encryption code to the website you are reading.',
+      'Droplet Labs is the work of Effi, 17, a second-year software engineering student in Yaoundé. He designs, writes, tests and ships each project himself, from the encryption code to the website you are reading.',
     founderLink: 'Read the founder’s page',
     visionTitle: 'Where this is going',
     visionText:
@@ -126,7 +126,7 @@ const en = {
     headline: 'Built in Yaoundé, for the places networks forget.',
     originTitle: 'Origin',
     origin: [
-      'Droplet Labs began with Droplet Messenger: an attempt to make a messaging app that keeps working when the network does not. Solving that one problem led to the others. Files needed to move between nearby devices, so Droplet Drop followed. Learning and preparation needed tools that respect a small budget, so Kunfox and Parole followed.',
+      'Droplet Labs began with two questions its founder kept hearing in Yaoundé: why is getting online so expensive, and why does every platform want your name and personal details before you can even sign in? Droplet Messenger was the first answer: a messaging app that keeps working when the network does not, with no personal information required. Solving that one problem led to the others. Files needed to move between nearby devices, so Droplet Drop followed. Learning and preparation needed tools that respect a small budget, so Kunfox and Parole followed.',
       'The name groups these projects under one roof. It is not yet a company: there is no registration, no staff and no investors. There is a body of working software and a plan.',
     ],
     founderTitle: 'The founder',
@@ -204,8 +204,18 @@ const en = {
     description: 'The founder and software developer behind Droplet Labs: biography, development philosophy, current projects and ambitions.',
     bioTitle: 'Biography',
     bio: [
-      'Based in Yaoundé, Cameroon, the founder of Droplet Labs is a self-directed software developer. Every project on this site was designed and built by him, from the user interface to the servers that run it.',
-      'The work spans several languages and platforms: Flutter and Dart for mobile apps, Kotlin for native Android, Rust for the file transfer engine, Java for fleet management, and TypeScript and Astro for the websites.',
+      'Effi is 17. He is in his second year of software engineering at a university in Yaoundé, and he founded Droplet Labs on his own.',
+      'At 13 he was the one people in his neighbourhood came to: he installed operating systems, swapped memory and hard drives, and built small games. As the internet grew around him, so did the debates he kept following: the price of mobile data going up again, and every platform asking for a name and personal details just to sign in, with no one saying what happens to them.',
+      'He decided to build the answer himself: a way for people to talk to each other without handing over personal information, and, in time, without depending on servers abroad. Every project on this site was designed and built by him, from the user interface to the servers that run it, in Dart, Kotlin, Rust, Java and TypeScript.',
+    ],
+    quote: 'Why do we always have to give our name and personal details to get online? And what do they do with them?',
+    quoteBy: 'Effi, on why he started Droplet Labs',
+    pathTitle: 'From the neighbourhood to Droplet Labs',
+    path: [
+      { when: 'At 13', what: 'Installs operating systems, upgrades memory and hard drives, builds small games for his neighbourhood.' },
+      { when: 'The years after', what: 'Follows the debates on the price of mobile data and on what platforms do with personal information.' },
+      { when: 'July 2026', what: 'Starts his first projects: the learning app that becomes Kunfox, then Droplet Messenger.' },
+      { when: 'At 17', what: 'Second-year software engineering student in Yaoundé; five projects published.' },
     ],
     philosophyTitle: 'Development philosophy',
     philosophy: [
@@ -216,7 +226,7 @@ const en = {
     projectsTitle: 'Current projects',
     ambitionsTitle: 'Long-term ambitions',
     ambitions:
-      'To build, from Cameroon, a complete connection infrastructure: one private identity that opens every Droplet app, without a phone number or an email. Then a team, a company, and apps built by others on the same foundations.',
+      'To build, from Cameroon, a complete connection infrastructure: one private identity that opens every Droplet app, without a phone number or an email. In time, a way for people to reach the internet at lower cost and securely, with nothing more than an identifier.',
   },
 
   vision: {
@@ -315,6 +325,7 @@ const en = {
           { text: 'Public documentation and a developer kit for Droplet ID', state: 'todo' },
           { text: 'Third-party apps signing in with Droplet ID', state: 'todo' },
           { text: 'Partners outside Cameroon', state: 'todo' },
+          { text: 'Internet access at lower cost, shared securely through the mesh with a Droplet ID', state: 'todo' },
         ],
         doneWhen: 'Apps built by others use Droplet ID, in several countries.',
       },
@@ -436,7 +447,7 @@ const fr: typeof en = {
     ],
     founderTitle: 'La personne derrière',
     founderText:
-      'Droplet Labs est, pour l’instant, le travail d’un seul développeur qui conçoit, écrit, teste et publie chaque projet, du code de chiffrement jusqu’au site que vous lisez.',
+      'Droplet Labs est le travail d’Effi, 17 ans, étudiant en deuxième année de génie logiciel à Yaoundé. Il conçoit, écrit, teste et publie chaque projet lui-même, du code de chiffrement jusqu’au site que vous lisez.',
     founderLink: 'Lire la page du fondateur',
     visionTitle: 'Vers où nous allons',
     visionText:
@@ -453,7 +464,7 @@ const fr: typeof en = {
     headline: 'Construit à Yaoundé, pour les endroits que les réseaux oublient.',
     originTitle: 'Origine',
     origin: [
-      'Droplet Labs a commencé avec Droplet Messenger : une messagerie qui continue de marcher quand le réseau lâche. Résoudre ce problème a mené aux autres. Les fichiers devaient passer d’un appareil proche à l’autre : Droplet Drop a suivi. Apprendre et se préparer demandait des outils qui respectent un petit budget : Kunfox et Parole ont suivi.',
+      'Droplet Labs est née de deux questions que son fondateur entendait sans cesse à Yaoundé : pourquoi la connexion coûte-t-elle si cher, et pourquoi chaque plateforme veut-elle votre nom et vos informations personnelles avant même de vous laisser entrer ? Droplet Messenger a été la première réponse : une messagerie qui continue de marcher quand le réseau lâche, sans aucune information personnelle. Résoudre ce problème a mené aux autres. Les fichiers devaient passer d’un appareil proche à l’autre : Droplet Drop a suivi. Apprendre et se préparer demandait des outils qui respectent un petit budget : Kunfox et Parole ont suivi.',
       'Le nom réunit ces projets sous un même toit. Ce n’est pas encore une société : ni immatriculation, ni salariés, ni investisseurs. Il y a un ensemble de logiciels qui fonctionnent, et un plan.',
     ],
     founderTitle: 'Le fondateur',
@@ -531,8 +542,18 @@ const fr: typeof en = {
     description: 'Le fondateur et développeur de Droplet Labs : biographie, philosophie de développement, projets en cours et ambitions.',
     bioTitle: 'Biographie',
     bio: [
-      'Installé à Yaoundé, au Cameroun, le fondateur de Droplet Labs est un développeur logiciel autodidacte. Chaque projet de ce site a été conçu et construit par lui, de l’interface jusqu’aux serveurs qui le font tourner.',
-      'Son travail couvre plusieurs langages et plateformes : Flutter et Dart pour les apps mobiles, Kotlin pour Android natif, Rust pour le moteur de transfert de fichiers, Java pour la gestion de parc, TypeScript et Astro pour les sites web.',
+      'Effi a 17 ans. Il est en deuxième année de génie logiciel dans une université de Yaoundé, et il a fondé Droplet Labs seul.',
+      'À 13 ans, c’était lui qu’on venait voir dans le quartier : il installait des systèmes d’exploitation, changeait la mémoire et les disques durs des ordinateurs, et créait de petits jeux. À mesure qu’Internet prenait de la place, il suivait les mêmes débats : le prix de la connexion qui augmente encore, et chaque plateforme qui demande un nom et des informations personnelles pour se connecter, sans dire ce qu’elle en fait.',
+      'Il a décidé de construire la réponse lui-même : un moyen de communiquer entre nous sans livrer d’informations personnelles et, à terme, sans dépendre de serveurs extérieurs. Chaque projet de ce site a été conçu et construit par lui, de l’interface jusqu’aux serveurs qui le font tourner, en Dart, Kotlin, Rust, Java et TypeScript.',
+    ],
+    quote: 'Pourquoi faut-il toujours donner son nom et ses informations personnelles pour se connecter ? Et qu’est-ce qu’ils en font ?',
+    quoteBy: 'Effi, sur ce qui l’a poussé à créer Droplet Labs',
+    pathTitle: 'Du quartier à Droplet Labs',
+    path: [
+      { when: 'À 13 ans', what: 'Installe des systèmes d’exploitation, change la mémoire et les disques durs, crée de petits jeux pour son quartier.' },
+      { when: 'Les années suivantes', what: 'Suit les débats sur le prix de la connexion et sur ce que les plateformes font des informations personnelles.' },
+      { when: 'Juillet 2026', what: 'Lance ses premiers projets : l’app d’apprentissage qui deviendra Kunfox, puis Droplet Messenger.' },
+      { when: 'À 17 ans', what: 'Étudiant en deuxième année de génie logiciel à Yaoundé ; cinq projets publiés.' },
     ],
     philosophyTitle: 'Philosophie de développement',
     philosophy: [
@@ -543,7 +564,7 @@ const fr: typeof en = {
     projectsTitle: 'Projets en cours',
     ambitionsTitle: 'Ambitions à long terme',
     ambitions:
-      'Construire, depuis le Cameroun, une infrastructure de connexion complète : une identité privée qui ouvre toutes les apps Droplet, sans numéro de téléphone ni e-mail. Puis une équipe, une société, et des apps construites par d’autres sur les mêmes fondations.',
+      'Construire, depuis le Cameroun, une infrastructure de connexion complète : une identité privée qui ouvre toutes les apps Droplet, sans numéro de téléphone ni e-mail. À terme, un moyen d’accéder à Internet à moindre coût et en sécurité, avec un simple identifiant.',
   },
 
   vision: {
@@ -642,6 +663,7 @@ const fr: typeof en = {
           { text: 'Une documentation publique et un kit de développement pour Droplet ID', state: 'todo' },
           { text: 'Des apps tierces qui se connectent avec Droplet ID', state: 'todo' },
           { text: 'Des partenaires hors du Cameroun', state: 'todo' },
+          { text: 'Un accès à Internet à moindre coût, partagé en sécurité par le réseau mesh avec un Droplet ID', state: 'todo' },
         ],
         doneWhen: 'Des apps construites par d’autres utilisent Droplet ID, dans plusieurs pays.',
       },

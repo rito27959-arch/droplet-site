@@ -50,6 +50,30 @@ const jsonLd = founder.name
     </div>
   </section>
 
+  <!-- His own question, the one that started everything. -->
+  <section class="relative isolate overflow-hidden border-t border-foam/[0.08]">
+    <div class="glow -z-10 left-1/2 top-1/2 h-[30rem] w-[44rem] -translate-x-1/2 -translate-y-1/2 bg-current/25"></div>
+    <figure class="wrap py-24 md:py-36">
+      <blockquote>
+        <Rise as="p" text={`« ${f.quote} »`.replace('« ', lang === 'fr' ? '« ' : '“').replace(' »', lang === 'fr' ? ' »' : '”')} class="max-w-[24ch] text-[clamp(2rem,1.2rem+3.4vw,4.6rem)] leading-[1.05] tracking-[-0.04em] font-[480]" />
+      </blockquote>
+      <figcaption class="mt-10 text-haze" data-reveal style="--d:400ms">{f.quoteBy}</figcaption>
+    </figure>
+  </section>
+
+  <!-- His path, from the neighbourhood to the company. -->
+  <section class="wrap grid gap-8 border-t border-foam/[0.08] py-20 md:grid-cols-12 md:gap-10 md:py-28">
+    <h2 class="md:col-span-4 text-[0.95rem] text-haze" data-reveal>{f.pathTitle}</h2>
+    <ol class="md:col-span-8">
+      {f.path.map((e, i) => (
+        <li class="grid gap-2 border-t border-foam/[0.08] py-7 sm:grid-cols-[11rem_1fr] sm:gap-8" data-reveal style={`--d:${i * 90}ms`}>
+          <p class:list={['text-lead', i === f.path.length - 1 ? 'text-ice' : 'text-haze']}>{e.when}</p>
+          <p class="max-w-[44ch] text-lead">{e.what}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
   <!-- Real dates, from the first commit of each project. -->
   <section class="border-t border-foam/[0.08] bg-trench/60">
     <div class="wrap py-20 md:py-28">
