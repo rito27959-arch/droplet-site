@@ -1,5 +1,5 @@
 ---
-import { Menu, X } from '@lucide/astro';
+import { Menu, X, Sun, Moon } from '@lucide/astro';
 import Logo from './Logo.astro';
 import { cleanPath, t, href, switchHref, type Lang } from '../i18n';
 
@@ -22,7 +22,7 @@ const other = lang === 'en' ? 'fr' : 'en';
 
 <!-- A floating capsule of glass: the page shows through it. -->
 <header class="fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-5 md:pt-4">
-  <div class="mx-auto flex h-14 max-w-[80rem] items-center justify-between gap-4 rounded-full bg-abyss/55 pl-4 pr-2 shadow-[inset_0_0_0_1px_rgba(233,243,246,0.09),0_20px_60px_-30px_rgba(0,0,0,0.8)] backdrop-blur-xl backdrop-saturate-150 md:pl-5">
+  <div class="mx-auto flex h-14 max-w-[80rem] items-center justify-between gap-4 rounded-full bg-abyss/55 pl-4 pr-2 shadow-[inset_0_0_0_1px_rgba(var(--rgb-foam),0.09),0_20px_60px_-30px_rgba(var(--rgb-abyss),0.8)] backdrop-blur-xl backdrop-saturate-150 md:pl-5">
     <a href={href(lang, '/')} class="flex items-center gap-2.5" aria-label={d.nav.home}>
       <Logo class="size-7 text-ice" />
       <span class="text-[1.02rem] font-[620] tracking-[-0.01em]">Droplet Labs</span>
@@ -43,6 +43,11 @@ const other = lang === 'en' ? 'fr' : 'en';
     <div class="flex items-center gap-1.5">
       <a href={switchHref(lang, path)} hreflang={other} lang={other} data-astro-reload
          class="hidden sm:inline-flex h-10 items-center rounded-full px-4 text-[0.9rem] text-haze hover:text-foam">{d.otherLang}</a>
+      <button type="button" data-theme-toggle class="inline-flex size-10 items-center justify-center rounded-full text-haze hover:bg-foam/10 hover:text-foam" aria-pressed="false">
+        <Sun class="theme-sun size-[1.15rem]" aria-hidden="true" />
+        <Moon class="theme-moon size-[1.15rem]" aria-hidden="true" />
+        <span class="sr-only">{d.nav.theme}</span>
+      </button>
       <a href={href(lang, '/contact')} class="hidden md:inline-flex btn btn-light !h-10 !px-4 !text-[0.9rem]">{d.nav.contact}</a>
       <button id="menu-open" type="button" class="lg:hidden inline-flex size-10 items-center justify-center rounded-full hover:bg-foam/10"
               aria-controls="menu-panel" aria-expanded="false">
@@ -96,4 +101,20 @@ const other = lang === 'en' ? 'fr' : 'en';
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && panel.dataset.open === 'true') set(false); });
   }
   document.addEventListener('astro:page-load', menu);
+
+  // Light or dark: the choice stays in this browser (see the privacy page).
+  function theme() {
+    const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+    if (!btn) return;
+    const sync = () => btn.setAttribute('aria-pressed', String(document.documentElement.dataset.theme === 'light'));
+    sync();
+    btn.onclick = () => {
+      const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+      try { localStorage.setItem('theme', next); } catch {}
+      if (next === 'light') document.documentElement.dataset.theme = 'light'; else delete document.documentElement.dataset.theme;
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', next === 'light' ? '#eef5f7' : '#03111a');
+      sync();
+    };
+  }
+  document.addEventListener('astro:page-load', theme);
 </script>

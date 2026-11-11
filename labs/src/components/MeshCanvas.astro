@@ -56,6 +56,8 @@
     }
 
     function frame(now: number) {
+      const css = getComputedStyle(document.documentElement);
+      const ICE = css.getPropertyValue('--rgb-ice').trim(), FOAM = css.getPropertyValue('--rgb-foam').trim();
       const dt = Math.min(48, now - last); last = now;
       ctx.clearRect(0, 0, w, h);
 
@@ -80,14 +82,14 @@
           const dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
           if (d2 < link * link) {
             const k = 1 - Math.sqrt(d2) / link;
-            ctx.strokeStyle = `rgba(142,234,245,${(k * 0.22).toFixed(3)})`;
+            ctx.strokeStyle = `rgba(${ICE},${(k * 0.22).toFixed(3)})`;
             ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
           }
         }
         if (pointer.on) {
           const dx = a.x - pointer.x, dy = a.y - pointer.y, d2 = dx * dx + dy * dy;
           if (d2 < 200 * 200) {
-            ctx.strokeStyle = `rgba(142,234,245,${((1 - Math.sqrt(d2) / 200) * 0.45).toFixed(3)})`;
+            ctx.strokeStyle = `rgba(${ICE},${((1 - Math.sqrt(d2) / 200) * 0.45).toFixed(3)})`;
             ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(pointer.x, pointer.y); ctx.stroke();
           }
         }
@@ -95,11 +97,11 @@
 
       // Devices, with a ring when a message lands.
       for (const n of nodes) {
-        ctx.fillStyle = 'rgba(233,243,246,0.75)';
+        ctx.fillStyle = `rgba(${FOAM},0.75)`;
         ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill();
         if (n.ping > 0) {
           const k = 1 - n.ping;
-          ctx.strokeStyle = `rgba(142,234,245,${(n.ping * 0.7).toFixed(3)})`;
+          ctx.strokeStyle = `rgba(${ICE},${(n.ping * 0.7).toFixed(3)})`;
           ctx.beginPath(); ctx.arc(n.x, n.y, 4 + k * 26, 0, Math.PI * 2); ctx.stroke();
         }
       }
@@ -112,11 +114,11 @@
         const x = a.x + (b.x - a.x) * pk.t, y = a.y + (b.y - a.y) * pk.t;
         const tx = a.x + (b.x - a.x) * Math.max(0, pk.t - 0.25), ty = a.y + (b.y - a.y) * Math.max(0, pk.t - 0.25);
         const g = ctx.createLinearGradient(tx, ty, x, y);
-        g.addColorStop(0, 'rgba(142,234,245,0)'); g.addColorStop(1, 'rgba(142,234,245,0.9)');
+        g.addColorStop(0, `rgba(${ICE},0)`); g.addColorStop(1, `rgba(${ICE},0.9)`);
         ctx.strokeStyle = g; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(x, y); ctx.stroke(); ctx.lineWidth = 1;
-        ctx.fillStyle = '#e9fbff';
-        ctx.shadowColor = 'rgba(142,234,245,0.9)'; ctx.shadowBlur = 14;
+        ctx.fillStyle = `rgb(${FOAM})`;
+        ctx.shadowColor = `rgba(${ICE},0.9)`; ctx.shadowBlur = 14;
         ctx.beginPath(); ctx.arc(x, y, 2.6, 0, Math.PI * 2); ctx.fill();
         ctx.shadowBlur = 0;
         if (pk.t >= 1) {

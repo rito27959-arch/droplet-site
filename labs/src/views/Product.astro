@@ -3,6 +3,10 @@ import { ArrowUpRight } from '@lucide/astro';
 import Base from '../layouts/Base.astro';
 import Rise from '../components/Rise.astro';
 import ProductMedia from '../components/ProductMedia.astro';
+import Phone3D from '../components/Phone3D.astro';
+import screenMessenger from '../assets/media/screen-messenger.png';
+import screenDrop from '../assets/media/screen-drop.png';
+import paroleSession from '../assets/media/parole-session.png';
 import { products, type Product } from '../products';
 import { t, href, type Lang } from '../i18n';
 
@@ -20,11 +24,25 @@ const jsonLd = {
   ...(p.website ? { url: p.website } : {}),
 };
 const started = lang === 'fr' ? 'Commencé en' : 'Started in';
+const fr = lang === 'fr';
+// The phone, for the projects that live on one. Kunfox (a mascot) and
+// NexFleet (a web dashboard) have no phone screen to show yet.
+const phone = {
+  'droplet-messenger': { screen: screenMessenger, title: fr ? 'Dans la main.' : 'In your hand.',
+    text: fr ? 'Une conversation reçue sans réseau, relayée par un téléphone voisin. Tournez le téléphone : il suit votre curseur.' : 'A conversation received with no network, relayed by a nearby phone. Move your pointer: the phone follows it.',
+    alt: fr ? 'Droplet Messenger : une conversation avec Amina, à portée par Bluetooth' : 'Droplet Messenger: a chat with Amina, in range over Bluetooth' },
+  'droplet-drop': { screen: screenDrop, title: fr ? 'Dans la main.' : 'In your hand.',
+    text: fr ? 'Quatre fichiers reçus d’un ordinateur par le Wi-Fi local, chacun vérifié bloc par bloc.' : 'Four files received from a laptop over local Wi-Fi, each one verified block by block.',
+    alt: fr ? 'Droplet Drop : réception terminée, tout est arrivé et vérifié' : 'Droplet Drop: receiving done, everything arrived and verified' },
+  parole: { screen: paroleSession, title: fr ? 'Dans la main.' : 'In your hand.',
+    text: fr ? 'Une question du jury, tirée d’une page précise du rapport de l’étudiant.' : 'A jury question, taken from a specific page of the student’s report.',
+    alt: fr ? 'Parole : une question du jury, tirée de la page 18 du rapport' : 'Parole: a jury question, taken from page 18 of the report' },
+}[p.slug as 'parole'];
 ---
 <Base lang={lang} title={p.name} description={p.line[lang]} jsonLd={jsonLd}>
   <!-- A hero lit in the project's own colour. -->
   <header class="relative isolate overflow-hidden">
-    <div class="absolute inset-0 -z-10" style={`background:radial-gradient(80% 70% at 75% 10%, color-mix(in oklab, ${p.accent} 30%, #03111a) 0%, #03111a 70%)`}></div>
+    <div class="absolute inset-0 -z-10" style={`background:radial-gradient(80% 70% at 75% 10%, color-mix(in oklab, ${p.accent} 30%, var(--color-abyss)) 0%, var(--color-abyss) 70%)`}></div>
     <div class="wrap pt-36 md:pt-48">
       <a class="link text-[0.95rem] text-haze hover:text-foam" href={href(lang, '/products')} data-reveal>{d.back}</a>
       <p class="mt-10 flex items-center gap-3 text-[0.95rem] text-haze" data-reveal>
@@ -39,6 +57,20 @@ const started = lang === 'fr' ? 'Commencé en' : 'Started in';
       </div>
     </div>
   </header>
+
+  {phone && (
+    <section class="relative isolate overflow-hidden border-t border-foam/[0.08]">
+      <div class="wrap grid items-center gap-16 py-24 md:grid-cols-12 md:gap-10 md:py-36">
+        <div class="md:col-span-5">
+          <Rise text={phone.title} class="text-title" />
+          <p class="mt-8 max-w-[34ch] text-lead text-haze" data-reveal style="--d:200ms">{phone.text}</p>
+        </div>
+        <div class="md:col-span-7 py-6">
+          <Phone3D screen={phone.screen} alt={phone.alt} accent={p.accent} name={p.name} />
+        </div>
+      </div>
+    </section>
+  )}
 
   <section class="wrap grid gap-16 border-t border-foam/[0.08] py-20 md:grid-cols-12 md:gap-10 md:py-28">
     <div class="md:col-span-7">

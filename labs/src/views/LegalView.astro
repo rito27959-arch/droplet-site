@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import type { LegalPage } from '../legal';
+import type { Lang } from '../i18n';
+
+interface Props { lang: Lang; page: LegalPage }
+const { lang, page } = Astro.props;
+---
+<Base lang={lang} title={page.title} description={page.description}>
+  <PageHead title={page.title} lead={page.intro} />
+  <section class="wrap pb-28 md:pb-36">
+    <div class="grid gap-10 md:grid-cols-12">
+      <p class="md:col-span-4 text-[0.9rem] text-haze">{page.updated}</p>
+      <div class="md:col-span-8 border-b border-foam/[0.08]">
+        {page.blocks.map((b) => (
+          <section class="grid gap-3 border-t border-foam/[0.08] py-8 sm:grid-cols-[13rem_1fr] sm:gap-8">
+            <h2 class="text-[1.15rem] tracking-[-0.015em]">{b.h}</h2>
+            <div class="space-y-3 text-foam/85 [overflow-wrap:anywhere]">{b.p.map((x) => <p class="max-w-[60ch]">{x}</p>)}</div>
+          </section>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

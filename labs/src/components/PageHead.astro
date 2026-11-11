@@ -4,7 +4,7 @@ interface Props { title: string; lead?: string; accent?: string }
 const { title, lead, accent = 'var(--color-current)' } = Astro.props;
 ---
 <header class="relative isolate overflow-hidden">
-  <div class="absolute inset-0 -z-10 bg-[radial-gradient(90%_70%_at_80%_0%,#0d3a4c_0%,#06202d_40%,transparent_75%)]"></div>
+  <div class="absolute inset-0 -z-10 bg-[radial-gradient(90%_70%_at_80%_0%,var(--color-deep)_0%,var(--color-deeper)_40%,transparent_75%)]"></div>
   <div class="glow -z-10 right-[-8%] top-[-30%] h-[34rem] w-[34rem] opacity-35" style={`background:${accent}`}></div>
   <div class="wrap pt-40 pb-16 md:pt-52 md:pb-24">
     <Rise as="h1" text={title} class="max-w-[16ch] text-mega font-[500]" />

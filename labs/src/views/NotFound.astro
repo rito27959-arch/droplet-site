@@ -9,7 +9,7 @@ const n = t[lang].notFound;
 ---
 <Base lang={lang} title={n.title} description={n.description}>
   <section class="relative isolate flex min-h-[90svh] items-center overflow-hidden">
-    <div class="absolute inset-0 -z-10 bg-[radial-gradient(90%_70%_at_50%_0%,#0d3a4c_0%,#03111a_70%)]"></div>
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(90%_70%_at_50%_0%,var(--color-deep)_0%,var(--color-abyss)_70%)]"></div>
     <MeshCanvas />
     <div class="wrap relative">
       <h1 class="max-w-[14ch] text-mega font-[500]">{n.headline}</h1>

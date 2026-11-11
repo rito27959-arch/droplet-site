@@ -14,6 +14,13 @@
   --color-ice: #8eeaf5;
   --color-current: #22b4cb;
 
+  /* The depths of the hero gradients, and the colours the canvases draw
+     with (as r,g,b so they can take an opacity). Swapped in light mode. */
+  --color-deep: #0d3a4c;
+  --color-deeper: #06202d;
+  --color-lit: #13506a;
+  --color-photo: #0f4356;
+
   --font-sans: 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
 
   --text-hero: clamp(3.1rem, 1.2rem + 8.4vw, 10.5rem);
@@ -27,6 +34,32 @@
   --text-title--letter-spacing: -0.035em;
   --text-lead: clamp(1.15rem, 1.02rem + 0.55vw, 1.45rem);
   --text-lead--line-height: 1.5;
+}
+
+:root { --rgb-ice: 142, 234, 245; --rgb-foam: 233, 243, 246; --rgb-glint: 233, 243, 245; --rgb-abyss: 3, 17, 26; --grain: 0.045; }
+
+/* ── Surface water ─────────────────────────────────────────────────────
+   Light mode, for reading in full sun: the same water seen from the
+   surface. Every colour above has its counterpart here; nothing else
+   changes. Chosen in the header, remembered in this browser only.       */
+:root[data-theme='light'] {
+  --color-abyss: #eef5f7;
+  --color-trench: #e1ecf0;
+  --color-shelf: #d2e2e8;
+  --color-foam: #08212d;
+  --color-haze: #4a6470;
+  --color-ice: #00788a;
+  --color-current: #5cc8d8;
+  --color-deep: #c7e5ee;
+  --color-deeper: #dcedf2;
+  --color-lit: #bfe2ec;
+  --color-photo: #cfe8ef;
+  --rgb-ice: 0, 120, 138;
+  --rgb-foam: 8, 33, 45;
+  --rgb-glint: 8, 52, 66;
+  --rgb-abyss: 238, 245, 247;
+  --grain: 0.03;
+  color-scheme: light;
 }
 
 @layer base {
@@ -69,7 +102,7 @@
     will-change: transform;
   }
   .btn-light { background: var(--color-foam); color: var(--color-abyss); }
-  .btn-light:hover { background: #fff; box-shadow: 0 0 0 6px color-mix(in oklab, var(--color-ice) 18%, transparent), 0 18px 50px -12px color-mix(in oklab, var(--color-ice) 55%, transparent); }
+  .btn-light:hover { background: color-mix(in oklab, var(--color-foam) 88%, var(--color-ice)); box-shadow: 0 0 0 6px color-mix(in oklab, var(--color-ice) 18%, transparent), 0 18px 50px -12px color-mix(in oklab, var(--color-ice) 55%, transparent); }
   .btn-glass {
     color: var(--color-foam);
     background: color-mix(in oklab, var(--color-foam) 6%, transparent);
@@ -83,7 +116,7 @@
   /* A panel of glass under water: used sparingly, for media and status. */
   .glass {
     background: linear-gradient(160deg, color-mix(in oklab, var(--color-foam) 7%, transparent), color-mix(in oklab, var(--color-foam) 2%, transparent));
-    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-foam) 10%, transparent), 0 40px 120px -40px rgba(0, 0, 0, 0.7);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-foam) 10%, transparent), 0 40px 120px -40px rgba(var(--rgb-abyss), 0.7);
     backdrop-filter: blur(14px);
   }
 
@@ -136,7 +169,7 @@
 
 /* Film grain over everything: the depth of a photograph, not a flat screen. */
 body::after {
-  content: ''; position: fixed; inset: -50%; z-index: 70; pointer-events: none; opacity: 0.045;
+  content: ''; position: fixed; inset: -50%; z-index: 70; pointer-events: none; opacity: var(--grain);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -147,3 +180,11 @@ header > div:first-child { transition: transform 0.5s cubic-bezier(0.16, 1, 0.3,
 /* Reading progress: a hairline of light under the header. */
 #progress { position: fixed; left: 0; top: 0; height: 2px; width: 100%; z-index: 80; transform-origin: 0 50%; transform: scaleX(var(--p, 0));
   background: linear-gradient(90deg, transparent, var(--color-ice)); box-shadow: 0 0 12px var(--color-ice); pointer-events: none; }
+
+/* The theme switch shows the mode it leads to. */
+.theme-moon { display: none; }
+:root[data-theme='light'] .theme-sun { display: none; }
+:root[data-theme='light'] .theme-moon { display: block; }
+
+/* Glows are drawn in `currentColor`: in light mode, sunlit water rather than ink. */
+:root[data-theme='light'] .glow { color: var(--color-current); opacity: 0.5; }

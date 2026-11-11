@@ -18,7 +18,7 @@ const country = lang === 'fr' ? 'Cameroun' : site.country;
 <Base lang={lang} title={h.title} description={h.description}>
   <!-- ── Hero: the mesh, alive ─────────────────────────────────────── -->
   <section class="relative isolate flex min-h-[100svh] items-end overflow-hidden">
-    <div class="absolute inset-0 -z-10 bg-[radial-gradient(120%_80%_at_70%_0%,#0d3a4c_0%,#06202d_38%,#03111a_75%)]"></div>
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(120%_80%_at_70%_0%,var(--color-deep)_0%,var(--color-deeper)_38%,var(--color-abyss)_75%)]"></div>
     <div class="glow -z-10 left-[55%] top-[-10%] h-[38rem] w-[38rem] bg-current/40"></div>
     <MeshCanvas />
     <div class="pointer-events-none absolute inset-x-0 bottom-0 -z-0 h-[40%] bg-gradient-to-t from-abyss to-transparent"></div>
@@ -28,7 +28,7 @@ const country = lang === 'fr' ? 'Cameroun' : site.country;
         <span class="relative flex size-2.5"><span class="absolute inset-0 animate-ping rounded-full bg-ice/60 motion-reduce:animate-none"></span><span class="relative size-2.5 rounded-full bg-ice"></span></span>
         {site.city}, {country}
       </p>
-      <Rise as="h1" text={h.headline} class="relative max-w-[12ch] text-hero font-[500] [text-shadow:0_2px_40px_rgba(3,17,26,0.6)]" />
+      <Rise as="h1" text={h.headline} class="relative max-w-[12ch] text-hero font-[500] [text-shadow:0_2px_40px_rgba(var(--rgb-abyss),0.6)]" />
       <div class="mt-10 grid gap-10 md:mt-14 md:grid-cols-12 md:items-end">
         <p class="md:col-span-6 max-w-[46ch] text-lead text-haze" data-reveal style="--d:500ms">{h.lead}</p>
         <div class="md:col-span-6 flex flex-wrap gap-3 md:justify-end" data-reveal style="--d:650ms">

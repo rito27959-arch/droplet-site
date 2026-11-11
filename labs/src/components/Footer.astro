@@ -39,5 +39,9 @@ const d = t[lang];
   </div>
   <div class="wrap flex flex-wrap items-center justify-between gap-4 border-t border-foam/[0.08] py-6 text-[0.85rem] text-haze">
     <a href={href(lang, '/')} class="flex items-center gap-2" aria-label={d.nav.home}><Logo class="size-5 text-ice" /> © 2026 {d.footer.rights}</a>
+    <nav class="flex gap-6" aria-label={d.nav.legal}>
+      <a class="hover:text-foam" href={href(lang, '/legal')}>{d.nav.legal}</a>
+      <a class="hover:text-foam" href={href(lang, '/privacy')}>{d.nav.privacy}</a>
+    </nav>
   </div>
 </footer>

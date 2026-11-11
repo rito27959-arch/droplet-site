@@ -69,6 +69,8 @@
         if (!calm) progress += (scrollProgress() - progress) * 0.08;
         ctx.clearRect(0, 0, w, h);
         const t = now / 1000;
+        const css = getComputedStyle(document.documentElement);
+        const lo = css.getPropertyValue('--rgb-ice').split(',').map(Number), hi = css.getPropertyValue('--rgb-glint').split(',').map(Number);
         for (const p of pts) {
           // Each point leaves for home a little after its neighbour: a wave.
           const k = Math.max(0, Math.min(1, (progress - p.d * 0.35) / 0.65));
@@ -83,7 +85,8 @@
           p.x += p.vx; p.y += p.vy;
           // Brighter towards the top of the letters: light from the surface.
           const a = 0.3 + 0.7 * e * (1 - p.hy / h * 0.35);
-          ctx.fillStyle = `rgba(${Math.round(142 + 91 * (1 - p.hy / h))},${Math.round(234 + 9 * (1 - p.hy / h))},${245},${a.toFixed(3)})`;
+          const m = 1 - p.hy / h;
+          ctx.fillStyle = `rgba(${Math.round(lo[0] + (hi[0] - lo[0]) * m)},${Math.round(lo[1] + (hi[1] - lo[1]) * m)},${Math.round(lo[2] + (hi[2] - lo[2]) * m)},${a.toFixed(3)})`;
           ctx.fillRect(p.x, p.y, p.s * 1.6, p.s * 1.6);
         }
         if (visible && !calm) raf = requestAnimationFrame(frame);

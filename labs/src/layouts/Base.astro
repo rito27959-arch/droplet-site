@@ -63,7 +63,24 @@ const website = {
     <meta name="twitter:image" content={og} />
 
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd ? [website, jsonLd] : website)} />
-    <script is:inline>document.documentElement.classList.add('js')</script>
+    <script is:inline>
+      // Dark by default. Light only if this visitor chose it (kept in this browser only),
+      // applied before the first paint, and again after every page change.
+      (function () {
+        var apply = function () {
+          var t = null;
+          try { t = localStorage.getItem('theme'); } catch (e) {}
+          var el = document.documentElement;
+          if (t === 'light') el.dataset.theme = 'light'; else delete el.dataset.theme;
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.setAttribute('content', t === 'light' ? '#eef5f7' : '#03111a');
+        };
+        document.documentElement.classList.add('js');
+        apply();
+        document.addEventListener('astro:after-swap', function () { document.documentElement.classList.add('js'); apply(); });
+        window.__applyTheme = apply;
+      })();
+    </script>
     <ClientRouter fallback="swap" />
   </head>
   <body class="min-h-dvh flex flex-col overflow-x-clip">
