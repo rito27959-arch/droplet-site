@@ -1,0 +1,52 @@
+---
+import { Mail } from '@lucide/astro';
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { t, type Lang } from '../i18n';
+import { contact, social } from '../config';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = t[lang].contact;
+type Key = keyof typeof contact;
+// A dedicated address when it exists, otherwise the general one.
+const address = (k: Key) => contact[k] ?? contact.general;
+const mailto = (k: Key) => {
+  const a = address(k);
+  return a ? `mailto:${a}?subject=${encodeURIComponent(c.subject[k] + ' | Droplet Labs')}` : null;
+};
+---
+<Base lang={lang} title={c.title} description={c.description}>
+  <PageHead title={c.headline} lead={c.lead}>
+    {contact.general && (
+      <a class="mt-10 inline-flex items-center gap-3 text-[clamp(1.4rem,1rem+1.8vw,2.6rem)] tracking-[-0.02em] text-river link break-all" href={`mailto:${contact.general}`}>
+        <Mail class="size-[0.9em] shrink-0" stroke-width={1.6} aria-hidden="true" />{contact.general}
+      </a>
+    )}
+  </PageHead>
+
+  <section class="wrap pb-20 md:pb-28">
+    <div class="grid border-t border-ink/12 md:grid-cols-2">
+      {c.topics.map((topic, i) => {
+        const k = topic.key as Key;
+        const link = mailto(k);
+        return (
+          <article class:list={['border-b border-ink/12 py-10 md:py-12', i % 2 === 0 ? 'md:pr-12 md:border-r' : 'md:pl-12']}>
+            <h2 class="text-[clamp(1.4rem,1.15rem+0.9vw,1.9rem)] leading-tight tracking-[-0.02em]">{topic.title}</h2>
+            <p class="mt-4 max-w-[46ch] text-slate">{topic.text}</p>
+            {link ? <a class="mt-6 btn btn-quiet" href={link}>{c.write}</a> : <p class="mt-6 text-slate">{c.noAddress}</p>}
+          </article>
+        );
+      })}
+    </div>
+
+    {social.length > 0 && (
+      <div class="mt-16">
+        <h2 class="text-[1.05rem] font-[560] text-river">{c.elsewhere}</h2>
+        <ul class="mt-4 flex flex-wrap gap-x-8 gap-y-2">
+          {social.map((s) => <li><a class="link text-lead" href={s.url} rel="me noopener">{s.label}</a></li>)}
+        </ul>
+      </div>
+    )}
+  </section>
+</Base>

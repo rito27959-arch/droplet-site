@@ -1,0 +1,22 @@
+---
+// The founder's portrait. To replace it, swap src/assets/founder.jpg for
+// another photograph (portrait orientation, at least 900 px wide).
+import { Picture } from 'astro:assets';
+import photo from '../assets/founder.jpg';
+import { founder } from '../config';
+import { t, type Lang } from '../i18n';
+
+interface Props { lang: Lang; class?: string; eager?: boolean; sizes?: string }
+const { lang, class: cls = '', eager = false, sizes = '(min-width: 64rem) 40vw, 100vw' } = Astro.props;
+const alt = founder.name ? (lang === 'fr' ? `Portrait de ${founder.name}` : `Portrait of ${founder.name}`) : t[lang].portraitAlt;
+---
+<Picture
+  src={photo}
+  alt={alt}
+  formats={['avif', 'webp']}
+  widths={[420, 640, 853]}
+  sizes={sizes}
+  loading={eager ? 'eager' : 'lazy'}
+  fetchpriority={eager ? 'high' : 'auto'}
+  class={`block h-auto w-full rounded-[28px] object-cover ${cls}`}
+/>

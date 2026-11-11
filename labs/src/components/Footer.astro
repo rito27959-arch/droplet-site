@@ -1,0 +1,40 @@
+---
+import Logo from './Logo.astro';
+import { t, href, type Lang } from '../i18n';
+import { site, social, contact } from '../config';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t[lang];
+const year = 2026;
+---
+
+<footer class="on-deep bg-deep text-foam mt-auto">
+  <div class="wrap py-16 md:py-20 grid gap-12 md:grid-cols-12">
+    <div class="md:col-span-6">
+      <a href={href(lang, '/')} class="inline-flex items-center gap-2.5" aria-label={d.nav.home}>
+        <Logo class="size-8 text-foam" />
+        <span class="text-lg font-[620]">Droplet Labs</span>
+      </a>
+      <p class="mt-6 max-w-[28ch] text-[1.6rem] leading-[1.15] tracking-[-0.02em]">{d.footer.tagline}</p>
+      <p class="mt-6 max-w-[48ch] text-[0.92rem] text-foam/70">{d.status}</p>
+    </div>
+    <nav class="md:col-span-3" aria-label="Footer">
+      <ul class="space-y-2.5 text-[0.95rem]">
+        <li><a class="link" href={href(lang, '/products')}>{d.nav.products}</a></li>
+        <li><a class="link" href={href(lang, '/innovation')}>{d.nav.innovation}</a></li>
+        <li><a class="link" href={href(lang, '/vision')}>{d.nav.vision}</a></li>
+        <li><a class="link" href={href(lang, '/about')}>{d.nav.about}</a></li>
+        <li><a class="link" href={href(lang, '/founder')}>{d.nav.founder}</a></li>
+        <li><a class="link" href={href(lang, '/contact')}>{d.nav.contact}</a></li>
+      </ul>
+    </nav>
+    <div class="md:col-span-3 text-[0.95rem] space-y-2.5 [overflow-wrap:anywhere]">
+      <p>{site.city}, {lang === 'fr' ? 'Cameroun' : site.country}</p>
+      <p class="text-foam/70">{site.coordinates.lat}, {site.coordinates.lon}</p>
+      {contact.general && <p><a class="link" href={`mailto:${contact.general}`}>{contact.general}</a></p>}
+      {social.map((s) => <p><a class="link" href={s.url} rel="me noopener">{s.label}</a></p>)}
+    </div>
+  </div>
+  <div class="wrap rule py-6 text-[0.85rem] text-foam/60">© {year} {d.footer.rights}</div>
+</footer>

@@ -1,0 +1,97 @@
+---
+import Base from '../layouts/Base.astro';
+import Ripple from '../components/Ripple.astro';
+import Portrait from '../components/Portrait.astro';
+import ProductIndex from '../components/ProductIndex.astro';
+import { t, href, type Lang } from '../i18n';
+import { site, contact, founder } from '../config';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t[lang];
+const h = d.home;
+---
+<Base lang={lang} title={h.title} description={h.description}>
+  <!-- Hero: the headline, and a drop falling into still water. -->
+  <section class="relative overflow-hidden">
+    <div class="pointer-events-none absolute -right-[46vw] top-[27rem] w-[120vw] max-w-none sm:top-[18rem] md:-right-[22vw] md:top-[-6rem] md:w-[78vw] lg:-right-[14vw] lg:w-[64vw]">
+      <Ripple />
+    </div>
+    <div class="wrap relative pt-16 pb-24 md:pt-28 md:pb-36">
+      <h1 class="max-w-[13ch] text-display font-[440]">{h.headline}</h1>
+      <p class="mt-8 max-w-[44ch] text-lead text-slate md:mt-10">{h.lead}</p>
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a class="btn btn-primary" href={href(lang, '/products')}>{h.ctaProducts}</a>
+        <a class="btn btn-quiet bg-mist/70" href={href(lang, '/founder')}>{h.ctaFounder}</a>
+      </div>
+      <p class="mt-16 max-w-[40ch] text-[0.9rem] text-slate md:mt-24">
+        {site.city}, {lang === 'fr' ? 'Cameroun' : site.country}. {d.status}
+      </p>
+    </div>
+  </section>
+
+  <!-- Introduction -->
+  <section class="wrap rule grid gap-6 py-20 md:grid-cols-12 md:gap-8 md:py-28">
+    <h2 class="md:col-span-4 text-[1.05rem] font-[560] text-river">{h.introTitle}</h2>
+    <p class="md:col-span-8 text-[clamp(1.4rem,1.1rem+1.2vw,2.1rem)] leading-[1.3] tracking-[-0.015em]">{h.intro}</p>
+  </section>
+
+  <!-- Projects -->
+  <section class="wrap pb-20 md:pb-28" aria-labelledby="projects-title">
+    <div class="flex flex-wrap items-end justify-between gap-4 pb-8">
+      <div>
+        <h2 id="projects-title" class="text-title">{h.productsTitle}</h2>
+        <p class="mt-3 text-slate">{h.productsLead}</p>
+      </div>
+      <a class="link text-[0.97rem]" href={href(lang, '/products')}>{h.allProducts}</a>
+    </div>
+    <ProductIndex lang={lang} />
+  </section>
+
+  <!-- How we build -->
+  <section class="bg-foam">
+    <div class="wrap py-20 md:py-28">
+      <h2 class="text-title max-w-[16ch]">{h.philosophyTitle}</h2>
+      <div class="mt-14 grid gap-10 md:grid-cols-3 md:gap-0">
+        {h.principles.map((p, i) => (
+          <div class:list={['md:px-8', i === 0 && 'md:pl-0', i > 0 && 'md:border-l md:border-ink/12']}>
+            <h3 class="text-[1.35rem] leading-snug tracking-[-0.015em]">{p.title}</h3>
+            <p class="mt-3 text-slate max-w-[38ch]">{p.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- The founder -->
+  <section class="on-deep bg-deep text-foam">
+    <div class="wrap grid gap-12 py-20 md:grid-cols-12 md:items-center md:gap-8 md:py-28">
+      <div class="md:col-span-5">
+        <Portrait lang={lang} sizes="(min-width: 48rem) 40vw, 100vw" />
+      </div>
+      <div class="md:col-span-6 md:col-start-7">
+        <h2 class="text-title">{h.founderTitle}</h2>
+        {founder.name && <p class="mt-6 text-lead">{founder.name}, {d.roleTitle.toLowerCase()}</p>}
+        <p class="mt-6 max-w-[46ch] text-lead text-foam/80">{h.founderText}</p>
+        <a class="mt-10 btn bg-foam text-deep hover:bg-white" href={href(lang, '/founder')}>{h.founderLink}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vision and contact -->
+  <section class="wrap grid gap-16 py-20 md:grid-cols-2 md:gap-8 md:py-28">
+    <div class="md:pr-8">
+      <h2 class="text-title">{h.visionTitle}</h2>
+      <p class="mt-6 max-w-[44ch] text-slate">{h.visionText}</p>
+      <a class="mt-8 inline-block link" href={href(lang, '/vision')}>{h.visionLink}</a>
+    </div>
+    <div class="md:border-l md:border-ink/12 md:pl-8">
+      <h2 class="text-title">{h.contactTitle}</h2>
+      <p class="mt-6 max-w-[44ch] text-slate">{h.contactText}</p>
+      {contact.general && (
+        <a class="mt-8 inline-block text-[clamp(1.3rem,1rem+1.2vw,1.9rem)] tracking-[-0.015em] text-river link break-all" href={`mailto:${contact.general}`}>{contact.general}</a>
+      )}
+      <p class="mt-6"><a class="link" href={href(lang, '/contact')}>{h.contactLink}</a></p>
+    </div>
+  </section>
+</Base>

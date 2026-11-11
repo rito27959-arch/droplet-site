@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { t, type Lang } from '../i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const v = t[lang].vision;
+---
+<Base lang={lang} title={v.title} description={v.description}>
+  <PageHead title={v.headline} lead={v.lead} />
+
+  <!-- A real sequence, so it is numbered. Only phase 1 is under way: it is
+       the only filled marker on the line. -->
+  <section class="wrap pb-20 md:pb-28">
+    <ol class="relative">
+      {v.phases.map((p, i) => (
+        <li class="relative grid gap-3 pb-14 pl-12 md:grid-cols-12 md:gap-8 md:pl-0 last:pb-0">
+          <span aria-hidden="true" class:list={[
+            'absolute left-[0.6rem] top-0 h-full w-px md:left-[calc(25%-2rem+0.6rem)]',
+            i === v.phases.length - 1 ? 'bg-transparent' : 'bg-ink/15',
+          ]}></span>
+          <span aria-hidden="true" class:list={[
+            'absolute left-0 top-[0.35rem] size-[1.25rem] rounded-full md:left-[calc(25%-2rem)]',
+            i === 0 ? 'bg-river ring-4 ring-river/20' : 'border border-ink/35 bg-mist',
+          ]}></span>
+          <div class="md:col-span-3 md:pr-14">
+            <p class="text-[0.95rem] text-slate">{lang === 'fr' ? 'Phase' : 'Phase'} {i + 1}</p>
+            <p class:list={['mt-1 text-[0.92rem] font-[560]', i === 0 ? 'text-river' : 'text-slate']}>{i === 0 ? v.current : v.planned}</p>
+          </div>
+          <div class="md:col-span-8 md:col-start-5">
+            <h2 class="text-[clamp(1.5rem,1.2rem+1.1vw,2.2rem)] leading-tight tracking-[-0.025em]">{p.title}</h2>
+            <p class="mt-4 max-w-[50ch] text-slate">{p.text}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+</Base>

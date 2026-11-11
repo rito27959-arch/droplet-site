@@ -1,0 +1,113 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/schibsted-grotesk';
+
+/* ── The Droplet Labs palette ─────────────────────────────────────────
+   mist   the page: a cool grey with a breath of green, like overcast
+          water — not cream, not white.
+   ink    text, deep blue-green.
+   slate  secondary text.
+   river  the one accent: the colour of deep water (5.6:1 on mist).
+   dew    quiet surfaces and rules.
+   deep   the dark band (founder, vision).                              */
+@theme {
+  --color-mist: #eef2f1;
+  --color-ink: #0d1d26;
+  --color-slate: #4b5c64;
+  --color-river: #0b6b75;
+  --color-dew: #d5e2e1;
+  --color-deep: #0f2a33;
+  --color-foam: #e3f0ef;
+
+  --font-sans: 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --text-display: clamp(2.75rem, 1.4rem + 6.2vw, 7.25rem);
+  --text-display--line-height: 0.98;
+  --text-display--letter-spacing: -0.035em;
+  --text-title: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
+  --text-title--line-height: 1.04;
+  --text-title--letter-spacing: -0.025em;
+  --text-lead: clamp(1.15rem, 1.05rem + 0.45vw, 1.4rem);
+  --text-lead--line-height: 1.5;
+}
+
+@layer base {
+  html {
+    background: var(--color-mist);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+  ::selection { background: var(--color-river); color: var(--color-mist); }
+  :focus-visible {
+    outline: 2px solid var(--color-river);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  .on-deep :focus-visible { outline-color: var(--color-foam); }
+  h1, h2, h3 { font-weight: 450; text-wrap: balance; }
+  p { text-wrap: pretty; }
+}
+
+@layer components {
+  /* The page grid: 16px gutters on phones, a 1200px measure on desktop. */
+  .wrap { width: min(100% - 2rem, 75rem); margin-inline: auto; }
+  @media (min-width: 48rem) { .wrap { width: min(100% - 4rem, 75rem); } }
+
+  .link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+    transition: text-decoration-color 0.2s;
+  }
+  .link:hover { text-decoration-color: currentColor; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    height: 3rem; padding-inline: 1.4rem; border-radius: 999px;
+    font-weight: 550; font-size: 0.97rem;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary { background: var(--color-ink); color: var(--color-mist); }
+  .btn-primary:hover { background: var(--color-river); }
+  .btn-quiet { box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 22%, transparent); }
+  .btn-quiet:hover { box-shadow: inset 0 0 0 1px var(--color-ink); }
+
+  /* A rule between sections: water-line thin. */
+  .rule { border-top: 1px solid color-mix(in oklab, var(--color-ink) 12%, transparent); }
+  .on-deep .rule { border-color: color-mix(in oklab, var(--color-foam) 16%, transparent); }
+}
+
+/* ── The ripple: the one moving thing on the site ─────────────────────
+   Rings spread once from the drop when the home page opens, then rest.  */
+.ripple circle.ring {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: ripple-in 2.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.ripple .drop { animation: drop-in 0.9s cubic-bezier(0.3, 0.9, 0.3, 1.2) both; transform-origin: center; transform-box: fill-box; }
+@keyframes ripple-in {
+  from { transform: scale(0.15); opacity: 0; }
+  35% { opacity: 1; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes drop-in {
+  from { transform: translateY(-40px) scale(0.6); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ripple circle.ring, .ripple .drop { animation: none; }
+}
+
+/* The mobile menu panel. */
+#menu-panel { transition: opacity 0.25s, visibility 0.25s; }
+#menu-panel[data-open='false'] { opacity: 0; visibility: hidden; }
+#menu-panel[data-open='true'] { opacity: 1; visibility: visible; }
+@media (prefers-reduced-motion: reduce) { #menu-panel { transition: none; } }

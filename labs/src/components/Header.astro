@@ -1,0 +1,103 @@
+---
+import { Menu, X } from '@lucide/astro';
+import Logo from './Logo.astro';
+import { cleanPath, t, href, switchHref, type Lang } from '../i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t[lang];
+const path = cleanPath(Astro.url.pathname);
+const bare = path.replace(/^\/fr(?=\/|$)/, '') || '/';
+const links = [
+  { to: '/products', label: d.nav.products },
+  { to: '/innovation', label: d.nav.innovation },
+  { to: '/vision', label: d.nav.vision },
+  { to: '/about', label: d.nav.about },
+  { to: '/founder', label: d.nav.founder },
+  { to: '/contact', label: d.nav.contact },
+];
+const isHere = (to: string) => bare === to || bare.startsWith(to + '/');
+---
+
+<header class="sticky top-0 z-40 bg-mist/85 backdrop-blur-md backdrop-saturate-150">
+  <div class="wrap flex h-16 items-center justify-between gap-6">
+    <a href={href(lang, '/')} class="flex items-center gap-2.5 text-ink" aria-label={d.nav.home}>
+      <Logo class="size-7 text-river" />
+      <span class="text-[1.05rem] font-[620] tracking-[-0.01em]">Droplet Labs</span>
+    </a>
+
+    <nav class="hidden lg:block" aria-label="Main">
+      <ul class="flex items-center gap-7 text-[0.95rem]">
+        {links.map((l) => (
+          <li>
+            <a
+              href={href(lang, l.to)}
+              class:list={['transition-colors hover:text-ink', isHere(l.to) ? 'text-ink font-[560]' : 'text-slate']}
+              aria-current={isHere(l.to) ? 'page' : undefined}
+            >{l.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a href={switchHref(lang, path)} hreflang={lang === 'en' ? 'fr' : 'en'} lang={lang === 'en' ? 'fr' : 'en'}
+         class="hidden sm:inline-flex h-9 items-center rounded-full px-3.5 text-[0.9rem] text-slate hover:text-ink">
+        {d.otherLang}
+      </a>
+      <button id="menu-open" type="button" class="lg:hidden inline-flex size-11 items-center justify-center rounded-full text-ink hover:bg-dew"
+              aria-controls="menu-panel" aria-expanded="false">
+        <Menu class="size-6" aria-hidden="true" />
+        <span class="sr-only">{d.nav.menu}</span>
+      </button>
+    </div>
+  </div>
+  <div class="rule"></div>
+
+  <!-- The phone menu: a full-height sheet, large targets. -->
+  <div id="menu-panel" data-open="false" class="lg:hidden fixed inset-0 z-50 bg-mist" role="dialog" aria-modal="true" aria-label="Menu">
+    <div class="wrap flex h-16 items-center justify-between">
+      <a href={href(lang, '/')} class="flex items-center gap-2.5" aria-label={d.nav.home}>
+        <Logo class="size-7 text-river" />
+        <span class="text-[1.05rem] font-[620]">Droplet Labs</span>
+      </a>
+      <button id="menu-close" type="button" class="inline-flex size-11 items-center justify-center rounded-full hover:bg-dew">
+        <X class="size-6" aria-hidden="true" />
+        <span class="sr-only">{d.nav.close}</span>
+      </button>
+    </div>
+    <nav class="wrap pt-6" aria-label="Main">
+      <ul>
+        {links.map((l) => (
+          <li class="rule">
+            <a href={href(lang, l.to)} class:list={['flex py-4 text-[1.9rem] leading-tight tracking-[-0.02em]', isHere(l.to) ? 'text-river' : 'text-ink']}
+               aria-current={isHere(l.to) ? 'page' : undefined}>{l.label}</a>
+          </li>
+        ))}
+        <li class="rule pt-6">
+          <a href={switchHref(lang, path)} hreflang={lang === 'en' ? 'fr' : 'en'} lang={lang === 'en' ? 'fr' : 'en'} class="btn btn-quiet">{d.otherLang}</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const panel = document.getElementById('menu-panel')!;
+  const open = document.getElementById('menu-open')!;
+  const close = document.getElementById('menu-close')!;
+  const set = (on: boolean) => {
+    panel.dataset.open = String(on);
+    open.setAttribute('aria-expanded', String(on));
+    document.documentElement.style.overflow = on ? 'hidden' : '';
+    (on ? close : open).focus();
+  };
+  open.addEventListener('click', () => set(true));
+  close.addEventListener('click', () => set(false));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && panel.dataset.open === 'true') set(false);
+  });
+  matchMedia('(min-width: 64rem)').addEventListener('change', (e) => {
+    if (e.matches && panel.dataset.open === 'true') set(false);
+  });
+</script>

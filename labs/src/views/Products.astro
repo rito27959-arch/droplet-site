@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import ProductIndex from '../components/ProductIndex.astro';
+import { t, type Lang } from '../i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const p = t[lang].products;
+---
+<Base lang={lang} title={p.title} description={p.description}>
+  <PageHead title={p.headline} lead={p.lead} />
+  <section class="wrap pb-20 md:pb-28">
+    <ProductIndex lang={lang} headingLevel="h2" />
+    <p class="mt-6 text-[0.9rem] text-slate">{p.checked}</p>
+  </section>
+</Base>

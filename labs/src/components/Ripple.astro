@@ -1,0 +1,15 @@
+---
+// The hero mark: a drop falling into still water, rings spreading once.
+// Thin rings far apart: the "connected future" as a picture, not a slogan.
+const rings = [60, 112, 170, 236, 310, 392, 482];
+---
+<svg class="ripple" viewBox="-500 -500 1000 1000" aria-hidden="true" fill="none">
+  {rings.map((r, i) => (
+    <circle class="ring" cx="0" cy="0" r={r}
+      stroke="var(--color-river)"
+      stroke-width={i === 0 ? 1.6 : 1.1}
+      stroke-opacity={Math.max(0.2, 0.75 - i * 0.08)}
+      style={`animation-delay:${120 + i * 140}ms`} />
+  ))}
+  <path class="drop" d="M0 -46c-13 17.5-20.5 29.4-20.5 39.6a20.5 20.5 0 0 0 41 0C20.5 -16.6 13 -28.5 0 -46Z" fill="var(--color-river)" />
+</svg>

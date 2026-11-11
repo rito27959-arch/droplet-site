@@ -1,0 +1,72 @@
+---
+import Base from '../layouts/Base.astro';
+import Portrait from '../components/Portrait.astro';
+import { products } from '../products';
+import { t, href, type Lang } from '../i18n';
+import { founder, site } from '../config';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t[lang];
+const f = d.founder;
+const jsonLd = founder.name
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      name: founder.name,
+      jobTitle: d.roleTitle,
+      address: { '@type': 'PostalAddress', addressLocality: site.city, addressCountry: 'CM' },
+    }
+  : undefined;
+---
+<Base lang={lang} title={founder.name ?? f.title} description={f.description} jsonLd={jsonLd}>
+  <section class="wrap grid gap-10 pt-12 pb-16 md:grid-cols-12 md:gap-8 md:pt-20 md:pb-24">
+    <div class="md:col-span-5">
+      <Portrait lang={lang} eager sizes="(min-width: 48rem) 40vw, 100vw" />
+    </div>
+    <div class="md:col-span-6 md:col-start-7 md:self-end">
+      <p class="text-[1.05rem] font-[560] text-river">{d.roleTitle}</p>
+      <h1 class="mt-4 text-[clamp(2.5rem,1.5rem+4vw,4.75rem)] leading-[1] tracking-[-0.032em] font-[440]">
+        {founder.name ?? d.TheFounder}
+      </h1>
+      <p class="mt-6 text-slate">{site.city}, {lang === 'fr' ? 'Cameroun' : site.country}</p>
+    </div>
+  </section>
+
+  <section class="wrap rule grid gap-6 py-16 md:grid-cols-12 md:gap-8 md:py-24">
+    <h2 class="md:col-span-4 text-[1.05rem] font-[560] text-river">{f.bioTitle}</h2>
+    <div class="md:col-span-8 space-y-6 text-[clamp(1.15rem,1rem+0.6vw,1.45rem)] leading-[1.5] max-w-[54ch]">
+      {f.bio.map((p) => <p>{p}</p>)}
+    </div>
+  </section>
+
+  <section class="bg-foam">
+    <div class="wrap grid gap-6 py-16 md:grid-cols-12 md:gap-8 md:py-24">
+      <h2 class="md:col-span-4 text-[1.05rem] font-[560] text-river">{f.philosophyTitle}</h2>
+      <ul class="md:col-span-8 space-y-5">
+        {f.philosophy.map((p) => <li class="max-w-[52ch] border-l-2 border-river pl-5 text-lead">{p}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="wrap grid gap-6 py-16 md:grid-cols-12 md:gap-8 md:py-24">
+    <h2 class="md:col-span-4 text-[1.05rem] font-[560] text-river">{f.projectsTitle}</h2>
+    <ul class="md:col-span-8 border-b border-ink/12">
+      {products.map((p) => (
+        <li class="rule">
+          <a class="group flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-5" href={href(lang, `/products/${p.slug}`)}>
+            <span class="text-[1.4rem] tracking-[-0.02em] transition-colors group-hover:text-river">{p.name}</span>
+            <span class="text-[0.92rem] text-slate">{p.stage[lang]}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="on-deep bg-deep text-foam">
+    <div class="wrap grid gap-6 py-20 md:grid-cols-12 md:gap-8 md:py-28">
+      <h2 class="md:col-span-4 text-[1.05rem] font-[560] text-foam/75">{f.ambitionsTitle}</h2>
+      <p class="md:col-span-8 text-[clamp(1.4rem,1.1rem+1.2vw,2.1rem)] leading-[1.3] tracking-[-0.015em] max-w-[34ch]">{f.ambitions}</p>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,21 @@
+---
+// The projects as an index, one row each: name, what it does, how far along.
+import { products } from '../products';
+import { href, type Lang } from '../i18n';
+
+interface Props { lang: Lang; headingLevel?: 'h2' | 'h3' }
+const { lang, headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+---
+<ul class="border-b border-ink/12">
+  {products.map((p) => (
+    <li class="rule">
+      <a href={href(lang, `/products/${p.slug}`)}
+         class="group grid gap-2 py-7 md:grid-cols-12 md:items-baseline md:gap-8 md:py-9">
+        <H class="md:col-span-4 text-[clamp(1.6rem,1.2rem+1.4vw,2.35rem)] leading-[1.08] tracking-[-0.025em] transition-colors group-hover:text-river">{p.name}</H>
+        <p class="md:col-span-5 text-slate max-w-[52ch]">{p.line[lang]}</p>
+        <p class="md:col-span-3 md:text-right text-[0.92rem] text-ink/80">{p.stage[lang]}</p>
+      </a>
+    </li>
+  ))}
+</ul>

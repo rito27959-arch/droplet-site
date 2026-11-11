@@ -1,0 +1,9 @@
+---
+// The Droplet Labs mark: a drop resting on its own ripple.
+interface Props { class?: string }
+const { class: cls = '' } = Astro.props;
+---
+<svg class={cls} viewBox="0 0 32 32" aria-hidden="true" fill="none">
+  <ellipse cx="16" cy="26.5" rx="11" ry="2.6" stroke="currentColor" stroke-width="1.4" opacity="0.45" />
+  <path d="M16 3.5c-4.6 6.2-7.2 10.4-7.2 14a7.2 7.2 0 0 0 14.4 0c0-3.6-2.6-7.8-7.2-14Z" fill="currentColor" />
+</svg>
