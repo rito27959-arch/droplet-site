@@ -1,100 +1,94 @@
-# Site vitrine de Droplet
+<div align="center">
 
-Site statique en [Astro](https://astro.build), en 10 langues (le français à la
-racine, les autres sous `/en/`, `/de/`, `/ar/`…).
+<img src="public/favicon.svg" width="88" height="88" alt="Droplet">
 
-## Lancer le site sur votre ordinateur
+# dropletmesh.app
 
-Il faut Node.js 20 ou plus récent.
+**The official website of Droplet — messaging without internet.**
+
+![Astro](https://img.shields.io/badge/Astro-static-0A0A0A?style=flat-square&logo=astro&logoColor=white)
+![Languages](https://img.shields.io/badge/languages-10-ff2d55?style=flat-square)
+![Fonts](https://img.shields.io/badge/fonts-self--hosted-0A0A0A?style=flat-square)
+![No-JS FAQ](https://img.shields.io/badge/FAQ-works%20without%20JS-0A0A0A?style=flat-square)
+![Hosted on Vercel](https://img.shields.io/badge/hosted%20on-Vercel-0A0A0A?style=flat-square&logo=vercel&logoColor=white)
+
+[**Visit dropletmesh.app**](https://dropletmesh.app) &nbsp;·&nbsp; [**Security**](https://dropletmesh.app/security/) &nbsp;·&nbsp; [**Support**](https://dropletmesh.app/support/) &nbsp;·&nbsp; [**The app**](https://github.com/rito27959-arch/droplet)
+
+<br>
+
+<img src="public/apercu.png" width="860" alt="dropletmesh.app — “Your messages get through, even when the network doesn't.”">
+
+</div>
+
+<br>
+
+## Overview
+
+A static [Astro](https://astro.build) site in ten languages — French at the root, the others under `/en/`, `/de/`, `/ar/`… Every phone screen on the page is drawn in HTML, so it stays sharp at any size and is translated like the rest of the copy.
+
+## The page, section by section
+
+```mermaid
+flowchart LR
+    H[Hero] --> G[Highlights] --> Z[Zoom] --> M[Manifesto] --> P[Journey] --> F[Features] --> C[Privacy] --> U[Use cases] --> Q[FAQ] --> E[Finale]
+    classDef s fill:#1c1c1e,stroke:#ff2d55,color:#fff
+    class H,G,Z,M,P,F,C,U,Q,E s
+```
+
+| Component | What it does |
+|:--|:--|
+| `Hero` | The headline and three phones that spread apart as you scroll |
+| `Galerie` | The *Highlights* carousel |
+| `Zoom` | A screen that pulls back to reveal the phones around it |
+| `Manifeste` | Copy that lights up word by word |
+| `Parcours` | A message travelling relay to relay |
+| `Fonctions`, `Confidentialite`, `Usages`, `Questions`, `Fin` | Features, privacy, use cases, FAQ and closing |
+| `Appareil`, `Ecran` | The phone and app screens, drawn in HTML |
+
+## Craft
+
+- **Theme colour chosen by the visitor** — eight hues, the same as in the app, from the swatch in the top bar or under the opening phones. Everything derives from `--goutte` (`src/styles/global.css`); the choice is remembered and applied before first paint.
+- **Motion with manners** — the top mesh pauses off-screen and in hidden tabs; the carousel only moves while visible and stops on touch; *Reduce motion* freezes everything.
+- **Privacy by construction** — fonts are served by the site itself: no request to Google, no cookies, no analytics.
+- **Invitation links** — `/i/#…` receives the links the app creates. Everything that identifies the inviter sits after the `#`: the browser never sends it to the server; the page reads it on the guest's phone and opens `droplet://droplet/invite?d=…`.
+
+## Documents
+
+| Page | French | Other languages |
+|:--|:--|:--|
+| Support | `/support/` | all ten languages |
+| Security | `/security/` | all ten languages |
+| Privacy | `/privacy/` | French and English; other languages show English with an explanatory banner |
+| Terms and legal notice | `/terms/` | same as Privacy |
+
+Text lives in `src/docs/<lang>.ts` (French is the reference). After any change, `node --experimental-strip-types outils/verif_docs.mjs <lang>` checks that a translation has the same structure as the French.
+
+## Develop
+
+Node.js 20 or later.
 
 ```bash
 npm install
-npm run dev        # http://localhost:4321, se recharge à chaque modification
+npm run dev        # http://localhost:4321, live reload
+npm run build      # dist/
+npm run preview    # check dist/ before publishing
 ```
 
-## Construire pour la mise en ligne
+All copy lives in `src/i18n/`, one language per file; `fr.ts` is the reference and TypeScript refuses to build if a key is missing elsewhere.
 
-```bash
-npm run build      # produit le dossier dist/
-npm run preview    # pour vérifier dist/ avant de le publier
-```
+## Deployment
 
-Le dossier `dist/` se publie tel quel sur Netlify, Vercel, Cloudflare Pages,
-GitHub Pages ou n'importe quel hébergeur de fichiers.
+Live at **[dropletmesh.app](https://dropletmesh.app)**, published by Vercel on every push to `main`. `vercel.json` also redirects `/droplet.apk` to the latest GitHub release.
 
-## Ce qu'il faut modifier avant de publier
+<br>
 
-- `src/config.ts` : le lien du bouton « Télécharger » (fiche Play Store ou
-  APK) et celui de la politique de confidentialité.
-- `astro.config.mjs` : l'adresse définitive du site (`site:`), utilisée pour
-  les aperçus de partage et les balises de langue.
-- `public/apercu.png` : l'image affichée quand on partage le lien (1200 × 630).
-
-## Où sont les choses
-
-- `src/i18n/` : tous les textes, une langue par fichier. `fr.ts` est la
-  référence ; les autres ont exactement les mêmes clés (TypeScript refuse de
-  compiler s'il en manque une).
-- `src/components/` : une section par fichier, dans l'ordre de la page :
-  `Hero` (le titre et les trois téléphones qui s'écartent au défilement),
-  `Galerie` (le carrousel « Les points forts »), `Zoom` (l'écran qui recule
-  et révèle les téléphones autour), `Manifeste` (le texte qui s'allume mot
-  après mot), `Parcours` (le message qui avance de relais en relais),
-  `Fonctions`, `Confidentialite`, `Usages`, `Questions`, `Fin`.
-- `src/components/Appareil.astro` et `Ecran.astro` : le téléphone et les
-  écrans de l'application, dessinés en HTML (nets à toutes les tailles,
-  traduits dans toutes les langues).
-- `src/styles/global.css` : couleurs, typographie, boutons.
-
-## Animations et accessibilité
-
-- Le maillage du haut se met en pause hors de l'écran et quand l'onglet est
-  caché ; le carrousel ne défile que lorsqu'il est visible, et s'arrête dès
-  qu'on le touche.
-- Avec « Réduire les animations » activé dans le système, tout est figé.
-- Les questions fréquentes fonctionnent sans JavaScript.
-- Les polices sont hébergées par le site : aucune requête vers Google.
-
-## Couleur du thème
-
-Les visiteurs choisissent la couleur du site (8 teintes, les mêmes que dans
-l'application) depuis la pastille de la barre du haut ou sous les téléphones
-de l'ouverture. Tout dérive de `--goutte` (`src/styles/global.css`) ; la
-liste des teintes est dans `src/couleurs.ts`. Le choix est retenu par le
-navigateur et réappliqué avant le premier affichage (`src/layouts/Base.astro`).
-
-## Pages de documents
-
-| Page | Français | Autres langues |
-|---|---|---|
-| Assistance | `/support/` | `/en/support/`, `/de/support/`… (traduite dans les 10 langues) |
-| Sécurité | `/security/` | traduite dans les 10 langues |
-| Confidentialité | `/privacy/` | français et anglais seulement ; les autres langues affichent l'anglais avec un bandeau qui l'explique |
-| Conditions d'utilisation + mentions légales | `/terms/` | idem |
-
-Le texte est dans `src/docs/<langue>.ts` (le français fait référence). Après
-toute modification : `node --experimental-strip-types outils/verif_docs.mjs <langue>`
-vérifie qu'une traduction a la même structure que le français.
-
-**À régler avant la mise en ligne** (`src/config.ts`) : `EDITEUR` (le nom
-juridiquement responsable) et `EMAIL_CONTACT` (une adresse que vous relevez).
-
-## La page des liens d'invitation
-
-`/i/` (`src/pages/i.astro`) reçoit les liens que l'application fabrique
-quand on partage son invitation : `https://dropletmesh.app/i/#…`. Tout ce qui
-identifie la personne qui invite est après le `#` : le navigateur ne
-l'envoie jamais au serveur, c'est le script de la page qui le lit sur le
-téléphone de l'invité, puis ouvre `droplet://droplet/invite?d=…`. Une seule
-adresse pour toutes les langues : la page prend celle du navigateur
-(textes dans `src/invitation/textes.ts`).
-
-## Publication
-
-Le site est en ligne sur **https://dropletmesh.app**, publié par Vercel :
-un `git push` sur `main` suffit, Vercel reconstruit et redéploie tout seul
-(réglages dans `vercel.json`, dont la redirection `/droplet.apk` vers la
-dernière version sur GitHub).
-
-Pour construire en local : `npm install`, puis `npm run dev` (aperçu) ou
-`npm run build` (le site final, dans `dist/`).
+<div align="center">
+<sub>
+<a href="https://dropletmesh.app">Droplet</a> &nbsp;·&nbsp;
+<a href="https://dropletid.dropletmesh.app">Droplet ID</a> &nbsp;·&nbsp;
+<a href="https://drop.dropletmesh.app">Droplet Drop</a> &nbsp;·&nbsp;
+<a href="https://web.dropletmesh.app">Droplet Web</a>
+<br><br>
+Designed and built in Yaoundé, Cameroon.
+</sub>
+</div>
