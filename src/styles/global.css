@@ -1,79 +1,137 @@
 /* ==========================================================================
-   LE SYSTÈME DU SITE — sur le modèle d'apple.com
+   DROPLET DESIGN LANGUAGE — le système commun aux sites Droplet
    --------------------------------------------------------------------------
-   • Le produit au centre et en grand ; le texte centré, court, monumental.
-   • Deux fonds seulement : le noir (la nuit, le maillage) et le gris très
-     clair d'Apple (#f5f5f7). Les sections alternent pour rythmer la page.
-   • Une couleur d'action : la goutte de Droplet. Le bleu signal ne sert
-     qu'aux liens du maillage et aux liens texte.
-   • Inter Tight pour les titres, Inter pour le texte : la neutralité de SF
-     Pro, dont le site ne peut pas se servir.
-   • Toutes ces valeurs viennent de Droplet Design (design/droplet-design.json),
-     la source commune aux apps et aux sites : on les change là, pas ici.
+   • Base Quiet Futurism : neutres froids, une seule encre. La couleur
+     d'action n'est pas encore choisie (décision G3) : l'encre en tient lieu.
+   • Commissioner pour l'interface (axe Flair en titre), Martian Mono pour
+     les données, Newsreader pour l'éditorial.
+   • Un thème clair et un thème sombre, au choix ou selon le système.
+   • Le mouvement : seulement là où il explique (voir la carte du mouvement
+     du document « Architecture du site Droplet »). Transform et opacité.
+   Même fichier sur dropletmesh.app, drop.dropletmesh.app, le site Droplet ID
+   et Droplet Labs : une correction ici se recopie là-bas.
    ========================================================================== */
 
-@import './droplet-design.css';
-
-/* LA COULEUR DU THÈME, ANIMÉE.
-   Déclarée comme une vraie couleur (`@property`), elle peut glisser d'une
-   teinte à l'autre au lieu de basculer : quand on choisit une couleur, tout
-   le site — boutons, lueurs, maillage — vire en douceur, comme les photos
-   d'un iPhone quand on change de finition sur apple.com. */
-@property --goutte {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: #ff2d55;
+@font-face {
+  font-family: 'Commissioner';
+  src: url('/fonts/commissioner.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Martian Mono';
+  src: url('/fonts/martian-mono.woff2') format('woff2');
+  font-weight: 100 800;
+  font-stretch: 75% 112.5%;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Newsreader';
+  src: url('/fonts/newsreader.woff2') format('woff2');
+  font-weight: 200 800;
+  font-display: swap;
 }
 
 :root {
-  --noir: #000;
-  --nuit: #050b1c;
-  --gris: var(--dd-clair-fond-groupe);
-  --blanc: #fff;
-  --encre: var(--dd-clair-texte);
-  --encre-2: var(--dd-clair-texte-2);
-  --clair: var(--dd-sombre-texte);
-  --clair-2: var(--dd-sombre-texte-2);
-  --carte-sombre: #141418;
-  /* La goutte : LA couleur du site. Toutes ses nuances en DÉRIVENT, pour
-     qu'un seul changement (le sélecteur de couleur) les emporte toutes. */
-  --goutte: var(--dd-goutte);
-  --goutte-fonce: color-mix(in srgb, var(--goutte) 86%, #000);
-  --goutte-pale: color-mix(in srgb, var(--goutte) 72%, #fff);
-  --goutte-nuit: color-mix(in srgb, var(--goutte) 22%, #000);
-  --goutte-encre: color-mix(in srgb, var(--goutte) 9%, #000);
-  transition: --goutte 0.7s var(--ease, ease);
-  --signal: #4cc3ff;
-  --lien-clair: #0071e3;
-  --lien-sombre: #2997ff;
+  /* Primitifs */
+  --gris-0: #ffffff;
+  --gris-50: #f3f5f7;
+  --gris-100: #e6eaee;
+  --gris-200: #c9d0d6;
+  --gris-500: #59626b;
+  --gris-550: #8d97a1;
+  --gris-800: #1d242b;
+  --gris-850: #12171c;
+  --gris-900: #0b0f13;
+  --gris-950: #05070a;
 
-  /* Les noms de la première version, gardés pour les sections qui les
-     emploient encore. */
-  --texte-nuit: #f5f5f7;
-  --texte-nuit-2: #a1a1a6;
-  --texte-jour: #1d1d1f;
-  --texte-jour-2: #6e6e73;
-  --trait-nuit: rgba(255, 255, 255, 0.12);
-  --trait-jour: rgba(0, 0, 0, 0.1);
-  --brume: #f5f5f7;
+  /* Sémantiques, thème clair */
+  --fond: var(--gris-100);
+  --surface: var(--gris-50);
+  --surface-haute: var(--gris-0);
+  --encre: #0e1216;
+  --encre-douce: var(--gris-500);
+  --trait: var(--gris-200);
+  --sur-encre: var(--gris-50);
+  --erreur: #b4232c;
+  --succes: #1d6b45;
 
-  --f-titre: var(--dd-f-titres);
-  --f-texte: var(--dd-f-texte);
+  /* Polices : Commissioner d'abord, puis les écritures qu'elle ne couvre pas. */
+  --police: 'Commissioner', 'Noto Sans Arabic', 'Noto Sans Devanagari', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --police-mono: 'Martian Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --police-edito: 'Newsreader', 'Noto Serif', Georgia, serif;
 
-  /* L'échelle d'apple.com : 17 / 21 / 28 / 40 / 56 / 80. */
-  --t-0: var(--dd-t0);
-  --t-1: var(--dd-t1);
-  --t-2: var(--dd-t2);
-  --t-3: var(--dd-t3);
-  --t-4: var(--dd-t4);
-  --t-5: var(--dd-t5);
-  --t-6: var(--dd-t6);
+  /* Échelle DDL ; affichage × 1,4 au-delà de 1024 px */
+  --t-display: clamp(40px, 6.4vw, 78px);
+  --t-headline: clamp(30px, 4.2vw, 52px);
+  --t-title: 28px;
+  --t-subtitle: 20px;
+  --t-body: 16px;
+  --t-label: 14px;
+  --t-caption: 12.5px;
 
-  --largeur: 980px;
-  --large: 1260px;
-  --gouttiere: clamp(20px, 5vw, 40px);
-  --ease: var(--dd-courbe);
-  --ease-sortie: var(--dd-sortie);
+  /* Espace (pas de 4) */
+  --e-1: 4px;
+  --e-2: 8px;
+  --e-3: 12px;
+  --e-4: 16px;
+  --e-5: 24px;
+  --e-6: 32px;
+  --e-7: 48px;
+  --e-8: 72px;
+  --e-9: 112px;
+  --gouttiere: clamp(16px, 4vw, 32px);
+  --large-max: 1160px;
+  --lecture-max: 720px;
+
+  /* Formes */
+  --r-controle: 12px;
+  --r-carte: 22px;
+  --r-pilule: 999px;
+
+  /* Mouvement */
+  --sortie: cubic-bezier(0.23, 1, 0.32, 1);
+  --entree-sortie: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Les noms des versions précédentes, pour les pages qui les emploient encore
+     (documents, invitation). Ils suivent le thème. */
+  --noir: var(--fond);
+  --blanc: var(--surface-haute);
+  --gris: var(--surface);
+  --encre-2: var(--encre-douce);
+  --clair: var(--encre);
+  --clair-2: var(--encre-douce);
+  --goutte: var(--encre);
+  --lien-clair: var(--encre);
+  --lien-sombre: var(--encre);
+  --f-titre: var(--police);
+  --f-texte: var(--police);
+  --t-0: 0.8125rem;
+  --t-1: 1rem;
+  --t-2: 1.25rem;
+  --t-3: 1.75rem;
+  --t-4: clamp(1.9rem, 1.2rem + 2.4vw, 3.25rem);
+  --t-5: clamp(2.5rem, 1.3rem + 4.4vw, 4.5rem);
+  --t-6: clamp(3rem, 1rem + 7vw, 6rem);
+  --largeur: var(--lecture-max);
+  --large: var(--large-max);
+  --ease: var(--sortie);
+  --ease-sortie: var(--sortie);
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --fond: var(--gris-950);
+  --surface: var(--gris-900);
+  --surface-haute: var(--gris-850);
+  --encre: #edf1f4;
+  --encre-douce: var(--gris-550);
+  --trait: var(--gris-800);
+  --sur-encre: var(--gris-950);
+  --erreur: #ff8a8a;
+  --succes: #5fd39a;
+  color-scheme: dark;
 }
 
 *,
@@ -81,200 +139,239 @@
 *::after {
   box-sizing: border-box;
 }
-
+[hidden] {
+  display: none !important;
+}
 html {
   -webkit-text-size-adjust: 100%;
-  background: var(--noir);
+  text-size-adjust: 100%;
+  background: var(--fond);
 }
-
+html.sans-defilement {
+  overflow: hidden;
+}
 body {
   margin: 0;
-  font-family: var(--f-texte);
-  font-size: var(--t-1);
-  line-height: 1.47;
-  letter-spacing: -0.011em;
-  color: var(--clair);
-  background: var(--noir);
+  background: var(--fond);
+  color: var(--encre);
+  font-family: var(--police);
+  font-size: var(--t-body);
+  line-height: 1.5;
+  font-variation-settings: 'FLAR' 0, 'VOLM' 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: clip;
-  font-feature-settings: 'ss01', 'cv11';
 }
-
 h1,
 h2,
-h3 {
-  font-family: var(--f-titre);
-  /* 600, pas 700 : Apple titre en SF Pro Display semi-gras. Plus lourd,
-     avec l'approche serrée d'Inter Tight, les lettres se touchaient. */
-  font-weight: 600;
+h3,
+h4 {
+  font-family: var(--police);
+  font-weight: 640;
   margin: 0;
   text-wrap: balance;
 }
-
 p {
   margin: 0;
   text-wrap: pretty;
 }
-
 a {
   color: inherit;
 }
-
 img,
 svg,
+video,
 canvas {
   display: block;
+  max-width: 100%;
 }
-
 :focus-visible {
-  outline: 2px solid var(--lien-sombre);
+  outline: 2px solid var(--encre);
   outline-offset: 3px;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
-.contenu {
-  width: min(100% - 2 * var(--gouttiere), var(--largeur));
-  margin-inline: auto;
-}
-
+/* Mise en page */
+.conteneur,
 .contenu--large {
-  width: min(100% - 2 * var(--gouttiere), var(--large));
+  width: min(100% - 2 * var(--gouttiere), var(--large-max));
   margin-inline: auto;
 }
-
-/* Les deux fonds d'Apple. */
-.fond-noir {
-  background: var(--noir);
-  color: var(--clair);
+.contenu {
+  width: min(100% - 2 * var(--gouttiere), var(--lecture-max));
+  margin-inline: auto;
 }
-
-.fond-gris {
-  background: var(--gris);
-  color: var(--encre);
+.section {
+  padding-top: var(--e-9);
 }
-
+/* Les anciennes classes de fond : un seul fond désormais, celui du thème. */
+.fond-noir,
+.fond-gris,
 .fond-blanc {
-  background: var(--blanc);
+  background: var(--fond);
   color: var(--encre);
 }
 
-/* ── Les titres de section, comme sur apple.com ───────────────────── */
+/* Rôles typographiques. Le Flair diminue avec la taille. */
+.display {
+  font-size: var(--t-display);
+  line-height: 1.04;
+  font-weight: 640;
+  letter-spacing: -0.025em;
+  font-variation-settings: 'FLAR' 80, 'VOLM' 30;
+  text-wrap: balance;
+}
+.headline,
 .titre-section {
-  font-size: var(--t-5);
-  line-height: 1.07;
-  letter-spacing: -0.022em;
-  font-weight: 600;
-}
-
-.chapo {
-  font-size: var(--t-3);
-  line-height: 1.24;
+  font-size: var(--t-headline);
+  line-height: 1.08;
+  font-weight: 640;
   letter-spacing: -0.02em;
+  font-variation-settings: 'FLAR' 70, 'VOLM' 20;
+  text-wrap: balance;
+}
+.title {
+  font-size: var(--t-title);
+  line-height: 1.2;
+  font-weight: 660;
+  letter-spacing: -0.015em;
+  font-variation-settings: 'FLAR' 50;
+}
+.subtitle {
+  font-size: var(--t-subtitle);
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.008em;
+  font-variation-settings: 'FLAR' 20;
+}
+.body {
+  font-size: var(--t-body);
+  line-height: 1.5;
+}
+.label {
+  font-size: var(--t-label);
+  line-height: 1.4;
   font-weight: 600;
 }
-
-.fond-noir .chapo {
-  color: var(--clair-2);
+.caption {
+  font-size: var(--t-caption);
+  line-height: 1.35;
+  font-weight: 450;
+  letter-spacing: 0.01em;
+  color: var(--encre-douce);
+}
+.technique {
+  font-family: var(--police-mono);
+  font-size: 13px;
+  line-height: 1.55;
+  font-weight: 450;
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-stretch: 92%;
+}
+.editorial {
+  font-family: var(--police-edito);
+  font-size: clamp(22px, 2.6vw, 32px);
+  line-height: 1.42;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  text-wrap: pretty;
+}
+.doux {
+  color: var(--encre-douce);
+}
+.chapo {
+  font-size: clamp(17px, 1.5vw, 20px);
+  line-height: 1.55;
+  color: var(--encre-douce);
+  max-width: 52ch;
 }
 
-.fond-gris .chapo,
-.fond-blanc .chapo {
-  color: var(--encre-2);
-}
-
-/* ── Les boutons et les liens d'action ───────────────────────────── */
+/* Boutons : seul l'appui bouge. */
 .bouton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 44px;
+  gap: var(--e-2);
+  min-height: 48px;
   padding: 0 22px;
-  border-radius: 980px;
-  font-family: var(--f-texte);
-  font-size: var(--t-1);
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  border-radius: var(--r-pilule);
+  border: 1px solid transparent;
+  background: var(--encre);
+  color: var(--sur-encre);
+  font: 600 15px/1 var(--police);
   text-decoration: none;
-  white-space: nowrap;
-  background: var(--goutte);
-  color: #fff;
-  transition:
-    background-color 0.25s var(--ease),
-    transform 0.2s var(--ease);
+  cursor: pointer;
+  transition: transform 160ms var(--sortie), opacity 150ms ease, border-color 150ms ease;
+  -webkit-tap-highlight-color: transparent;
 }
-
-.bouton:hover {
-  background: var(--goutte-fonce);
-}
-
 .bouton:active {
   transform: scale(0.97);
 }
-
+@media (hover: hover) and (pointer: fine) {
+  .bouton:hover {
+    opacity: 0.88;
+  }
+  .bouton--secondaire:hover {
+    opacity: 1;
+    border-color: var(--encre-douce);
+  }
+}
+.bouton--secondaire {
+  background: transparent;
+  color: var(--encre);
+  border-color: var(--trait);
+}
+.bouton--petit {
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+}
 .bouton svg {
   width: 18px;
   height: 18px;
 }
-
-/* Le « En savoir plus › » d'Apple : un lien, pas un bouton. */
-.lien-fleche {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: var(--t-1);
-  text-decoration: none;
-  color: var(--lien-sombre);
-}
-
-.fond-gris .lien-fleche,
-.fond-blanc .lien-fleche {
-  color: var(--lien-clair);
-}
-
-.lien-fleche:hover {
+.lien-fleche,
+.lien {
+  color: var(--encre);
+  font-weight: 600;
   text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
 }
-
 .lien-fleche::after {
-  content: '›';
-  font-size: 1.25em;
-  line-height: 1;
-  transform: translateY(-1px);
+  content: none;
 }
 
-/* En arabe, rien à faire : « › » est un caractère « miroir », que le
-   navigateur retourne tout seul dans un texte de droite à gauche. Le
-   remplacer par « ‹ » le faisait retourner deux fois — la flèche pointait
-   à rebours. */
-
-/* ── Apparition au défilement ─────────────────────────────────────
-   Réservée aux titres de section : un léger lever, une seule fois.
-   (Le reste du mouvement de la page est piloté par le défilement.) */
+/* Les apparitions au défilement sont retirées : le contenu est là, tout de suite. */
 .apparait {
-  opacity: 0;
-  transform: translateY(32px);
-  transition:
-    opacity 1s var(--ease-sortie),
-    transform 1s var(--ease-sortie);
-}
-
-.apparait.est-visible {
   opacity: 1;
   transform: none;
 }
 
+/* Transitions entre pages (Chrome 126+, Safari 18.2+ ; ailleurs la page change simplement). */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-group(*) {
+  animation-duration: 320ms;
+  animation-timing-function: var(--entree-sortie);
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-  .apparait {
-    opacity: 1;
-    transform: none;
   }
 }

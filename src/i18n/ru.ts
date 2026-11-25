@@ -134,4 +134,9 @@ export const ru: Textes = {
   lireFr: "Читать по-французски",
   faqToutes: "Все вопросы",
   confPlus: "Как Droplet защищает ваши сообщения",
+  navProduits: "Продукты",
+  themeVersSombre: "Включить тёмную тему",
+  themeVersClair: "Включить светлую тему",
+  idAccroche: "Вход одним жестом, без пароля.",
+  labsAccroche: "Лаборатория, которая создаёт Droplet.",
 };

@@ -134,4 +134,9 @@ export const en: Textes = {
   lireFr: "Read in French",
   faqToutes: "All questions",
   confPlus: "How Droplet protects your messages",
+  navProduits: "Products",
+  themeVersSombre: "Switch to dark theme",
+  themeVersClair: "Switch to light theme",
+  idAccroche: "Sign in with one gesture, no password.",
+  labsAccroche: "The lab that makes Droplet.",
 };

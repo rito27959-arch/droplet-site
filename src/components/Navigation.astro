@@ -1,313 +1,326 @@
 ---
-// La barre du produit : une CAPSULE DE VERRE qui flotte au-dessus de la page
-// (façon iOS 26), la même sur tous les sites de la famille Droplet. Le nom à
-// gauche, les liens et l'action à droite. Sombre sur les sections noires,
-// claire sur les claires ; elle se resserre quand on défile.
+// LA NAVIGATION — Droplet Design Language.
+// Une barre plate et typographique, sans verre, qui s'efface derrière le
+// contenu : un filet d'un pixel n'apparaît qu'une fois la page défilée.
+// « Produits » ouvre un panneau avec toute la famille Droplet ; sur téléphone,
+// « Menu » ouvre un panneau plein écran. Même structure sur tous les sites
+// Droplet (dropletmesh.app, drop, Droplet ID, Droplet Labs).
 import Logo from './Logo.astro';
-import SelecteurCouleur from './SelecteurCouleur.astro';
 import { LIEN_ANDROID } from '../config';
+import { famille, type LangueFamille } from '../famille/textes';
 import type { Textes } from '../i18n/fr';
+import type { Langue } from '../i18n';
 
 interface Props {
   t: Textes;
   accueil: string;
-  /** Sur une page de document : les liens pointent vers l'accueil, et la
-   *  barre est claire dès le haut de la page (le fond y est blanc). */
+  langue?: Langue;
+  /** Sur une page de document, les ancres pointent vers l'accueil. */
   surAccueil?: boolean;
-  /** La page commence sur un fond clair : texte sombre dès le départ. */
+  /** Gardé pour compatibilité ; le fond suit désormais le thème. */
   clairEnHaut?: boolean;
 }
-const { t, accueil, surAccueil = true, clairEnHaut = false } = Astro.props;
+const { t, accueil, langue = 'fr', surAccueil = true } = Astro.props;
+const f = famille[langue as LangueFamille] ?? famille.fr;
 const base = surAccueil ? '' : accueil;
 const liens = [
-  { texte: t.galerieTitre.replace(/[.。]$/, ''), href: `${base}#galerie` },
   { texte: t.navFonctionnement, href: `${base}#parcours` },
   { texte: t.navConfidentialite, href: `${base}#confidentialite` },
   { texte: t.piedAssistance, href: `${accueil}support/` },
 ];
+const produits = [
+  { nom: 'Droplet', phrase: f.dropletAccroche, plateforme: f.dropletPlateformes, href: accueil, ici: true },
+  { nom: 'Droplet Web', phrase: f.webAccroche, plateforme: f.webPlateformes, href: 'https://web.dropletmesh.app' },
+  { nom: 'Droplet Drop', phrase: f.dropAccroche, plateforme: f.dropPlateformes, href: langue === 'fr' ? 'https://drop.dropletmesh.app/' : `https://drop.dropletmesh.app/${langue}/` },
+  { nom: 'Droplet ID', phrase: t.idAccroche, plateforme: 'Android 12+', href: 'https://dropletid.dropletmesh.app/' },
+];
 ---
-<header class:list={['nav', { 'sur-clair': clairEnHaut }]} data-nav>
-  <div class="nav__dedans contenu--large">
-    <a class="nav__marque" href={accueil}>
-      <Logo taille={20} />
+<header class="barre" data-barre>
+  <div class="barre__dedans contenu--large">
+    <a class="barre__marque" href={accueil}>
+      <Logo taille={20} actif={false} />
       <span>Droplet</span>
     </a>
-    <nav class="nav__liens" aria-label="Droplet">
-      {liens.map((l) => <a href={l.href}>{l.texte}</a>)}
+
+    <nav class="barre__liens" aria-label="Droplet">
+      <button class="barre__lien" type="button" aria-expanded="false" aria-controls="panneau-produits" data-ouvre="panneau-produits">
+        {t.navProduits}
+        <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      {liens.map((l) => <a class="barre__lien" href={l.href}>{l.texte}</a>)}
     </nav>
-    <SelecteurCouleur t={t} variante="nav" />
-    <!-- Sur téléphone, les liens passent derrière ce chevron, comme dans la
-         barre de produit d'apple.com. -->
-    <button class="nav__menu" type="button" aria-expanded="false" aria-controls="nav-tiroir" aria-label={t.menu} data-menu>
-      <svg viewBox="0 0 14 8" aria-hidden="true"><path d="M1 1l6 6 6-6" /></svg>
-    </button>
-    <a class="nav__bouton" href={LIEN_ANDROID}>{t.telecharger}</a>
+
+    <div class="barre__actions">
+      <button class="barre__icone" type="button" aria-label={t.themeVersSombre} data-theme-toggle data-sombre={t.themeVersSombre} data-clair={t.themeVersClair}>
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7">
+          <circle cx="12" cy="12" r="8" />
+          <path d="M12 4a8 8 0 0 0 0 16Z" fill="currentColor" stroke="none" />
+        </svg>
+      </button>
+      <a class="bouton bouton--petit barre__telecharger" href={LIEN_ANDROID}>{t.telecharger}</a>
+      <button class="barre__menu" type="button" aria-expanded="false" aria-controls="panneau-mobile" data-ouvre="panneau-mobile">{t.menu}</button>
+    </div>
   </div>
-  <div class="nav__tiroir" id="nav-tiroir" data-tiroir>
-    <nav aria-label="Droplet">
-      {liens.map((l) => <a href={l.href}>{l.texte}</a>)}
-    </nav>
+
+  <div class="panneau" id="panneau-produits" hidden>
+    <ul class="contenu--large panneau__produits">
+      {produits.map((p) => (
+        <li>
+          <a class="panneau__produit" href={p.href} aria-current={p.ici ? 'page' : undefined}>
+            <span class="subtitle">{p.nom}</span>
+            <span class="caption">{p.phrase}</span>
+            <span class="technique doux">{p.plateforme}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="contenu--large panneau__labs caption">
+      <a href="https://labs.dropletmesh.app/">Droplet Labs</a><span> {t.labsAccroche}</span>
+    </p>
+  </div>
+
+  <div class="panneau panneau--plein" id="panneau-mobile" hidden>
+    <div class="contenu--large panneau__plein">
+      <p class="caption">{t.navProduits}</p>
+      <ul class="panneau__liste">
+        {produits.map((p) => <li><a class="title" href={p.href}>{p.nom}</a></li>)}
+      </ul>
+      <ul class="panneau__liste panneau__liste--secondaire">
+        {liens.map((l) => <li><a class="subtitle" href={l.href}>{l.texte}</a></li>)}
+      </ul>
+      <a class="bouton" href={LIEN_ANDROID}>{t.telechargerAndroid}</a>
+    </div>
   </div>
 </header>
 
+<script>
+  const barre = document.querySelector<HTMLElement>('[data-barre]')!;
+  const sync = () => barre.classList.toggle('est-defilee', scrollY > 8);
+  addEventListener('scroll', sync, { passive: true });
+  sync();
+
+  // Panneaux : un seul ouvert à la fois ; Échap ou un clic ailleurs ferme.
+  const boutons = [...barre.querySelectorAll<HTMLButtonElement>('[data-ouvre]')];
+  const fermer = () =>
+    boutons.forEach((b) => {
+      b.setAttribute('aria-expanded', 'false');
+      document.getElementById(b.dataset.ouvre!)!.hidden = true;
+    });
+  boutons.forEach((b) =>
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const panneau = document.getElementById(b.dataset.ouvre!)!;
+      const ouvrir = panneau.hidden;
+      fermer();
+      panneau.hidden = !ouvrir;
+      b.setAttribute('aria-expanded', String(ouvrir));
+      barre.classList.toggle('a-panneau', ouvrir);
+      document.documentElement.classList.toggle('sans-defilement', ouvrir && b.dataset.ouvre === 'panneau-mobile');
+    }),
+  );
+  const toutFermer = () => {
+    fermer();
+    barre.classList.remove('a-panneau');
+    document.documentElement.classList.remove('sans-defilement');
+  };
+  document.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('.panneau')) toutFermer();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const ouvert = boutons.find((b) => b.getAttribute('aria-expanded') === 'true');
+    toutFermer();
+    ouvert?.focus();
+  });
+
+  // Thème clair ou sombre, mémorisé.
+  const theme = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  const libelle = () => {
+    const sombre = document.documentElement.dataset.theme === 'dark';
+    theme?.setAttribute('aria-label', (sombre ? theme.dataset.clair : theme.dataset.sombre) ?? '');
+  };
+  libelle();
+  theme?.addEventListener('click', () => {
+    const suivant = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = suivant;
+    try {
+      localStorage.setItem('theme', suivant);
+    } catch {}
+    libelle();
+  });
+</script>
+
 <style>
-  .nav {
-    position: fixed;
-    top: 12px;
-    left: 50%;
+  .barre {
+    position: sticky;
+    top: 0;
     z-index: 50;
-    width: min(1024px, calc(100% - 24px));
-    transform: translateX(-50%);
-    border-radius: 26px;
-    isolation: isolate;
-    color: var(--clair);
-    background: rgba(30, 30, 32, 0.42);
-    backdrop-filter: saturate(180%) blur(22px);
-    -webkit-backdrop-filter: saturate(180%) blur(22px);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.14),
-      0 10px 30px -12px rgba(0, 0, 0, 0.55);
-    transition:
-      width 0.5s var(--ease-sortie),
-      top 0.5s var(--ease-sortie),
-      background-color 0.5s var(--ease),
-      color 0.5s var(--ease),
-      box-shadow 0.5s var(--ease);
+    background: var(--fond);
+    transition: box-shadow 150ms ease;
   }
-  /* Le liseré de lumière du verre, sur le bord seulement. */
-  .nav::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    padding: 1px;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.06) 40%, rgba(255, 255, 255, 0.02) 60%, rgba(255, 255, 255, 0.3));
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
+  .barre.est-defilee,
+  .barre.a-panneau {
+    box-shadow: 0 1px 0 var(--trait);
   }
-  .nav.est-defilee {
-    top: 8px;
-    width: min(820px, calc(100% - 24px));
-    background: rgba(30, 30, 32, 0.62);
-  }
-  /* Sur un fond clair, la capsule devient du verre clair. */
-  .nav.sur-clair {
-    color: var(--encre);
-    background: rgba(255, 255, 255, 0.55);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.8),
-      0 10px 30px -12px rgba(0, 0, 0, 0.22),
-      0 1px 2px rgba(0, 0, 0, 0.06);
-  }
-  .nav.sur-clair::before {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.2) 40%, rgba(0, 0, 0, 0.04) 60%, rgba(255, 255, 255, 0.7));
-  }
-  .nav.est-defilee.sur-clair {
-    background: rgba(255, 255, 255, 0.72);
-    color: var(--encre);
-  }
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .nav { background: rgb(30, 30, 32); }
-    .nav.sur-clair { background: #fff; }
-  }
-  .nav__dedans {
-    width: 100%;
-    max-width: none;
-    margin: 0;
-    padding: 0 8px 0 18px;
-    height: 52px;
+  .barre__dedans {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: var(--e-6);
+    height: 64px;
   }
-  .nav__marque {
+  .barre__marque {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin-inline-end: auto;
-    text-decoration: none;
-    font-family: var(--f-titre);
-    font-size: 1.3rem;
-    font-weight: 650;
+    font-size: 19px;
+    font-weight: 700;
     letter-spacing: -0.02em;
-  }
-  .nav__liens {
-    display: flex;
-    gap: 2px;
-  }
-  .nav__liens a {
-    padding: 7px 12px;
-    border-radius: 980px;
-    font-size: 0.8125rem;
-    opacity: 0.85;
+    font-variation-settings: 'FLAR' 100, 'VOLM' 40;
     text-decoration: none;
-    transition: opacity 0.2s, background-color 0.2s;
   }
-  .nav__liens a:hover {
-    opacity: 1;
-    background: color-mix(in srgb, currentColor 10%, transparent);
+  .barre__liens {
+    display: flex;
+    gap: var(--e-5);
   }
-  .nav__bouton {
+  .barre__lien {
     display: inline-flex;
     align-items: center;
-    height: 36px;
-    padding: 0 16px;
-    border-radius: 980px;
-    background: var(--goutte);
-    color: #fff;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: background-color 0.2s;
-  }
-  .nav__bouton:hover {
-    background: var(--goutte-fonce);
-  }
-  .nav__menu {
-    display: none;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    padding: 0;
+    gap: 6px;
+    padding: 8px 0;
     border: 0;
-    background: transparent;
-    color: inherit;
+    background: none;
+    color: var(--encre-douce);
+    font: 500 15px var(--police);
+    text-decoration: none;
     cursor: pointer;
+    transition: color 120ms ease;
   }
-  .nav__menu svg {
-    width: 12px;
-    height: 7px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.6;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    opacity: 0.8;
-    transition: transform 0.35s var(--ease-sortie);
+  .barre__lien:hover,
+  .barre__lien[aria-expanded='true'] {
+    color: var(--encre);
   }
-  .nav__menu[aria-expanded='true'] svg {
+  .barre__lien svg {
+    transition: transform 180ms var(--sortie);
+  }
+  .barre__lien[aria-expanded='true'] svg {
     transform: rotate(180deg);
   }
-  /* Le tiroir : il se déroule sous la barre, en verre, et ses liens
-     arrivent l'un après l'autre. */
-  .nav__tiroir {
-    display: grid;
-    grid-template-rows: 0fr;
-    background: inherit;
-    transition: grid-template-rows 0.4s var(--ease-sortie);
-  }
-  .nav__tiroir > nav {
-    overflow: hidden;
+  .barre__actions {
     display: flex;
-    flex-direction: column;
-    padding-inline: 18px;
+    align-items: center;
+    gap: var(--e-2);
+    margin-inline-start: auto;
   }
-  .nav.est-ouverte .nav__tiroir {
-    grid-template-rows: 1fr;
+  .barre__icone {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--encre);
+    cursor: pointer;
   }
-  .nav.est-ouverte {
-    background: rgba(30, 30, 32, 0.9);
-    height: auto;
+  .barre__icone:hover {
+    background: color-mix(in srgb, var(--encre) 7%, transparent);
   }
-  .nav.est-ouverte.sur-clair {
-    background: rgba(255, 255, 255, 0.94);
+  .barre__menu {
+    display: none;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--trait);
+    border-radius: var(--r-pilule);
+    background: none;
+    color: var(--encre);
+    font: 600 14px var(--police);
+    cursor: pointer;
   }
-  .nav__tiroir a {
-    padding: 13px 0;
-    font-size: 0.9375rem;
+
+  .panneau {
+    position: absolute;
+    inset: 100% 0 auto 0;
+    background: var(--fond);
+    box-shadow: 0 1px 0 var(--trait), 0 24px 40px -24px rgb(0 0 0 / 0.25);
+    transform-origin: top center;
+    animation: panneau 180ms var(--sortie);
+  }
+  @keyframes panneau {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.985);
+    }
+  }
+  .panneau__produits {
+    list-style: none;
+    padding: var(--e-5) 0 var(--e-3);
+    margin-block: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .panneau__produits li + li {
+    border-inline-start: 1px solid var(--trait);
+  }
+  .panneau__produit {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    height: 100%;
+    padding: var(--e-3) var(--e-4);
+    border-radius: var(--r-controle);
     text-decoration: none;
-    border-bottom: 1px solid var(--trait-nuit);
-    opacity: 0;
-    transform: translateY(-6px);
-    transition:
-      opacity 0.3s var(--ease),
-      transform 0.4s var(--ease-sortie);
+    transition: background-color 120ms ease;
   }
-  .sur-clair .nav__tiroir a {
-    border-bottom-color: var(--trait-jour);
+  .panneau__produit:hover,
+  .panneau__produit:focus-visible {
+    background: color-mix(in srgb, var(--encre) 5%, transparent);
   }
-  .nav__tiroir a:last-child {
-    border-bottom: 0;
-    margin-bottom: 10px;
+  .panneau__labs {
+    padding-bottom: var(--e-5);
+    padding-inline: var(--e-4);
   }
-  .nav.est-ouverte .nav__tiroir a {
-    opacity: 1;
-    transform: none;
+  .panneau__labs a {
+    color: var(--encre);
+    font-weight: 600;
   }
-  .nav.est-ouverte .nav__tiroir a:nth-child(2) { transition-delay: 0.04s; }
-  .nav.est-ouverte .nav__tiroir a:nth-child(3) { transition-delay: 0.08s; }
-  .nav.est-ouverte .nav__tiroir a:nth-child(4) { transition-delay: 0.12s; }
-  @media (max-width: 760px) {
-    .nav__liens {
+  .panneau--plein {
+    position: fixed;
+    inset: 64px 0 0 0;
+    overflow-y: auto;
+    animation-duration: 240ms;
+  }
+  .panneau__plein {
+    display: grid;
+    gap: var(--e-5);
+    padding-block: var(--e-5) var(--e-8);
+  }
+  .panneau__liste {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--e-3);
+  }
+  .panneau__liste a {
+    text-decoration: none;
+  }
+  .panneau__liste--secondaire {
+    padding-top: var(--e-4);
+    border-top: 1px solid var(--trait);
+  }
+
+  @media (max-width: 900px) {
+    .barre__liens,
+    .barre__telecharger {
       display: none;
     }
-    .nav__menu {
-      display: grid;
-    }
-    .nav__dedans {
-      gap: 14px;
-      padding-inline-start: 16px;
-    }
-    .nav,
-    .nav.est-defilee {
-      width: calc(100% - 20px);
-      top: 10px;
+    .barre__menu {
+      display: inline-block;
     }
   }
-  @media (min-width: 761px) {
-    .nav__tiroir {
-      display: none;
+  @media (min-width: 901px) {
+    #panneau-mobile {
+      display: none !important;
     }
   }
 </style>
-
-<script>
-  const nav = document.querySelector<HTMLElement>('[data-nav]');
-  if (nav) {
-    const clairs = [...document.querySelectorAll<HTMLElement>('.fond-gris, .fond-blanc')];
-    let attente = false;
-    const maj = () => {
-      attente = false;
-      nav.classList.toggle('est-defilee', window.scrollY > 10);
-      const milieu = 38; // le milieu de la capsule (12 px + 26 px)
-      nav.classList.toggle(
-        'sur-clair',
-        clairs.some((s) => {
-          const r = s.getBoundingClientRect();
-          return r.top <= milieu && r.bottom > milieu;
-        }),
-      );
-    };
-    maj();
-    window.addEventListener(
-      'scroll',
-      () => {
-        if (!attente) {
-          attente = true;
-          requestAnimationFrame(maj);
-        }
-      },
-      { passive: true },
-    );
-  }
-
-  // Le tiroir du menu, sur téléphone.
-  const bouton = document.querySelector<HTMLButtonElement>('[data-menu]');
-  if (nav && bouton) {
-    const basculer = (ouvrir: boolean) => {
-      nav.classList.toggle('est-ouverte', ouvrir);
-      bouton.setAttribute('aria-expanded', String(ouvrir));
-    };
-    bouton.addEventListener('click', () => basculer(!nav.classList.contains('est-ouverte')));
-    nav.querySelectorAll('[data-tiroir] a').forEach((a) => a.addEventListener('click', () => basculer(false)));
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && nav.classList.contains('est-ouverte')) {
-        basculer(false);
-        bouton.focus();
-      }
-    });
-  }
-</script>

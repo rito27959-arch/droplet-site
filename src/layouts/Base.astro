@@ -1,11 +1,6 @@
 ---
-import '@fontsource-variable/inter-tight';
-import '@fontsource-variable/inter';
 import '../styles/global.css';
 import { BASE, LANGUES, chemin, estRtl, textes, type Langue } from '../i18n';
-import { CLE_STOCKAGE, COULEURS } from '../couleurs';
-
-const teintes = Object.fromEntries(COULEURS.map((c) => [c.cle, c.hex]));
 
 interface Props {
   langue: Langue;
@@ -29,7 +24,8 @@ const descriptionPage = description ?? t.metaDescription;
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{titreComplet}</title>
     <meta name="description" content={descriptionPage} />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#e6eaee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#05070a" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href={`${BASE}/favicon.svg`} type="image/svg+xml" />
     <link rel="canonical" href={urlPage} />
     {LANGUES.map((l) => (
@@ -42,34 +38,18 @@ const descriptionPage = description ?? t.metaDescription;
     <meta property="og:url" content={urlPage} />
     <meta property="og:image" content={new URL(`${BASE}/apercu.png`, site)} />
     <meta name="twitter:card" content="summary_large_image" />
-    <!-- La couleur choisie, posée AVANT le premier affichage : sans ça, la
-         page apparaîtrait en rose puis virerait à la couleur retenue. -->
-    <script is:inline define:vars={{ teintes, cle: CLE_STOCKAGE }}>
-      try {
-        const c = localStorage.getItem(cle);
-        if (c && teintes[c]) {
-          document.documentElement.style.setProperty('--goutte', teintes[c]);
-          document.documentElement.dataset.couleur = c;
-        }
-      } catch (e) {}
+    <link rel="preload" href="/fonts/commissioner.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Le thème, posé AVANT le premier affichage : choix mémorisé, sinon celui du système. -->
+    <script is:inline>
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (t !== 'dark' && t !== 'light') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      })();
     </script>
   </head>
   <body>
     <slot />
-    <script>
-      // Les titres de section se lèvent une fois, quand ils entrent à l'écran.
-      const io = new IntersectionObserver(
-        (entrees) => {
-          for (const e of entrees) {
-            if (e.isIntersecting) {
-              e.target.classList.add('est-visible');
-              io.unobserve(e.target);
-            }
-          }
-        },
-        { rootMargin: '0px 0px -12% 0px' },
-      );
-      document.querySelectorAll('.apparait').forEach((el) => io.observe(el));
-    </script>
   </body>
 </html>

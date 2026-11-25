@@ -131,4 +131,9 @@ export const zh: Textes = {
   lireFr: "阅读法文版",
   faqToutes: "全部问题",
   confPlus: "Droplet 如何保护你的消息",
+  navProduits: "产品",
+  themeVersSombre: "切换到深色主题",
+  themeVersClair: "切换到浅色主题",
+  idAccroche: "一个手势即可登录，无需密码。",
+  labsAccroche: "打造 Droplet 的实验室。",
 };

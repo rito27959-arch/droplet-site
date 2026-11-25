@@ -136,6 +136,11 @@ export const fr = {
   lireFr: "Lire en français",
   faqToutes: "Toutes les questions",
   confPlus: "Comment Droplet protège vos messages",
+  navProduits: "Produits",
+  themeVersSombre: "Passer au thème sombre",
+  themeVersClair: "Passer au thème clair",
+  idAccroche: "Se connecter d'un geste, sans mot de passe.",
+  labsAccroche: "Le laboratoire qui fait Droplet.",
 };
 
 export type Textes = typeof fr;

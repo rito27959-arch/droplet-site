@@ -47,7 +47,7 @@ const ICONES: Record<string, string> = {
 const genre = (b: Bloc) => (typeof b === 'string' ? 'p' : Object.keys(b)[0]);
 ---
 <Base langue={langue} page={cle} titre={page.titre} description={page.description}>
-  <Navigation t={t} accueil={chemin(langue)} surAccueil={false} clairEnHaut={!sombre} />
+  <Navigation t={t} accueil={chemin(langue)} langue={langue} surAccueil={false} />
   <main class:list={['doc', `doc--${cle}`]}>
     <header class:list={['doc__tete', sombre ? 'fond-noir' : cle === 'support' ? 'fond-gris' : 'fond-blanc']}>
       <div class:list={[centre ? 'contenu--doc' : 'contenu--large']}>
@@ -176,10 +176,7 @@ const genre = (b: Bloc) => (typeof b === 'string' ? 'p' : Object.keys(b)[0]);
     margin-inline: auto;
   }
   .doc--security .doc__titre {
-    background: linear-gradient(180deg, #fff 30%, #a1a1a6 130%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--encre);
   }
   .doc__chapo {
     margin-top: 18px;
@@ -198,7 +195,7 @@ const genre = (b: Bloc) => (typeof b === 'string' ? 'p' : Object.keys(b)[0]);
   .doc__maj {
     margin-top: 22px;
     font-size: var(--t-0);
-    color: #86868b;
+    color: var(--encre-douce);
   }
   /* L'emblème de la sécurité : un cadenas dessiné en traits, sous une lueur
      de la couleur du thème. */
@@ -211,12 +208,9 @@ const genre = (b: Bloc) => (typeof b === 'string' ? 'p' : Object.keys(b)[0]);
     stroke-width: 2.6;
     stroke-linecap: round;
     stroke-linejoin: round;
-    filter: drop-shadow(0 8px 30px color-mix(in srgb, var(--goutte) 55%, transparent));
   }
   .doc--security .doc__tete {
-    background:
-      radial-gradient(50% 60% at 50% 0%, color-mix(in srgb, var(--goutte) 16%, transparent), transparent 70%),
-      #000;
+    background: var(--fond);
   }
 
   /* ── Le bandeau de langue ─────────────────────────────────────── */
@@ -331,7 +325,7 @@ const genre = (b: Bloc) => (typeof b === 'string' ? 'p' : Object.keys(b)[0]);
     list-style: none;
     margin: 0;
     padding: 0;
-    border-inline-start: 1px solid #d2d2d7;
+    border-inline-start: 1px solid var(--trait);
   }
   .sommaire a {
     display: block;
@@ -359,7 +353,7 @@ const genre = (b: Bloc) => (typeof b === 'string' ? 'p' : Object.keys(b)[0]);
   .texte {
     font-size: 1.0625rem;
     line-height: 1.6;
-    color: #1d1d1f;
+    color: var(--encre);
   }
   .texte__section {
     scroll-margin-top: 84px;
@@ -446,7 +440,7 @@ const genre = (b: Bloc) => (typeof b === 'string' ? 'p' : Object.keys(b)[0]);
     text-align: start;
     vertical-align: top;
     padding: 14px 16px 14px 0;
-    border-bottom: 1px solid #d2d2d7;
+    border-bottom: 1px solid var(--trait);
   }
   .tableau thead th {
     font-size: var(--t-0);
@@ -497,8 +491,8 @@ const genre = (b: Bloc) => (typeof b === 'string' ? 'p' : Object.keys(b)[0]);
       width: 8px;
       height: 8px;
       margin-top: 3px;
-      border-right: 1.5px solid #86868b;
-      border-bottom: 1.5px solid #86868b;
+      border-right: 1.5px solid var(--encre-douce);
+      border-bottom: 1.5px solid var(--encre-douce);
       transform: rotate(45deg);
       transition: transform 0.3s var(--ease);
     }
@@ -544,7 +538,7 @@ const genre = (b: Bloc) => (typeof b === 'string' ? 'p' : Object.keys(b)[0]);
     .tableau tr {
       display: block;
       padding: 14px 0;
-      border-bottom: 1px solid #d2d2d7;
+      border-bottom: 1px solid var(--trait);
     }
     .tableau tbody tr:last-child {
       border-bottom: 0;
@@ -562,7 +556,7 @@ const genre = (b: Bloc) => (typeof b === 'string' ? 'p' : Object.keys(b)[0]);
       margin-top: 8px;
       font-size: 0.75rem;
       font-weight: 600;
-      color: #86868b;
+      color: var(--encre-douce);
     }
   }
 </style>

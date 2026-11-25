@@ -1,49 +1,670 @@
 ---
-// La page d'accueil, dans une langue donnée. Le rythme d'apple.com : les
-// sections alternent noir et clair, et chacune ne dit qu'une chose.
+// LA PAGE D'ACCUEIL de Droplet, dans une langue donnée — Droplet Design Language.
+// Le gabarit commun des pages produit :
+//   1 héros · 2 les moments où ça sert · 3 démonstration (le chemin d'un message)
+//   4 manifeste · 5 fonctions · 6 confidentialité · 7 la famille Droplet
+//   8 questions · 9 télécharger.
+// Une seule animation forte : la démonstration, pilotée par le défilement (CSS).
 import Base from '../layouts/Base.astro';
 import Navigation from './Navigation.astro';
-import Hero from './Hero.astro';
-import Galerie from './Galerie.astro';
-import Zoom from './Zoom.astro';
-import Manifeste from './Manifeste.astro';
-import Parcours from './Parcours.astro';
-import Fonctions from './Fonctions.astro';
-import Confidentialite from './Confidentialite.astro';
-import Usages from './Usages.astro';
-import Questions from './Questions.astro';
-import Famille from '../famille/Famille.astro';
+import Ecran from './Ecran.astro';
+import Pied from './Pied.astro';
 import { famille } from '../famille/textes';
 import { LIEN_ANDROID } from '../config';
-import Fin from './Fin.astro';
-import Pied from './Pied.astro';
-import { BASE, chemin, textes, type Langue } from '../i18n';
+import { chemin, textes, type Langue } from '../i18n';
 
 interface Props { langue: Langue }
 const { langue } = Astro.props;
 const t = textes(langue);
 const f = famille[langue];
-// Les liens de la famille, vus depuis dropletmesh.app.
-const liensFamille = {
-  droplet: { href: LIEN_ANDROID, texte: f.telechargerAndroid, principal: true },
-  web: { href: 'https://web.dropletmesh.app', texte: f.ouvrirWeb, principal: true },
-  drop: { href: langue === 'fr' ? 'https://drop.dropletmesh.app/' : `https://drop.dropletmesh.app/${langue}/`, texte: `${f.decouvrir} Droplet Drop` },
-};
+const accueil = chemin(langue);
+
+const usages = [
+  { titre: t.u1Titre, texte: t.u1Texte },
+  { titre: t.u2Titre, texte: t.u2Texte },
+  { titre: t.u3Titre, texte: t.u3Texte },
+  { titre: t.u4Titre, texte: t.u4Texte },
+];
+const etapes = [
+  { titre: t.etape1Titre, texte: t.etape1Texte },
+  { titre: t.etape2Titre, texte: t.etape2Texte },
+  { titre: t.etape3Titre, texte: t.etape3Texte },
+  { titre: t.etape4Titre, texte: t.etape4Texte },
+];
+const fonctions = [
+  { titre: t.fVocauxTitre, texte: t.fVocauxTexte },
+  { titre: t.fAppelsTitre, texte: t.fAppelsTexte },
+  { titre: t.fGroupesTitre, texte: t.fGroupesTexte },
+  { titre: t.fEphemeresTitre, texte: t.fEphemeresTexte },
+  { titre: t.fVerrouTitre, texte: t.fVerrouTexte },
+  { titre: t.fLanguesTitre, texte: t.fLanguesTexte },
+];
+const garanties = [
+  { titre: t.conf1Titre, texte: t.conf1Texte },
+  { titre: t.conf2Titre, texte: t.conf2Texte },
+  { titre: t.conf3Titre, texte: t.conf3Texte },
+];
+const questions = [
+  { q: t.q1, r: t.r1 },
+  { q: t.q2, r: t.r2 },
+  { q: t.q3, r: t.r3 },
+  { q: t.q4, r: t.r4 },
+];
+const apps = [
+  { nom: 'Droplet', accroche: f.dropletAccroche, texte: f.dropletTexte, plateformes: f.dropletPlateformes, lien: { href: LIEN_ANDROID, texte: f.telechargerAndroid }, ici: true },
+  { nom: 'Droplet Web', accroche: f.webAccroche, texte: f.webTexte, plateformes: f.webPlateformes, lien: { href: 'https://web.dropletmesh.app', texte: f.ouvrirWeb } },
+  { nom: 'Droplet Drop', accroche: f.dropAccroche, texte: f.dropTexte, plateformes: f.dropPlateformes, lien: { href: langue === 'fr' ? 'https://drop.dropletmesh.app/' : `https://drop.dropletmesh.app/${langue}/`, texte: `${f.decouvrir} Droplet Drop` } },
+];
+
+// Ce que voit un relais : une enveloppe chiffrée. Toujours la même suite,
+// tirée d'une graine fixe, pour que la page ne change pas d'un chargement à l'autre.
+let graine = 7;
+const hexa = Array.from({ length: 96 }, () => {
+  graine = (graine * 1103515245 + 12345) % 2147483648;
+  return '0123456789abcdef'[(graine >>> 16) % 16];
+}).join('').replace(/(.{4})/g, '$1 ').trim();
 ---
 <Base langue={langue}>
-  <Navigation t={t} accueil={chemin(langue)} />
+  <Navigation t={t} accueil={accueil} langue={langue} />
   <main>
-    <Hero t={t} />
-    <Galerie t={t} />
-    <Zoom t={t} />
-    <Manifeste t={t} langue={langue} />
-    <Parcours t={t} />
-    <Fonctions t={t} />
-    <Confidentialite t={t} />
-    <Usages t={t} />
-    <Famille langue={langue} ici="droplet" liens={liensFamille} iconeDrop={`${BASE}/famille-drop.webp`} racine={BASE} />
-    <Questions t={t} />
+    <!-- 1. Héros -->
+    <section class="heros contenu--large" aria-labelledby="titre">
+      <div class="heros__texte">
+        <h1 id="titre" class="display revele">{t.heroTitre}</h1>
+        <p class="chapo revele">{t.heroTexte}</p>
+        <div class="boutons revele">
+          <a class="bouton" href={LIEN_ANDROID}>{t.telechargerAndroid}</a>
+          <a class="bouton bouton--secondaire" href="#parcours">{t.voirFonctionnement}</a>
+        </div>
+        <p class="caption revele">{t.heroNote}</p>
+      </div>
+      <div class="heros__ecran" aria-hidden="true">
+        <div class="cadre cadre--sombre"><Ecran t={t} vue="discussion" anime /></div>
+        <div class="cadre cadre--clair"><Ecran t={t} vue="discussion" theme="clair" anime /></div>
+      </div>
+    </section>
+
+    <!-- 2. Les moments où ça sert -->
+    <section class="section contenu--large" id="usages" aria-labelledby="titre-usages">
+      <h2 id="titre-usages" class="headline">{t.usagesTitre}</h2>
+      <ul class="grille-filets grille-filets--4">
+        {usages.map((u) => (
+          <li>
+            <h3 class="subtitle">{u.titre}</h3>
+            <p class="body doux">{u.texte}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- 3. Démonstration : le chemin d'un message -->
+    <section class="demo" id="parcours" aria-labelledby="titre-parcours">
+      <div class="demo__colle contenu--large">
+        <h2 id="titre-parcours" class="headline">{t.parcoursTitre}</h2>
+        <ol class="demo__etapes">
+          {etapes.map((e, i) => (
+            <li class={`etape e${i + 1}`}>
+              <span class="technique doux">{i + 1}</span>
+              <span><strong>{e.titre}.</strong> {e.texte}</span>
+            </li>
+          ))}
+        </ol>
+        <svg class="demo__schema" viewBox="0 0 1000 250" role="img" aria-label={t.parcoursTitre}>
+          <path class="internet" d="M90 112 Q 500 -6 910 112" />
+          <text class="internet__mot" x="500" y="40" text-anchor="middle">Internet / Tor</text>
+          <line class="liaison" x1="90" y1="150" x2="910" y2="150" />
+          <g class="noeud" transform="translate(90 150)"><circle r="12" /></g>
+          <g class="noeud relais r1" transform="translate(370 150)"><circle r="10" /><path class="cadenas" d="M-5 -26h10v8h-10zM-3 -26v-4a3 3 0 0 1 6 0v4" /></g>
+          <g class="noeud relais r2" transform="translate(630 150)"><circle r="10" /><path class="cadenas" d="M-5 -26h10v8h-10zM-3 -26v-4a3 3 0 0 1 6 0v4" /></g>
+          <g class="noeud arrivee" transform="translate(910 150)"><circle r="12" /></g>
+          <g class="message"><rect x="74" y="138" width="32" height="24" rx="8" /></g>
+          <text class="nom" x="90" y="200" text-anchor="middle">{t.parcoursVous}</text>
+          <text class="nom doux" x="370" y="200" text-anchor="middle">{t.parcoursRelais}</text>
+          <text class="nom doux" x="630" y="200" text-anchor="middle">{t.parcoursRelais}</text>
+          <text class="nom" x="910" y="200" text-anchor="middle">{t.parcoursDest}</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 4. Manifeste -->
+    <section class="section contenu--large manifeste" aria-label="Droplet">
+      <p class="editorial">{t.manifeste}</p>
+    </section>
+
+    <!-- 5. Fonctions -->
+    <section class="section contenu--large" id="fonctions" aria-labelledby="titre-fonctions">
+      <h2 id="titre-fonctions" class="headline">{t.fonctionsTitre}</h2>
+      <ul class="grille-filets grille-filets--3">
+        {fonctions.map((x) => (
+          <li>
+            <h3 class="subtitle">{x.titre}</h3>
+            <p class="body doux">{x.texte}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- 6. Confidentialité -->
+    <section class="section contenu--large confidentialite" id="confidentialite" aria-labelledby="titre-conf">
+      <div>
+        <h2 id="titre-conf" class="headline">{t.confTitre}</h2>
+        <p class="chapo">{t.confTexte}</p>
+        <a class="lien" href={chemin(langue, 'security')}>{t.confPlus}</a>
+      </div>
+      <figure class="enveloppe">
+        <div>
+          <p class="caption">{t.telSaisie}</p>
+          <p class="enveloppe__clair">{t.confClair}</p>
+        </div>
+        <div>
+          <p class="caption">{t.confVuRelais}</p>
+          <p class="technique enveloppe__chiffre" dir="ltr">{hexa}</p>
+        </div>
+      </figure>
+      <ul class="grille-filets grille-filets--3 confidentialite__garanties">
+        {garanties.map((g) => (
+          <li>
+            <h3 class="subtitle">{g.titre}</h3>
+            <p class="body doux">{g.texte}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- 7. La famille Droplet -->
+    <section class="section contenu--large" id="famille" aria-labelledby="titre-famille">
+      <h2 id="titre-famille" class="headline">{f.titre}</h2>
+      <p class="chapo">{f.chapo}</p>
+      <ul class="apps">
+        {apps.map((a) => (
+          <li class="app">
+            <p class="title">{a.nom}</p>
+            <div>
+              <p class="subtitle">{a.accroche}</p>
+              <p class="body doux">{a.texte}</p>
+              <p class="technique doux">{a.plateformes}</p>
+            </div>
+            {a.ici ? <p class="caption app__ici">{f.ici}</p> : <a class="lien app__lien" href={a.lien.href}>{a.lien.texte}</a>}
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- 8. Questions -->
+    <section class="section contenu--large questions" id="questions" aria-labelledby="titre-questions">
+      <div>
+        <h2 id="titre-questions" class="headline">{t.faqTitre}</h2>
+        <a class="lien" href={chemin(langue, 'support')}>{t.faqToutes}</a>
+      </div>
+      <div>
+        {questions.map((q) => (
+          <details>
+            <summary class="subtitle">{q.q}</summary>
+            <p class="body doux">{q.r}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- 9. Télécharger -->
+    <section class="section contenu--large fin" id="telecharger" aria-labelledby="titre-fin">
+      <h2 id="titre-fin" class="headline">{t.finTitre}</h2>
+      <p class="chapo">{t.finTexte}</p>
+      <div class="boutons">
+        <a class="bouton" href={LIEN_ANDROID}>{t.telechargerAndroid}</a>
+      </div>
+      <p class="caption">{t.heroNote}</p>
+    </section>
   </main>
-  <Fin t={t} langue={langue} />
   <Pied t={t} langue={langue} />
 </Base>
+
+<style>
+  .boutons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-3);
+    margin-top: var(--e-6);
+  }
+
+  /* 1. Héros */
+  .heros {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    gap: var(--e-8);
+    align-items: center;
+    padding-top: var(--e-8);
+  }
+  .heros__texte .chapo {
+    margin-top: var(--e-5);
+  }
+  .heros__texte .caption {
+    margin-top: var(--e-4);
+  }
+  .heros__ecran {
+    justify-self: center;
+    width: min(100%, 340px);
+  }
+  .cadre {
+    position: relative;
+    container-type: inline-size;
+    aspect-ratio: 9 / 19.5;
+    border-radius: 36px;
+    overflow: hidden;
+    border: 1px solid var(--trait);
+  }
+  .cadre--clair {
+    display: none;
+  }
+  :global(:root[data-theme='light']) .cadre--clair {
+    display: block;
+  }
+  :global(:root[data-theme='light']) .cadre--sombre {
+    display: none;
+  }
+  /* Une seule fois, à l'ouverture : où commencer à lire. */
+  .revele {
+    animation: revele 400ms var(--sortie) both;
+  }
+  .revele:nth-child(2) {
+    animation-delay: 50ms;
+  }
+  .revele:nth-child(3) {
+    animation-delay: 90ms;
+  }
+  .revele:nth-child(4) {
+    animation-delay: 120ms;
+  }
+  @keyframes revele {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  /* Listes à filets : séparées par l'espace et un trait d'un pixel. */
+  .grille-filets {
+    list-style: none;
+    margin: var(--e-7) 0 0;
+    padding: 0;
+    display: grid;
+    border-top: 1px solid var(--trait);
+  }
+  .grille-filets--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .grille-filets--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .grille-filets li {
+    display: grid;
+    gap: var(--e-2);
+    align-content: start;
+    padding: var(--e-5) var(--e-5) var(--e-6) 0;
+  }
+  .grille-filets li + li {
+    padding-inline-start: var(--e-5);
+    border-inline-start: 1px solid var(--trait);
+  }
+  .grille-filets--3 li:nth-child(3n + 1) {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+  }
+  .grille-filets--3 li:nth-child(n + 4) {
+    border-top: 1px solid var(--trait);
+  }
+
+  /* 3. Démonstration — sans prise en charge du défilement, les étapes se lisent à la suite. */
+  .demo {
+    margin-top: var(--e-9);
+    padding-block: var(--e-8);
+    background: var(--surface);
+    border-block: 1px solid var(--trait);
+  }
+  .demo__colle {
+    display: grid;
+    gap: var(--e-6);
+  }
+  .demo__etapes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--e-3);
+    max-width: 64ch;
+  }
+  .etape {
+    display: flex;
+    gap: var(--e-3);
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  .etape strong {
+    font-weight: 650;
+  }
+  .demo__schema {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .internet {
+    fill: none;
+    stroke: var(--encre-douce);
+    stroke-width: 1.5;
+    stroke-dasharray: 3 8;
+    stroke-linecap: round;
+  }
+  .internet__mot {
+    font: 450 14px var(--police-mono);
+    fill: var(--encre-douce);
+  }
+  .liaison {
+    stroke: var(--trait);
+    stroke-width: 2;
+  }
+  .noeud circle {
+    fill: var(--encre);
+  }
+  .relais circle {
+    fill: var(--surface);
+    stroke: var(--encre);
+    stroke-width: 2;
+  }
+  .cadenas {
+    fill: none;
+    stroke: var(--encre);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+  }
+  .message rect {
+    fill: var(--encre);
+  }
+  .message {
+    transform: translateX(820px);
+    opacity: 0;
+  }
+  .nom {
+    font: 600 16px var(--police);
+    fill: var(--encre);
+  }
+  .nom.doux {
+    fill: var(--encre-douce);
+  }
+  :global([dir='rtl']) .demo__schema {
+    transform: scaleX(-1);
+  }
+  :global([dir='rtl']) .demo__schema text {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scaleX(-1);
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .demo {
+        height: 360vh;
+        padding: 0;
+        view-timeline-name: --demo;
+      }
+      .demo__colle {
+        position: sticky;
+        top: 64px;
+        height: calc(100svh - 64px);
+        align-content: center;
+      }
+      .demo__etapes {
+        display: grid;
+        min-height: 4.6em;
+      }
+      .etape {
+        grid-area: 1 / 1;
+      }
+      .e1,
+      .e2,
+      .e3,
+      .e4,
+      .message,
+      .r1 .cadenas,
+      .r2 .cadenas,
+      .internet,
+      .arrivee circle {
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --demo;
+        animation-range: contain 0% contain 100%;
+      }
+      .e1 {
+        animation-name: e1;
+      }
+      .e2 {
+        animation-name: e2;
+      }
+      .e3 {
+        animation-name: e3;
+      }
+      .e4 {
+        animation-name: e4;
+      }
+      .message {
+        animation-name: trajet;
+      }
+      .r1 .cadenas {
+        animation-name: cadenas1;
+      }
+      .r2 .cadenas {
+        animation-name: cadenas2;
+      }
+      .arrivee circle {
+        animation-name: arrivee;
+      }
+      .internet {
+        animation-name: internet;
+      }
+    }
+  }
+  @keyframes e1 {
+    0%, 20% { opacity: 1; transform: none; }
+    25%, 100% { opacity: 0; transform: translateY(-8px); }
+  }
+  @keyframes e2 {
+    0%, 23% { opacity: 0; transform: translateY(8px); }
+    28%, 48% { opacity: 1; transform: none; }
+    53%, 100% { opacity: 0; transform: translateY(-8px); }
+  }
+  @keyframes e3 {
+    0%, 51% { opacity: 0; transform: translateY(8px); }
+    56%, 72% { opacity: 1; transform: none; }
+    77%, 100% { opacity: 0; transform: translateY(-8px); }
+  }
+  @keyframes e4 {
+    0%, 75% { opacity: 0; transform: translateY(8px); }
+    80%, 100% { opacity: 1; transform: none; }
+  }
+  /* Le message s'arrête à chaque relais : il attend, puis repart. */
+  @keyframes trajet {
+    0%, 6% { transform: translateX(0); opacity: 1; }
+    20%, 30% { transform: translateX(280px); opacity: 1; }
+    42%, 50% { transform: translateX(540px); opacity: 1; }
+    62% { transform: translateX(820px); opacity: 1; }
+    68%, 100% { transform: translateX(820px); opacity: 0; }
+  }
+  @keyframes cadenas1 {
+    0%, 18% { opacity: 0; }
+    21%, 100% { opacity: 1; }
+  }
+  @keyframes cadenas2 {
+    0%, 40% { opacity: 0; }
+    43%, 100% { opacity: 1; }
+  }
+  @keyframes arrivee {
+    0%, 60% { fill: var(--encre-douce); }
+    64%, 100% { fill: var(--encre); }
+  }
+  @keyframes internet {
+    0%, 75% { opacity: 0.25; }
+    82%, 100% { opacity: 1; }
+  }
+
+  /* 4. Manifeste */
+  .manifeste .editorial {
+    max-width: 34ch;
+    margin-inline-start: auto;
+  }
+
+  /* 6. Confidentialité */
+  .confidentialite {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: var(--e-6) var(--e-8);
+    align-items: start;
+  }
+  .confidentialite .chapo {
+    margin: var(--e-5) 0 var(--e-4);
+  }
+  .enveloppe {
+    margin: 0;
+    display: grid;
+    gap: var(--e-4);
+    padding: var(--e-5);
+    border: 1px solid var(--trait);
+    border-radius: var(--r-carte);
+    background: var(--surface);
+  }
+  .enveloppe > div {
+    display: grid;
+    gap: var(--e-2);
+  }
+  .enveloppe > div + div {
+    padding-top: var(--e-4);
+    border-top: 1px solid var(--trait);
+  }
+  .enveloppe__clair {
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .enveloppe__chiffre {
+    color: var(--encre-douce);
+    word-break: break-all;
+  }
+  .confidentialite__garanties {
+    grid-column: 1 / -1;
+    margin-top: var(--e-4);
+  }
+
+  /* 7. La famille */
+  #famille .chapo {
+    margin-top: var(--e-4);
+  }
+  .apps {
+    list-style: none;
+    margin: var(--e-7) 0 0;
+    padding: 0;
+    border-top: 1px solid var(--trait);
+  }
+  .app {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 6fr) minmax(0, 3fr);
+    gap: var(--e-5);
+    align-items: start;
+    padding: var(--e-5) 0;
+    border-bottom: 1px solid var(--trait);
+  }
+  .app > div {
+    display: grid;
+    gap: var(--e-2);
+  }
+  .app__lien,
+  .app__ici {
+    justify-self: end;
+  }
+
+  /* 8. Questions */
+  .questions {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    gap: var(--e-7);
+  }
+  .questions .lien {
+    display: inline-block;
+    margin-top: var(--e-4);
+  }
+  details {
+    border-bottom: 1px solid var(--trait);
+  }
+  details:first-child {
+    border-top: 1px solid var(--trait);
+  }
+  summary {
+    list-style: none;
+    cursor: pointer;
+    padding: var(--e-4) 0;
+    display: flex;
+    justify-content: space-between;
+    gap: var(--e-4);
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::after {
+    content: '+';
+    font-weight: 400;
+    color: var(--encre-douce);
+    transition: transform 180ms var(--sortie);
+  }
+  details[open] summary::after {
+    transform: rotate(45deg);
+  }
+  details p {
+    margin: 0 0 var(--e-4);
+    max-width: 62ch;
+  }
+
+  /* 9. Télécharger */
+  .fin .chapo {
+    margin-top: var(--e-4);
+  }
+  .fin .caption {
+    margin-top: var(--e-4);
+  }
+
+  @media (max-width: 900px) {
+    .heros,
+    .confidentialite,
+    .questions {
+      grid-template-columns: 1fr;
+      gap: var(--e-6);
+    }
+    .heros__ecran {
+      width: min(100%, 300px);
+    }
+    .grille-filets--4,
+    .grille-filets--3 {
+      grid-template-columns: 1fr;
+    }
+    .grille-filets li,
+    .grille-filets li + li {
+      padding: var(--e-4) 0;
+      border-inline-start: 0;
+    }
+    .grille-filets li + li {
+      border-top: 1px solid var(--trait);
+    }
+    .app {
+      grid-template-columns: 1fr;
+      gap: var(--e-3);
+    }
+    .app__lien,
+    .app__ici {
+      justify-self: start;
+    }
+    .internet__mot {
+      font-size: 26px;
+    }
+    .nom {
+      font-size: 34px;
+    }
+    .manifeste .editorial {
+      margin-inline-start: 0;
+    }
+  }
+</style>

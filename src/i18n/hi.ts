@@ -134,4 +134,9 @@ export const hi: Textes = {
   lireFr: "फ़्रेंच में पढ़ें",
   faqToutes: "सभी प्रश्न",
   confPlus: "Droplet आपके संदेशों की सुरक्षा कैसे करता है",
+  navProduits: "उत्पाद",
+  themeVersSombre: "गहरी थीम पर जाएँ",
+  themeVersClair: "हल्की थीम पर जाएँ",
+  idAccroche: "एक इशारे से साइन इन करें, बिना पासवर्ड के।",
+  labsAccroche: "वह लैब जो Droplet बनाती है।",
 };
