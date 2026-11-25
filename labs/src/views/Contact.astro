@@ -35,7 +35,7 @@ const hues = ['#22b4cb', '#8e7bff', '#2e8bff', '#12b68a'];
             <div class="glow -z-10 -right-20 -top-20 h-64 w-64 opacity-25 transition-opacity duration-700 group-hover:opacity-55" style={`background:${hues[i]}`}></div>
             <h2 class="text-[clamp(1.6rem,1.2rem+1.2vw,2.3rem)] leading-tight tracking-[-0.03em]">{topic.title}</h2>
             <p class="mt-4 max-w-[44ch] text-haze">{topic.text}</p>
-            {link ? <a class="btn btn-glass mt-8" href={link} data-magnet>{c.write}</a> : <p class="mt-8 text-haze">{c.noAddress}</p>}
+            {link ? <a class="btn btn-glass mt-8" href={link}>{c.write}</a> : <p class="mt-8 text-haze">{c.noAddress}</p>}
           </article>
         );
       })}

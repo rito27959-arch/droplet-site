@@ -20,9 +20,9 @@ const isHere = (to: string) => bare === to || bare.startsWith(to + '/');
 const other = lang === 'en' ? 'fr' : 'en';
 ---
 
-<!-- A floating capsule of glass: the page shows through it. -->
-<header class="fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-5 md:pt-4">
-  <div class="mx-auto flex h-14 max-w-[80rem] items-center justify-between gap-4 rounded-full bg-abyss/55 pl-4 pr-2 shadow-[inset_0_0_0_1px_rgba(var(--rgb-foam),0.09),0_20px_60px_-30px_rgba(var(--rgb-abyss),0.8)] backdrop-blur-xl backdrop-saturate-150 md:pl-5">
+<!-- Droplet Design Language : une barre plate sur le fond de la page ; un filet apparaît une fois la page défilée. -->
+<header class="fixed inset-x-0 top-0 z-50 bg-abyss" data-barre>
+  <div class="wrap flex h-16 items-center justify-between gap-4">
     <a href={href(lang, '/')} class="flex items-center gap-2.5" aria-label={d.nav.home}>
       <Logo class="size-7 text-ice" />
       <span class="text-[1.02rem] font-[620] tracking-[-0.01em]">Droplet Labs</span>
@@ -33,7 +33,7 @@ const other = lang === 'en' ? 'fr' : 'en';
         {links.map((l) => (
           <li>
             <a href={href(lang, l.to)}
-               class:list={['rounded-full px-3.5 py-2 transition-colors', isHere(l.to) ? 'bg-foam/10 text-foam' : 'text-haze hover:text-foam']}
+               class:list={['px-3 py-2 transition-colors', isHere(l.to) ? 'text-foam font-[600]' : 'text-haze hover:text-foam']}
                aria-current={isHere(l.to) ? 'page' : undefined}>{l.label}</a>
           </li>
         ))}
@@ -57,7 +57,7 @@ const other = lang === 'en' ? 'fr' : 'en';
     </div>
   </div>
 
-  <div id="menu-panel" data-open="false" class="lg:hidden fixed inset-0 z-50 bg-abyss/95 backdrop-blur-2xl" role="dialog" aria-modal="true" aria-label="Menu">
+  <div id="menu-panel" data-open="false" class="lg:hidden fixed inset-0 z-50 bg-abyss" role="dialog" aria-modal="true" aria-label="Menu">
     <div class="flex h-[4.25rem] items-center justify-between px-6 pt-3">
       <a href={href(lang, '/')} class="flex items-center gap-2.5" aria-label={d.nav.home}>
         <Logo class="size-7 text-ice" /><span class="font-[620]">Droplet Labs</span>
@@ -117,4 +117,14 @@ const other = lang === 'en' ? 'fr' : 'en';
     };
   }
   document.addEventListener('astro:page-load', theme);
+
+  // Le filet sous la barre, une fois la page défilée.
+  function filet() {
+    const barre = document.querySelector<HTMLElement>('[data-barre]');
+    if (!barre) return;
+    const sync = () => barre.classList.toggle('shadow-[0_1px_0_color-mix(in_oklab,var(--color-foam)_12%,transparent)]', scrollY > 8);
+    addEventListener('scroll', sync, { passive: true });
+    sync();
+  }
+  document.addEventListener('astro:page-load', filet);
 </script>

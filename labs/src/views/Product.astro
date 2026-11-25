@@ -29,7 +29,7 @@ const fr = lang === 'fr';
 // NexFleet (a web dashboard) have no phone screen to show yet.
 const phone = {
   'droplet-messenger': { screen: screenMessenger, title: fr ? 'Dans la main.' : 'In your hand.',
-    text: fr ? 'Une conversation reçue sans réseau, relayée par un téléphone voisin. Tournez le téléphone : il suit votre curseur.' : 'A conversation received with no network, relayed by a nearby phone. Move your pointer: the phone follows it.',
+    text: fr ? 'Une conversation reçue sans réseau, relayée par un téléphone voisin.' : 'A conversation received with no network, relayed by a nearby phone.',
     alt: fr ? 'Droplet Messenger : une conversation avec Amina, à portée par Bluetooth' : 'Droplet Messenger: a chat with Amina, in range over Bluetooth' },
   'droplet-drop': { screen: screenDrop, title: fr ? 'Dans la main.' : 'In your hand.',
     text: fr ? 'Quatre fichiers reçus d’un ordinateur par le Wi-Fi local, chacun vérifié bloc par bloc.' : 'Four files received from a laptop over local Wi-Fi, each one verified block by block.',
@@ -42,11 +42,10 @@ const phone = {
 <Base lang={lang} title={p.name} description={p.line[lang]} jsonLd={jsonLd}>
   <!-- A hero lit in the project's own colour. -->
   <header class="relative isolate overflow-hidden">
-    <div class="absolute inset-0 -z-10" style={`background:radial-gradient(80% 70% at 75% 10%, color-mix(in oklab, ${p.accent} 30%, var(--color-abyss)) 0%, var(--color-abyss) 70%)`}></div>
     <div class="wrap pt-36 md:pt-48">
       <a class="link text-[0.95rem] text-haze hover:text-foam" href={href(lang, '/products')} data-reveal>{d.back}</a>
       <p class="mt-10 flex items-center gap-3 text-[0.95rem] text-haze" data-reveal>
-        <span class="size-2.5 rounded-full" style={`background:${p.accent};box-shadow:0 0 20px ${p.accent}`}></span>{p.stage[lang]}
+        <span class="size-2.5 rounded-full" style={`background:${p.accent}`}></span>{p.stage[lang]}
       </p>
       <Rise as="h1" text={p.name} class="mt-5 text-hero font-[500] max-w-[11ch]" />
       <p class="mt-10 max-w-[40ch] text-lead text-haze" data-reveal style="--d:300ms">{p.line[lang]}</p>
@@ -108,7 +107,7 @@ const phone = {
       <div class="glass rounded-[26px] p-7" data-reveal style="--d:200ms">
         <h2 class="text-[0.9rem] text-haze">{d.websiteTitle}</h2>
         {p.website ? (
-          <a class="mt-3 inline-flex max-w-full items-center gap-1.5 text-lead link [overflow-wrap:anywhere] min-w-0" style={`color:color-mix(in oklab, ${p.accent} 55%, white)`} href={p.website} rel="noopener">
+          <a class="mt-3 inline-flex max-w-full items-center gap-1.5 text-lead link [overflow-wrap:anywhere] min-w-0"  href={p.website} rel="noopener">
             <span class="min-w-0">{host}</span><ArrowUpRight class="size-5 shrink-0" aria-hidden="true" />
           </a>
         ) : <p class="mt-3 text-haze">{d.noWebsite}</p>}
@@ -122,7 +121,7 @@ const phone = {
       <div class="glow -z-10 right-0 top-0 h-[24rem] w-[24rem] opacity-0 transition-opacity duration-700 group-hover:opacity-40" style={`background:${next.accent}`}></div>
       <span class="text-[0.95rem] text-haze">{d.next}</span>
       <span class="mt-3 flex items-center gap-4 text-mega font-[500] transition-transform duration-700 group-hover:translate-x-3">
-        <span class="size-3 rounded-full" style={`background:${next.accent};box-shadow:0 0 24px ${next.accent}`}></span>{next.name}
+        <span class="size-3 rounded-full" style={`background:${next.accent}`}></span>{next.name}
       </span>
     </a>
   </nav>

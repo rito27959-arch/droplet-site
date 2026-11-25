@@ -24,16 +24,16 @@ const country = lang === 'fr' ? 'Cameroun' : site.country;
     <div class="pointer-events-none absolute inset-x-0 bottom-0 -z-0 h-[40%] bg-gradient-to-t from-abyss to-transparent"></div>
 
     <div class="wrap relative pb-14 pt-36 md:pb-20">
-      <p class="mb-8 inline-flex items-center gap-2.5 rounded-full bg-foam/[0.06] py-1.5 pl-2 pr-4 text-[0.88rem] text-haze ring-1 ring-foam/10 backdrop-blur" data-reveal>
-        <span class="relative flex size-2.5"><span class="absolute inset-0 animate-ping rounded-full bg-ice/60 motion-reduce:animate-none"></span><span class="relative size-2.5 rounded-full bg-ice"></span></span>
+      <p class="mb-8 inline-flex items-center gap-2.5 py-1.5 text-[0.88rem] text-haze font-mono" data-reveal>
+        <span class="relative flex size-2.5"><span class="relative size-2.5 rounded-full bg-ice"></span></span>
         {site.city}, {country}
       </p>
       <Rise as="h1" text={h.headline} class="relative max-w-[12ch] text-hero font-[500] [text-shadow:0_2px_40px_rgba(var(--rgb-abyss),0.6)]" />
       <div class="mt-10 grid gap-10 md:mt-14 md:grid-cols-12 md:items-end">
         <p class="md:col-span-6 max-w-[46ch] text-lead text-haze" data-reveal style="--d:500ms">{h.lead}</p>
         <div class="md:col-span-6 flex flex-wrap gap-3 md:justify-end" data-reveal style="--d:650ms">
-          <a class="btn btn-light" href={href(lang, '/products')} data-magnet>{h.ctaProducts}</a>
-          <a class="btn btn-glass" href={href(lang, '/founder')} data-magnet>{h.ctaFounder}</a>
+          <a class="btn btn-light" href={href(lang, '/products')}>{h.ctaProducts}</a>
+          <a class="btn btn-glass" href={href(lang, '/founder')}>{h.ctaFounder}</a>
         </div>
       </div>
       <p class="mt-14 max-w-[52ch] border-t border-foam/10 pt-5 text-[0.88rem] text-haze/80" data-reveal style="--d:800ms">{d.status}</p>
@@ -42,7 +42,7 @@ const country = lang === 'fr' ? 'Cameroun' : site.country;
 
   <!-- ── Manifesto: words light up as you read ─────────────────────── -->
   <section class="wrap py-28 md:py-44">
-    <p class="lit-words max-w-[24ch] text-[clamp(1.9rem,1.1rem+3.4vw,4.4rem)] leading-[1.08] tracking-[-0.035em] font-[480]">
+    <p class="lit-words ml-auto max-w-[30ch] font-serif text-[clamp(1.6rem,1rem+2.4vw,2.6rem)] leading-[1.35] font-[400]">
       {h.manifesto.split(' ').map((w) => <><span class="w">{w}</span>{' '}</>)}
     </p>
   </section>
@@ -70,7 +70,7 @@ const country = lang === 'fr' ? 'Cameroun' : site.country;
             <Rise as="h3" text={p.name} class="mt-5 text-title" />
             <p class="mt-6 max-w-[40ch] text-lead text-haze" data-reveal>{p.line[lang]}</p>
             <div class="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3" data-reveal style="--d:120ms">
-              <a class="btn btn-glass" href={href(lang, `/products/${p.slug}`)} data-magnet>{h.discover} {p.name}</a>
+              <a class="btn btn-glass" href={href(lang, `/products/${p.slug}`)}>{h.discover} {p.name}</a>
               {p.website && <a class="link text-[0.95rem] text-haze hover:text-foam" href={p.website} rel="noopener">{new URL(p.website).host}</a>}
             </div>
           </div>
@@ -127,7 +127,7 @@ const country = lang === 'fr' ? 'Cameroun' : site.country;
             </li>
           ))}
         </ol>
-        <a class="btn btn-light mt-12" href={href(lang, '/founder')} data-magnet>{h.founderLink}</a>
+        <a class="btn btn-light mt-12" href={href(lang, '/founder')}>{h.founderLink}</a>
       </div>
     </div>
   </section>

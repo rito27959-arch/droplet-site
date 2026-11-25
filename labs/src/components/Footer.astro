@@ -1,6 +1,5 @@
 ---
 import Logo from './Logo.astro';
-import Finale from './Finale.astro';
 import { t, href, type Lang } from '../i18n';
 import { site, social, contact } from '../config';
 
@@ -35,7 +34,6 @@ const d = t[lang];
   </div>
   <!-- The name, made of the mesh: the points gather as the page ends. -->
   <div class="wrap pb-4 pt-6">
-    <Finale />
   </div>
   <div class="wrap flex flex-wrap items-center justify-between gap-4 border-t border-foam/[0.08] py-6 text-[0.85rem] text-haze">
     <a href={href(lang, '/')} class="flex items-center gap-2" aria-label={d.nav.home}><Logo class="size-5 text-ice" /> © 2026 {d.footer.rights}</a>
